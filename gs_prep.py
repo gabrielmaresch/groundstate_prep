@@ -1,6 +1,7 @@
 import pennylane as qml
 import pennylane.numpy as np
 import random
+from typing import Any, List
 import matplotlib.pyplot as plt
 
 def transverse_ising_hamiltonian(J:float, h:float, N:int, boundary_condition: str='periodic'):
@@ -27,7 +28,7 @@ def evaluate_sqrt_gaussian(sigma:float, t:float):
 
 
 ### this is a very particular op_set for testing 
-def construct_opset(num_qubits:int, *, output = False):
+def construct_opset(num_qubits:int, *, output:bool = False):
     with qml.QueuingManager.stop_recording():
         op_set = []
         for i in range(num_qubits):
@@ -41,9 +42,9 @@ def construct_opset(num_qubits:int, *, output = False):
 
 
 
-def construct_interaction_hamiltonian(num_qubits:int, sigma:float, t:float,  A, alpha:float = 1, rng = 42):
+def construct_interaction_hamiltonian(num_qubits:int, sigma:float, t:float,  A:"qml.Operator", alpha:float = 1):
     # num_qubits is system qubits without environment
-    random.seed(rng)
+
     
     with qml.QueuingManager.stop_recording():
         # environment
@@ -56,17 +57,17 @@ def construct_interaction_hamiltonian(num_qubits:int, sigma:float, t:float,  A, 
     #return f(AB*A†B)
     return H_int
 
-def construct_environmental_hamiltonian(num_qubits:int, omega):
+def construct_environmental_hamiltonian(num_qubits:int, omega:float):
     return qml.Hamiltonian([-omega/2], [qml.PauliZ(num_qubits)])
 
 
-def construct_W_layer(num_qubits:int, m:int, tau:float, T:float, sigma:float, op, alpha:float = 1):
+def construct_W_layer(num_qubits:int, m:int, tau:float, T:float, sigma:float, op:"qml.Operator", alpha:float = 1):
     t = (m+1)/2*tau-T
     H_int = construct_interaction_hamiltonian(num_qubits, sigma, t, op, alpha)
     qml.evolve(H_int, coeff=tau/2)
     return None
 
-def construct_U_layer(num_qubits:int, m:int, tau:float, T:float, sigma:float, op, omega, H_sys, alpha:float = 1):
+def construct_U_layer(num_qubits:int, m:int, tau:float, T:float, sigma:float, op:"qml.Operator", omega:float, H_sys:qml.Hamiltonian, alpha:float = 1):
 
     construct_W_layer(N, 1, tau, T, sigma, op, alpha )
     
@@ -80,7 +81,7 @@ def construct_U_layer(num_qubits:int, m:int, tau:float, T:float, sigma:float, op
     return None
 
 
-def initialize_rho_env(wire, beta, omega, *, first=False):
+def initialize_rho_env(wire:int, beta:float, omega:float, *, first:bool=False):
     if not first: 
         _ = qml.measure(wires=wire, reset=True)
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
@@ -88,6 +89,14 @@ def initialize_rho_env(wire, beta, omega, *, first=False):
     qml.StatePrep(rho_env, wires=[wire])
 
     return None
+
+def sample_A_omega(op_set:List["qml.Operator"] , omega_max:float, rng:int = 24):
+    random.seed(rng)
+    A = random.choice(op_set)
+    omega = random.uniform(0, omega_max)
+    print("chosen operator: ", A)
+    print("chosen omega:", np.round(omega, 2))
+    return A, omega
 
 if __name__ == "__main__":
 
@@ -105,18 +114,19 @@ if __name__ == "__main__":
     print(M, "substeps")
 
     op_set = construct_opset(N)
-    #print(op_set)
+    A, omega = sample_A_omega(op_set, omega_max)
+
     H_sys  = transverse_ising_hamiltonian(-1, 0, N)
+
+    
+
+
 
     dev = qml.device("default.qubit", wires=N+1)
     @qml.qnode(dev)
 
     def circuit():
-        A = random.choice(op_set)
-        omega = random.uniform(0, omega_max)
-
-        print("chosen operator: ", A)
-        print("chosen omega:", np.round(omega, 2))
+        
         #construct_W_layer(N, 1, tau, T, sigma, op_set, alpha )
 
         initialize_rho_env(N, beta, omega, first=True)
@@ -126,28 +136,30 @@ if __name__ == "__main__":
             construct_U_layer(N, 1, tau, T, sigma, A, omega, H_sys, alpha)
             qml.Barrier(wires=range(N + 1), only_visual=True)
 
-    
-        return qml.state()
 
-    #final_state = circuit()
-    
-    #print(np.round(final_state, 3))
+        
+        return qml.density_matrix(wires=range(N))
+
+    final_state = circuit()
+    print(np.round(final_state, 4))
 
 
 
 
 
     ###################### display circuit nicely ###################
-    from matplotlib.text import Text
+    display_circuit = False
+    if display_circuit:
+        from matplotlib.text import Text
 
-    fig, ax = qml.draw_mpl(circuit)()
+        fig, ax = qml.draw_mpl(circuit)()
 
-    # Replace the default evolve label with a custom one
-    for artist in fig.findobj(Text):
-        txt = artist.get_text()
-        if "Exp(-"+str(np.round(tau/2, 2)) in txt:
-            artist.set_text(r"$W(\tau/2)$")
-        elif "Exp(-"+str(np.round(tau, 2)) in txt:
-            artist.set_text(r"$e^{-i\tau H_{\alpha}}$")      
-    fig.savefig("circuit.png", dpi=100, bbox_inches=None)
-    plt.close(fig)
+        # Replace the default evolve label with a custom one
+        for artist in fig.findobj(Text):
+            txt = artist.get_text()
+            if "Exp(-"+str(np.round(tau/2, 2)) in txt:
+                artist.set_text(r"$W(\tau/2)$")
+            elif "Exp(-"+str(np.round(tau, 2)) in txt:
+                artist.set_text(r"$e^{-i\tau H_{\alpha}}$")      
+        fig.savefig("circuit.png", dpi=100, bbox_inches=None)
+        plt.close(fig)
