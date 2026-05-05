@@ -3,6 +3,7 @@ import pennylane.numpy as np
 
 import random
 from typing import Any, List
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 def transverse_ising_hamiltonian(J:float, h:float, N:int, boundary_condition: str='periodic'):
@@ -122,13 +123,15 @@ def sample_operator(op_set:List["qml.Operator"], rng:int = 24):
     random.seed(rng)
     A = random.choice(op_set)
     print("chosen operator: ", A)
-    return A
+    rng_A = random.randint(1, 1_000_000)
+    return A, rng_A
 
-def sample_omega(omega_max:float, rng:int = 24):
+def sample_omega(omega_max:float, rng:int = 25):
     random.seed(rng)
     omega = random.uniform(0, omega_max)
     print("chosen omega:", np.round(omega, 2))
-    return omega
+    rng_w = random.randint(1, 1_000_000)
+    return omega, rng_w
 
 
 ############### helper function ###########
@@ -144,7 +147,7 @@ def get_evolutiontime(op:"qml.Hamiltonian"):
 
 if __name__ == "__main__":
 
-    print("hello world")
+    print(80*"-","\nstart of computation\n", 80*"-", sep='')
     N = 3
     T = 1
     alpha = 1
@@ -155,9 +158,10 @@ if __name__ == "__main__":
     tau = 1/2
     num_timesteps = 2
 
-    op_set = construct_opset(N)
-    A, omega = sample_operator(op_set), sample_omega(omega_max)
+    #random seed
+    rng = [24, 25]
 
+    op_set = construct_opset(N)
     H_sys  = transverse_ising_hamiltonian(-1, 0, N)
 
     # we might need a mixed device, because the auxilary qubit is thermal 
@@ -165,14 +169,21 @@ if __name__ == "__main__":
     @qml.qnode(dev) #we need extra qubits for deferred mid circuit measurment
 
     def circuit():
-        
+        rng_A, rng_w = rng[0], rng[1] 
+
         for i in range(num_timesteps):
+            print("\ntimestep", i, ": ")
+            
+            A, rng_A = sample_operator(op_set, rng_A)
+            omega, rng_w =  sample_omega(omega_max, rng_w)
+            
             is_first = (i==0)
             initialize_rho_env(N, beta, omega, first=is_first)
             construct_U_layers(N, tau, T, sigma, A, omega, H_sys)
             #qml.measure(wires=N_env)
             qml.Barrier(wires=range(N + 1), only_visual=True)
         
+        print("\nsystem density matrix (N=", N, "):\n")
         return qml.density_matrix(wires=range(N))
             
     final_state = circuit()
@@ -183,9 +194,11 @@ if __name__ == "__main__":
 
 
     ###################### display circuit nicely ###################
-    display_circuit = True
+    display_circuit = False
     if display_circuit:
         from matplotlib.text import Text
+        mpl.rcParams["mathtext.fontset"] = "stix" # use a font that doesnt throw warnings
+        mpl.rcParams["font.family"] = "STIXGeneral"
             
         qscript = qml.tape.make_qscript(circuit.func)()
         all_ops = list(qscript.operations)
@@ -221,5 +234,5 @@ if __name__ == "__main__":
             else:
                 artist.set_text(r"$e^{-i\tau H_{\mathrm{sys}}}$")
 
-        fig.savefig("circuit_"+str(num_timesteps)+"_steps.png", dpi=100, bbox_inches=None)
+        fig.savefig("circuit_"+str(num_timesteps)+"_steps.png", dpi=200, bbox_inches=None)
         plt.close(fig)
