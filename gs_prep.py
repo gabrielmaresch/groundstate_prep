@@ -30,15 +30,23 @@ def evaluate_sqrt_gaussian(sigma:float, t:float):
 
 
 ### this is a very particular op_set for testing 
-def construct_opset(num_qubits:int, *, output:bool = False):
+def construct_opset(num_qubits:int, *, type:str = "XX2", output:bool = False):
     with qml.QueuingManager.stop_recording():
         op_set = []
-        for i in range(num_qubits):
-            for j in range(i+1, num_qubits):
-                if output:
-                    print(i,j)
-                op_set.append(qml.PauliX(i)@qml.PauliX(j))
-                op_set.append(-(qml.PauliX(i)@qml.PauliX(j)))
+
+        if type == "XX2":
+            for i in range(num_qubits):
+                for j in range(i+1, num_qubits):
+                    if output:
+                        print(i,j)
+                    op_set.append(qml.PauliX(i)@qml.PauliX(j))
+                    op_set.append(-(qml.PauliX(i)@qml.PauliX(j)))
+
+        elif type == "XZ":
+            for i in range(num_qubits):
+                op_set.extend([qml.PauliX(i), -qml.PauliX(i)])
+                op_set.extend([qml.PauliZ(i), -qml.PauliZ(i)])
+
     return op_set
 
 
@@ -152,11 +160,13 @@ if __name__ == "__main__":
     omega_max = 5
     beta = 10 
 
-    tau = 1/2
-    num_timesteps = 2
+    tau = 1/4
+    s = input("Enter number of timesteps [2]: ")
+    num_timesteps = int(s) if s else 2
 
 
-    op_set = construct_opset(N)
+
+    op_set = construct_opset(N, type="XZ")
     H_sys  = transverse_ising_hamiltonian(-1, 0, N)
 
     # we might need a mixed device, because the auxilary qubit is thermal 
@@ -180,8 +190,8 @@ if __name__ == "__main__":
         print("\nsystem density matrix (N=", N, "):\n", sep='')
         return qml.density_matrix(wires=range(N))
             
-    final_state = circuit(42)
-    print(np.round(final_state, 4))
+    final_state = circuit(24)
+    print(np.round(final_state, 3))
     print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
 
 
