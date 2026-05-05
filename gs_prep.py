@@ -85,23 +85,22 @@ def construct_U_layers(num_qubits:int, tau:float, T:float, sigma:float, op:"qml.
  
     H_env = construct_environmental_hamiltonian(num_qubits, omega)
     
-    construct_W_layer(N, 1, tau/2, T, sigma, op, alpha )
-    for i in range(M):
+    construct_W_layer(num_qubits, 0, tau/2, T, sigma, op, alpha )
+    for m in range(1,M+1):
         #qml.ApproxTimeEvolution(H_env, tau, 1)
         qml.evolve(H_env, coeff=tau)
         # this should later be trotterized
-
         #qml.ApproxTimeEvolution(H_sys, tau, 1)
         qml.evolve(H_sys, coeff=tau)
-        if i < M-1:
-            construct_W_layer(N, 1, tau, T, sigma, op, alpha )
+        if m < M:
+            construct_W_layer(N, m, tau, T, sigma, op, alpha )
         else:
-            construct_W_layer(N, 1, tau/2, T, sigma, op, alpha )
+            construct_W_layer(N, M, tau/2, T, sigma, op, alpha )
     
     return None
 
 
-def initialize_rho_env(wire:int, beta:float, omega:float, rng:int = 42, *, first:bool = False):
+def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, first:bool = False):
     
     if not first:
         qml.measure(wires=[wire], reset=True)
@@ -111,27 +110,25 @@ def initialize_rho_env(wire:int, beta:float, omega:float, rng:int = 42, *, first
     
 
     # exp(beta Z) is diagonal, so we sample from the density matrix
-    random.seed(rng)
-    if random.uniform(0.0, 1.0) > p0:
+    rng = random.Random(seed)
+    if rng.uniform(0.0, 1.0) > p0:
         qml.PauliX(wires=wire)
     #rho_env = np.diag(np.array([p0, p1], dtype=complex)) 
     #qml.QubitDensityMatrix(rho_env, wires=[wire])
 
     return None
 
-def sample_operator(op_set:List["qml.Operator"], rng:int = 24):
-    random.seed(rng)
-    A = random.choice(op_set)
+def sample_operator(op_set:List["qml.Operator"], *, seed:int):
+    rng = random.Random(seed)
+    A = rng.choice(op_set)
     print("chosen operator: ", A)
-    rng_A = random.randint(1, 1_000_000)
-    return A, rng_A
+    return A
 
-def sample_omega(omega_max:float, rng:int = 25):
-    random.seed(rng)
-    omega = random.uniform(0, omega_max)
+def sample_omega(omega_max:float, *, seed:int):
+    rng = random.Random(seed)
+    omega = rng.uniform(0, omega_max)
     print("chosen omega:", np.round(omega, 2))
-    rng_w = random.randint(1, 1_000_000)
-    return omega, rng_w
+    return omega
 
 
 ############### helper function ###########
@@ -158,8 +155,6 @@ if __name__ == "__main__":
     tau = 1/2
     num_timesteps = 2
 
-    #random seed
-    rng = [24, 25]
 
     op_set = construct_opset(N)
     H_sys  = transverse_ising_hamiltonian(-1, 0, N)
@@ -168,26 +163,26 @@ if __name__ == "__main__":
     dev = qml.device("default.qubit", wires=N+num_timesteps)
     @qml.qnode(dev) #we need extra qubits for deferred mid circuit measurment
 
-    def circuit():
-        rng_A, rng_w = rng[0], rng[1] 
+    def circuit(seed):
 
         for i in range(num_timesteps):
             print("\ntimestep", i, ": ")
-            
-            A, rng_A = sample_operator(op_set, rng_A)
-            omega, rng_w =  sample_omega(omega_max, rng_w)
+
+            A = sample_operator(op_set, seed=seed+3*i)
+            omega =  sample_omega(omega_max, seed=seed+3*i+1)
             
             is_first = (i==0)
-            initialize_rho_env(N, beta, omega, first=is_first)
+            initialize_rho_env(N, beta, omega, seed=seed+3*i+2, first=is_first)
             construct_U_layers(N, tau, T, sigma, A, omega, H_sys)
             #qml.measure(wires=N_env)
             qml.Barrier(wires=range(N + 1), only_visual=True)
         
-        print("\nsystem density matrix (N=", N, "):\n")
+        print("\nsystem density matrix (N=", N, "):\n", sep='')
         return qml.density_matrix(wires=range(N))
             
-    final_state = circuit()
+    final_state = circuit(42)
     print(np.round(final_state, 4))
+    print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
 
 
     
