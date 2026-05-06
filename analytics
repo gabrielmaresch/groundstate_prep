@@ -1,0 +1,57 @@
+import pennylane as qml
+import pennylane.numpy as np
+import random
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+from typing import Any, List
+from cooling import create_circuit_diagram, create_cooling_circuit, transverse_ising_hamiltonian, construct_opset
+
+N = 3
+T = 1
+alpha = 1
+sigma = 1
+omega_max = 5
+beta = 10 
+tau = 1/2
+
+assert tau < T
+
+op_set = construct_opset(N, type="XZ")
+J, h = -1, 1
+H_sys  = transverse_ising_hamiltonian(J, h, N)
+
+seed = 123
+mixed = True
+circuit_diagram = True
+
+print("\n" + 80 * "-")
+print("Start calculation")
+print(80 * "-")
+
+print("\nTransversal Ising XXZ model on", N,"qubits with J=", J, ", h=", h, ":\n")
+print("H_sys =", H_sys, "\n")
+
+s = input("Enter number of timesteps [10]: ")
+num_timesteps = int(s) if s else 10
+
+circuit = create_cooling_circuit(
+    num_system_qubits=N,
+    num_timesteps=num_timesteps,
+    H_sys=H_sys,
+    tau=tau,
+    beta=beta,
+    T=T,
+    omega_max=omega_max,
+    op_set=op_set,
+    alpha=alpha,
+    sigma=sigma,
+    seed=seed,
+    mixed=mixed)
+
+        
+final_state = circuit()
+print(np.round(final_state, 3))
+print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
+is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
+print("is diagonal:", is_diagonal)
