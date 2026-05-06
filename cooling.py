@@ -206,18 +206,20 @@ def get_evolutiontime(op:"qml.Hamiltonian"):
     return evo_time
 
 ###################### display circuit nicely ###################
-def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int, tau:float):
+def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int, tau:float, mixed:bool):
     from matplotlib.text import Text
     mpl.rcParams["mathtext.fontset"] = "stix" # use a font that doesnt throw warnings
     mpl.rcParams["font.family"] = "STIXGeneral"
+    mpl.rcParams["font.size"] = 20
+    artist.set_fontsize(18)   # or 20, 22, ...
         
     qscript = qml.tape.make_qscript(qc_name.func)()
     all_ops = list(qscript.operations)
     N = len(qc_name.device.wires) - 1  
 
     evolv_ops = {"W_tau": [], "W_tau_half": [], "H_env": [], "H_sys": []}
-    op_condition = ("Evolution" in op.name) or ("ApproxTimeEvolution" in op.name) or ("RZ" in op.name) or ("X" in op.name)
     for op in all_ops:
+        op_condition = ("Evolution" in op.name) or ("ApproxTimeEvolution" in op.name) or ("RZ" in op.name) or ("X" in op.name)
         #print(op.name, list(op.wires), getattr(op, "coeff", None))
         if op_condition:
             if [N] == list(op.wires):
@@ -232,8 +234,8 @@ def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int
 
     fig, ax = qml.draw_mpl(qc_name)()
 
-    op_texts = [artist for artist in fig.findobj(Text) if ("Exp(" in artist.get_text()) or ("RZ" in artist.get_text())]
-    evolve_ops_in_order = [op for op in all_ops if ("Evolution" in op.name) or("RZ" in op.name) ]
+    op_texts = [artist for artist in fig.findobj(Text) if ("Exp(" in artist.get_text()) or ("Approx" in artist.get_text()) or ("RZ" in artist.get_text())]
+    evolve_ops_in_order = [op for op in all_ops if ("Evolution" in op.name) or ("ApproxTimeEvolution" in op.name) or ("RZ" in op.name) or ("X" in op.name) ]
 
     for artist, op in zip(op_texts, evolve_ops_in_order):
         if op in evolv_ops["H_env"]:
@@ -244,6 +246,14 @@ def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int
             artist.set_text(r"$W(\tau)$")
         else:
             artist.set_text(r"$e^{-i\tau H_{\mathrm{sys}}}$")
+
+    # replace the reset labels  
+    all_texts = fig.findobj(Text)
+    for artist in all_texts:
+        txt = artist.get_text().strip()
+        if (not mixed and txt == "X") or (mixed and txt == "QubitChannel"):
+            artist.set_text(r"$\rho_E$")
+            artist.set_fontsize(20) 
 
     file_name = "cooling_circuit_"+str(num_timesteps)+"_steps.png" if (file_name == "") else file_name 
 
@@ -268,6 +278,7 @@ if __name__ == "__main__":
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
     seed = 123
+    mixed = True
     circuit_diagram = True
     
     print("\n" + 80 * "-")
@@ -292,7 +303,7 @@ if __name__ == "__main__":
         alpha=alpha,
         sigma=sigma,
         seed=seed,
-        mixed=False)
+        mixed=mixed)
     
             
     final_state = circuit()
@@ -302,5 +313,5 @@ if __name__ == "__main__":
     print("is diagonal:", is_diagonal)
 
     if circuit_diagram:
-        create_circuit_diagram(circuit, num_timesteps=num_timesteps, tau=tau)
+        create_circuit_diagram(circuit, num_timesteps=num_timesteps, tau=tau, mixed=mixed)
     
