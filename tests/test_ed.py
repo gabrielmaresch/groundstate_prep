@@ -1,4 +1,4 @@
-import numpy as np
+import pennylane.numpy as np
 
 
 local_path = "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep/"

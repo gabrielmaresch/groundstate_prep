@@ -141,16 +141,18 @@ def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:boo
 
     return None
 
-def sample_operator(op_set:List["qml.Operator"], *, seed:int):
+def sample_operator(op_set:List["qml.Operator"], *, seed:int, output:bool = False):
     rng = random.Random(seed)
     A = rng.choice(op_set)
-    print("chosen operator: ", A)
+    if output:
+        print("chosen operator: ", A)
     return A
 
-def sample_omega(omega_max:float, *, seed:int):
+def sample_omega(omega_max:float, *, seed:int, output:bool = False):
     rng = random.Random(seed)
     omega = rng.uniform(0, omega_max)
-    print("chosen omega:", np.round(omega, 2))
+    if output:
+        print("chosen omega:", np.round(omega, 2))
     return omega
 
 ############### this is the main function of this file #######
@@ -168,8 +170,9 @@ alpha:int=1,                #coupling parameter system-environment
 sigma:int=1,                #inverse frequency width for gaussian filter
 *,              
 seed:int=42,                #answer to live, universe and everything
-mixed:bool=True):           #circuit transforms either density matrices or pure states
-         
+mixed:bool=True,           #circuit transforms either density matrices or pure states
+output:bool = False):
+    
     num_auxiliary_qubits = 1
     N = num_system_qubits + num_auxiliary_qubits
     
@@ -180,10 +183,11 @@ mixed:bool=True):           #circuit transforms either density matrices or pure 
     def circuit():
 
         for i in range(num_timesteps):
-            print("\ntimestep", i, ": ")
+            if output:
+                print("\ntimestep", i, ": ")
 
-            A = sample_operator(op_set, seed=seed+3*i)
-            omega =  sample_omega(omega_max, seed=seed+3*i+1)
+            A = sample_operator(op_set, seed=seed+3*i, output=output)
+            omega =  sample_omega(omega_max, seed=seed+3*i+1, output=output)
             
             initialize_rho_env(N-1, beta, omega, seed=seed+3*i+2, mixed=mixed)
             construct_U_layers(num_system_qubits, tau, T, sigma, A, omega, H_sys, alpha, mixed=mixed)
@@ -213,8 +217,7 @@ def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int
     from matplotlib.text import Text
     mpl.rcParams["mathtext.fontset"] = "stix" # use a font that doesnt throw warnings
     mpl.rcParams["font.family"] = "STIXGeneral"
-    mpl.rcParams["font.size"] = 20
-    artist.set_fontsize(18)   # or 20, 22, ...
+    mpl.rcParams["font.size"] = 20   # or 20, 22, ...
         
     qscript = qml.tape.make_qscript(qc_name.func)()
     all_ops = list(qscript.operations)
@@ -265,7 +268,9 @@ def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int
 
 if __name__ == "__main__":
 
+
     # generic parameters for testing
+    output = True
     N = 3
     T = 1
     alpha = 1
@@ -288,7 +293,7 @@ if __name__ == "__main__":
     print("Start calculation")
     print(80 * "-")
 
-    print("\nTransversal Ising XXZ model on", N,"qubits with J=", J, ", h=", h, ":\n")
+    print("\nTransversal Ising model on", N,"qubits with J=", J, ", h=", h, ":\n")
     print("H_sys =", H_sys, "\n")
 
     s = input("Enter number of timesteps [10]: ")
@@ -306,14 +311,16 @@ if __name__ == "__main__":
         alpha=alpha,
         sigma=sigma,
         seed=seed,
-        mixed=mixed)
+        mixed=mixed,
+        output=output)
     
             
     final_state = circuit()
-    print(np.round(final_state, 3))
-    print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
-    is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
-    print("is diagonal:", is_diagonal)
+    if output:
+        print(np.round(final_state, 3))
+        print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
+        is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
+        print("is diagonal:", is_diagonal)
 
     if circuit_diagram:
         create_circuit_diagram(circuit, num_timesteps=num_timesteps, tau=tau, mixed=mixed)

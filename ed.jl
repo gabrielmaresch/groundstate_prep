@@ -11,7 +11,7 @@ using Pkg
 Construct the Hamiltonian matrix of the spin-1/2 transverse Ising model
 for a 1D chain with periodic boundary conditions.
 
-H = -J ∑_<i,j> Z_i Z_j + h ∑_i X_i      
+H = -J ∑_<i,j> Z_i Z_j - h ∑_i X_i      
 
 # Arguments
 - `N::Int`: Number of spins in the chain.
@@ -24,23 +24,23 @@ H = -J ∑_<i,j> Z_i Z_j + h ∑_i X_i
 """
 function transverse_ising_hamiltonian(N::Int, J::Real, h::Real)
     H = zeros(Float64, 2^N, 2^N)
-    sx = [0.0 1.0; 1.0 0.0] / 2
-    sz = [1.0 0.0; 0.0 -1.0] / 2
+    X = [0.0 1.0; 1.0 0.0] 
+    Z = [1.0 0.0; 0.0 -1.0]
     id2 =[1.0 0.0; 0.0 1.0]
 
     for i in 1:N
         # construct Sz-Sz term
         if i == N
-            v_z = [(j==N || j==1 ? sz : id2)  for j in 1:N]
+            v_z = [(j==N || j==1 ? Z : id2)  for j in 1:N]
         # periodic boundary condition (not elegant, but easily readable)
         else
-            v_z = [(j==i || j==i+1 ? sz : id2)  for j in 1:N]
+            v_z = [(j==i || j==i+1 ? Z : id2)  for j in 1:N]
         end
         H += -J.*kron(v_z...)
         
         # construct Sx term
-        v_x = [(j==i ? sx : id2)  for j in 1:N]
-        H += h.*kron(v_x...)
+        v_x = [(j==i ? X : id2)  for j in 1:N]
+        H += -h.*kron(v_x...)
     end
     return Hermitian(H)
 end
