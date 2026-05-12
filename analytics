@@ -1,53 +1,58 @@
 import pennylane as qml
 import pennylane.numpy as np
 import random
+import os
+import sys
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from typing import Any, List
 from cooling import create_circuit_diagram, create_cooling_circuit, transverse_ising_hamiltonian, construct_opset
 
+
+##################
+N = 3
+J, h = -1, 1
+beta = 1
+##################
+
+
+#__________________________________ JULIA ED ________________________________________
 from juliacall import Main as jl
 
 local_path = "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep/"
 file_name = "ed.jl" 
 jl.include(local_path+file_name)
 
-gs, energy = jl.get_transverse_ising_groundstate(3, 1, 1)
+gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
 
-print(gs)
-print(energy)
+def nice_print_matrix(A, digits=3):
+    A = np.asarray(A)
+    fmt = f"{{:.{digits}f}}"
+    for row in A:
+        print("  ".join(fmt.format(x) for x in row))
 
+def trace_distace(A,B):
+    lambdas = np.linalg.eigvalsh(A-B)
+    dist = 1/2*sum(abs(ev) for ev in lambdas)
+    return dist
 
-
-
-
-
-
-
-
-
-
-
+nice_print_matrix(gibbs_state)
 
 
-
-
-N = 3
+#'____________________________ COOLING CICUIT EXECUTION _____________________________'
 T = 1
 alpha = 1
 sigma = 1
 omega_max = 5
-beta = 10 
 tau = 1/2
 
 assert tau < T
 
 op_set = construct_opset(N, type="XZ")
-J, h = -1, 1
 H_sys  = transverse_ising_hamiltonian(J, h, N)
 
-seed = 123
+seed = 12
 mixed = True
 circuit_diagram = True
 
@@ -58,26 +63,53 @@ print(80 * "-")
 print("\nTransversal Ising XXZ model on", N,"qubits with J=", J, ", h=", h, ":\n")
 print("H_sys =", H_sys, "\n")
 
-s = input("Enter number of timesteps [10]: ")
-num_timesteps = int(s) if s else 10
+s = input("Enter number of max. timesteps [100]: ")
+max_timesteps = int(s) if s else 100
 
-circuit = create_cooling_circuit(
-    num_system_qubits=N,
-    num_timesteps=num_timesteps,
-    H_sys=H_sys,
-    tau=tau,
-    beta=beta,
-    T=T,
-    omega_max=omega_max,
-    op_set=op_set,
-    alpha=alpha,
-    sigma=sigma,
-    seed=seed,
-    mixed=mixed)
+tr_dist = []
+for num_timesteps in range(1, max_timesteps + 1):
+    circuit = create_cooling_circuit(
+        num_system_qubits=N,
+        num_timesteps=num_timesteps,
+        H_sys=H_sys,
+        tau=tau,
+        beta=beta,
+        T=T,
+        omega_max=omega_max,
+        op_set=op_set,
+        alpha=alpha,
+        sigma=sigma,
+        seed=seed,
+        mixed=mixed,
+        output=False)
 
-        
-final_state = circuit()
-print(np.round(final_state, 3))
-print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
-is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
-print("is diagonal:", is_diagonal)
+            
+    final_state = circuit()
+    #nice_print_matrix(final_state)
+
+    #print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
+    #is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
+    #print("is diagonal:", is_diagonal)
+    dist = trace_distace(final_state, gibbs_state)
+    #print("trace distance:", np.round(dist, 3))
+    tr_dist.append(dist)
+
+print(np.round(tr_dist, 2))
+
+info = f"N = {N}\nJ = {J}\nh = {h}\nT = {T}\nbeta = {beta}"
+
+plt.scatter(range(1, max_timesteps + 1), tr_dist)
+plt.xlabel("number of timesteps")
+plt.title("trace distance cooled state vs. Gibbs state")
+plt.text(
+    0.95, 0.95, info,
+    transform=plt.gca().transAxes,
+    verticalalignment="top",
+    horizontalalignment="right",
+    bbox=dict(boxstyle="round", facecolor="white", alpha=0.8)
+)
+plt.savefig("trace_distance.png", dpi=200)
+plt.show()
+
+###############################
+sys.stdout.flush()
