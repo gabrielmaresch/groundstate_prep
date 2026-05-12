@@ -1,3 +1,5 @@
-pennylane>=0.33.0
-numpy>=1.23.0
-matplotlib>=3.7.0
+pennylane==0.44.1
+numpy==2.4.4
+matplotlib==3.10.9
+pytest==9.0.3
+juliacall

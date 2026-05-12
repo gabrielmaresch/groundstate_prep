@@ -7,6 +7,32 @@ import matplotlib.pyplot as plt
 from typing import Any, List
 from cooling import create_circuit_diagram, create_cooling_circuit, transverse_ising_hamiltonian, construct_opset
 
+from juliacall import Main as jl
+
+local_path = "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep/"
+file_name = "ed.jl" 
+jl.include(local_path+file_name)
+
+gs, energy = jl.get_transverse_ising_groundstate(3, 1, 1)
+
+print(gs)
+print(energy)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 N = 3
 T = 1
 alpha = 1

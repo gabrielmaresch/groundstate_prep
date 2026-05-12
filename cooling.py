@@ -6,6 +6,9 @@ from typing import Any, List
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+""" 
+H = -J ∑_<i,j> Z_i Z_j + h ∑_i X_i  
+"""    
 def transverse_ising_hamiltonian(J:float, h:float, N:int, boundary_condition: str='periodic'):
     coeffs = []
     ops = []
@@ -183,7 +186,7 @@ mixed:bool=True):           #circuit transforms either density matrices or pure 
             omega =  sample_omega(omega_max, seed=seed+3*i+1)
             
             initialize_rho_env(N-1, beta, omega, seed=seed+3*i+2, mixed=mixed)
-            construct_U_layers(num_system_qubits, tau, T, sigma, A, omega, H_sys, mixed=mixed)
+            construct_U_layers(num_system_qubits, tau, T, sigma, A, omega, H_sys, alpha, mixed=mixed)
           
             qml.Barrier(wires=range(N), only_visual=True)
         
