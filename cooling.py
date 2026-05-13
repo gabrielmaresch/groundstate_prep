@@ -104,7 +104,7 @@ def construct_U_layers(num_qubits:int, tau:float, T:float, sigma:float, op:"qml.
     for m in range(1,M+1):
 
         if mixed:
-            order = 1
+            order = 2
             qml.ApproxTimeEvolution(H_sys, tau, order)
         else:
             qml.evolve(H_sys, coeff=tau)
