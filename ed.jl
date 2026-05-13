@@ -112,3 +112,6 @@ function get_transverse_ising_gibbsstate(N::Int, J::Real, h::Real, beta::Real)
     return gibbs, gibbs_energy
 end
 
+function get_spectrum(H::AbstractMatrix)
+    return eigen(H).values
+end
