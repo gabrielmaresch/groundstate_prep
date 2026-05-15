@@ -1,0 +1,82 @@
+\documentclass[11pt,a4paper]{article}
+
+% Encoding, language, typography
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% Page layout
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{parskip}
+
+% Mathematics
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{bm}
+
+% Units and numbers
+\usepackage{siunitx}
+
+\sisetup{
+    per-mode=symbol,
+    separate-uncertainty=true,
+    detect-all=true
+}
+
+% Quantum notation and circuits
+\usepackage{braket}
+\usepackage{quantikz}
+
+% Figures and tables
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+
+% Code listings
+\usepackage{xcolor}
+\usepackage{listings}
+
+% Links and references
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+% Default epsilon
+\let\epsilon\varepsilon
+
+% Common number sets
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+
+% Common quantum/math operators
+\newcommand{\id}{\mathbb{I}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\rank}{\operatorname{rank}}
+
+% Code listing defaults
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    tabsize=4,
+    showstringspaces=false
+}
+
+\title{Technical Documentation \--- QIST Project:\\ Cooling and Filtering 
+Algorithms for State Preparation}
+\author{Gabriel Maresch}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\end{document}
