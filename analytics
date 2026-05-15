@@ -3,6 +3,8 @@ import pennylane.numpy as np
 import random
 import os
 import sys
+from pathlib import Path
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -15,14 +17,19 @@ N = 3
 J, h = 1, 1
 beta = 3
 ##################
-
+T = 1
+alpha = 0.25
+sigma = 1.0
+omega_max = 4
+tau = 0.1
+##################
 
 #__________________________________ JULIA ED ________________________________________
 from juliacall import Main as jl
 
-local_path = "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep/"
+local_path = Path(__file__).resolve().parent
 file_name = "ed.jl" 
-jl.include(local_path+file_name)
+jl.include(str(local_path/file_name))
 
 gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
 
@@ -41,11 +48,7 @@ nice_print_matrix(gibbs_state)
 
 
 #'____________________________ COOLING CICUIT EXECUTION _____________________________'
-T = 1
-alpha = 0.25
-sigma = 1.0
-omega_max = 4
-tau = 0.1
+
 
 assert tau < T
 
@@ -104,7 +107,7 @@ print(np.round(tr_dist, 2))
 
 info = f"N = {N}\nJ = {J}\nh = {h}\nT = {T}\nbeta = {beta}"
 
-plt.scatter(range(1, max_timesteps + 1,5), tr_dist)
+plt.scatter(range(1, max_timesteps + 1, 5), tr_dist)
 plt.xlabel("number of timesteps")
 plt.title("trace distance cooled state vs. Gibbs state")
 plt.text(
@@ -114,7 +117,9 @@ plt.text(
     horizontalalignment="right",
     bbox=dict(boxstyle="round", facecolor="white", alpha=0.8)
 )
-plt.savefig("trace_distance_"+str(max_timesteps)+"timesteps.png", dpi=200)
+pic_dir = "pics"
+pic_name = "trace_distance_"+str(max_timesteps)+"timesteps.png"
+plt.savefig(local_path/pic_dir/pic_name, dpi=200)
 plt.show()
 
 ###############################

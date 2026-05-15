@@ -6,6 +6,9 @@ from typing import Any, List
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+from pathlib import Path
+
+
 """ 
 H = -J ∑_<i,j> Z_i Z_j + h ∑_i X_i  
 """    
@@ -213,7 +216,7 @@ def get_evolutiontime(op:"qml.Hamiltonian"):
     return evo_time
 
 ###################### display circuit nicely ###################
-def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int, tau:float, mixed:bool):
+def create_circuit_diagram(qc_name:str, path, file_name:str = "", *, num_timesteps:int, tau:float, mixed:bool):
     from matplotlib.text import Text
     mpl.rcParams["mathtext.fontset"] = "stix" # use a font that doesnt throw warnings
     mpl.rcParams["font.family"] = "STIXGeneral"
@@ -263,7 +266,7 @@ def create_circuit_diagram(qc_name:str, file_name:str = "", *, num_timesteps:int
 
     file_name = "cooling_circuit_"+str(num_timesteps)+"_steps.png" if (file_name == "") else file_name 
 
-    fig.savefig(file_name, dpi=200)
+    fig.savefig(path+file_name, dpi=200)
     plt.close(fig)
 
 if __name__ == "__main__":
@@ -323,5 +326,6 @@ if __name__ == "__main__":
         print("is diagonal:", is_diagonal)
 
     if circuit_diagram:
-        create_circuit_diagram(circuit, num_timesteps=num_timesteps, tau=tau, mixed=mixed)
+        local_path = Path(__file__).resolve().parent
+        create_circuit_diagram(circuit, local_path, num_timesteps=num_timesteps, tau=tau, mixed=mixed)
     
