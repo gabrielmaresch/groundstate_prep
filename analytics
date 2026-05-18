@@ -14,13 +14,13 @@ from cooling import create_circuit_diagram, create_cooling_circuit, transverse_i
 
 ##################
 N = 4
-J, h = 1, 2
+J, h = 1.0, 2.0
 beta = 0.1
 ##################
 T = 1
 alpha = 0.25
 sigma = 1.0
-omega_max = 6
+omega_max = 6.0
 tau = 0.1
 ##################
 
@@ -64,16 +64,15 @@ print("\n" + 80 * "-")
 print("Start calculation")
 print(80 * "-")
 
-print("\nTransversal Ising XXZ model on", N,"qubits with J=", J, ", h=", h, ":\n")
+print("\nTransversal Ising XXZ model on", N,"qubits with J =", J, ", h =", h, ":\n")
 print("H_sys =", H_sys, "\n")
 
 s = input("Enter number of max. timesteps [100]: ")
 max_timesteps = int(s) if s else 100
 
 tr_dist = []
-for num_timesteps in range(1, max_timesteps + 1, 5):
-    if num_timesteps > 1:
-        num_timesteps -= 1
+start = 5
+for num_timesteps in range(start, max_timesteps + 1, 5):
     
     circuit = create_cooling_circuit(
         num_system_qubits=N,
@@ -99,14 +98,14 @@ for num_timesteps in range(1, max_timesteps + 1, 5):
     #is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
     #print("is diagonal:", is_diagonal)
     dist = trace_distace(final_state, gibbs_state)
-    print(num_timesteps, "timesteps:\t", dist)
-    if num_timesteps>1:
-        print("\t\t\t\t\t trace dist. increment", trace_distace(previous_state, final_state))
+    print(num_timesteps, "timesteps:\t", np.round(dist,3))
+    if num_timesteps>start:
+        print("\t\t\t\t\t trace dist. increment", np.round(trace_distace(previous_state, final_state),3))
     previous_state = final_state
     #print("trace distance:", np.round(dist, 3))
     tr_dist.append(dist)
 
-print(np.round(tr_dist, 2))
+print(np.round(tr_dist, 3))
 
 info_H = f"N = {N}\nJ = {J}\nh = {h}"
 info_ch = (
@@ -122,20 +121,20 @@ plt.xlabel("number of timesteps")
 plt.title("trace distance cooled state vs. Gibbs state")
 
 plt.text(
-    0.85, 0.95, info_H,
+    0.8, 0.95, info_H,
     transform=plt.gca().transAxes,
     verticalalignment="top",
     horizontalalignment="left",
     bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 plt.text(
-0.85, 0.5, info_ch,
+0.8, 0.65, info_ch,
 transform=plt.gca().transAxes,
 verticalalignment="top",
 horizontalalignment="left",
 bbox=dict(boxstyle="round", facecolor="white", alpha=0.8)
 )
 
-pic_dir = "pics"
+pic_dir = "plots"
 pic_name = "trace_distance_"+str(max_timesteps)+"timesteps.png"
 plt.savefig(local_path/pic_dir/pic_name, dpi=200)
 plt.show()
