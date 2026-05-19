@@ -1,5 +1,4 @@
 pennylane==0.44.1
-numpy==2.4.4
 matplotlib==3.10.9
 pytest==9.0.3
 juliacall
