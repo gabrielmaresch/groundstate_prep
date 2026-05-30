@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 """ 
-H = -J ∑_<i,j> Z_i Z_j + h ∑_i X_i  
+H = -J ∑_<i,j> Z_i Z_j - h ∑_i X_i  
 """    
 def transverse_ising_hamiltonian(J:float, h:float, N:int, boundary_condition: str='periodic'):
     coeffs = []

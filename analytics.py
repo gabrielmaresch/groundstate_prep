@@ -164,7 +164,7 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
         f"$\\alpha$ = {alpha}\n"
         f"$\\sigma$ = {sigma}"
     )
-    if plots:
+    if plots and len(times)>2:
     
         plt.scatter(times, tr_dist_gibbs)
         plt.xlabel("number of timesteps")
