@@ -202,4 +202,3 @@ dependencies:
       - termcolor==3.3.0
       - tomli==2.4.1
       - tomlkit==0.14.0
-prefix: /usr/local/Caskroom/miniforge/base/envs/triqs
