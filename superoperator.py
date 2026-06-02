@@ -70,7 +70,58 @@ def get_superoperator_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys,
 
     return S
 
+def get_averaged_channel(N, tau, T, sigma, op, omega, H_sys, alpha, beta, *, averages=50, output=False, k_max = 250):
 
+    S = np.zeros((2**(2*N),2**(2*N)), dtype = complex)
+
+    for i in range(averages):
+        A = sample_operator(op_set, seed=3*i+1)
+        omega =  sample_omega(omega_max, seed=3*i+2)
+        S += get_superoperator_matrix(N, tau, T, sigma, A, omega, H_sys, alpha, beta)
+    S = S/averages
+
+    eigvals, eigvecs = eigs(S, k=k_max, which="LM")
+
+    idx = np.argmin(np.abs(eigvals - 1))
+    fixedpoint = eigvecs[:, idx]
+    target = 0.0 + 1.0j
+    degeneracy = np.sum(np.isclose(eigvals, target, atol=1e-4))
+
+    ### sort eigenvals:
+    lambda2 = np.sort(abs(eigvals))[1]
+
+    plt.scatter(eigvals.real, eigvals.imag, s=10)
+    plt.axhline(0, color="k", lw=0.5)
+    plt.axvline(0, color="k", lw=0.5)
+    plt.xlabel("Re($\\lambda$)")
+    plt.ylabel("Im($\\lambda$)")
+    plt.gca().set_aspect("equal", adjustable="box")
+
+    info = f"degeneracy = {degeneracy}\n$\\lambda_2$ = {lambda2:.4f}"
+
+    ax = plt.gca()
+    ax.text(
+        0.03,
+        0.97,
+        info,
+        transform=ax.transAxes,
+        ha="left",
+        va="top",
+        bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.6", alpha=0.9),
+    )
+
+    theta = np.linspace(0, 2 * np.pi, 400)
+    plt.plot(np.cos(theta), np.sin(theta), "k--", lw=1)
+
+    path = Path(__file__).resolve().parent
+    file_name = "superoperator_N"+str(N)+".png" 
+
+    plt.savefig(path/file_name, dpi=200)
+    
+    if output:
+        plt.show()
+
+    return S, [fixedpoint, degeneracy]
 
 
 
@@ -80,10 +131,10 @@ if __name__ == "__main__":
     # generic parameters for testing
     N = 4
     T = 10
-    alpha = 3
+    alpha = 1
     sigma = 0.5
     omega_max = 5
-    beta = 10
+    beta = 1
     tau = 1/2
     
     op_set = construct_opset(N, type="XZ")
@@ -94,28 +145,5 @@ if __name__ == "__main__":
     J, h = 1, 2
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
-    
-    
-    S= get_superoperator_matrix(N, tau, T, sigma, A, omega, H_sys, alpha, beta)
+    averages = 50
 
-eigvals, _ = eigs(S, k=250, which="LM")
-target = 0.0 + 1.0j
-degeneracy = np.sum(np.isclose(eigvals, target, atol=1e-4))
-print("fp degeneracy:", degeneracy)
-
-plt.scatter(eigvals.real, eigvals.imag, s=10)
-plt.axhline(0, color="k", lw=0.5)
-plt.axvline(0, color="k", lw=0.5)
-plt.xlabel("Re($\\lambda$)")
-plt.ylabel("Im($\\lambda$)")
-plt.gca().set_aspect("equal", adjustable="box")
-
-theta = np.linspace(0, 2 * np.pi, 400)
-plt.plot(np.cos(theta), np.sin(theta), "k--", lw=1)
-
-path = Path(__file__).resolve().parent
-file_name = "superoperator_N"+str(N)+".png" 
-
-plt.savefig(path/file_name, dpi=200)
-
-plt.show()
