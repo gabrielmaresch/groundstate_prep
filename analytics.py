@@ -1,5 +1,5 @@
 import pennylane as qml
-import pennylane.numpy as np
+import numpy as np
 import random
 import os
 import sys
