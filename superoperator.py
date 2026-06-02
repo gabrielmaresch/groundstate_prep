@@ -147,3 +147,4 @@ if __name__ == "__main__":
 
     averages = 50
 
+    get_averaged_channel(N, tau, T, sigma, op_set, omega, H_sys, alpha, beta)
