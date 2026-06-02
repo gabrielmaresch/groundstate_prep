@@ -9,8 +9,19 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
-
+from analytics import trace_distace
 from scipy.sparse.linalg import eigs
+##################
+from juliacall import Main as jl
+
+local_path = Path(__file__).resolve().parent
+file_name = "ed.jl" 
+jl.include(str(local_path/file_name))
+
+def get_gibbs(N, J, h, beta):
+    gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
+    return gibbs_state, energy
+####################
 
 
 def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
@@ -70,8 +81,9 @@ def get_superoperator_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys,
 
     return S
 
-def get_averaged_channel(N, tau, T, sigma, op, omega, H_sys, alpha, beta, *, averages=50, output=False, k_max = 250):
-
+def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, averages=50):
+    S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
+    
     S = np.zeros((2**(2*N),2**(2*N)), dtype = complex)
 
     for i in range(averages):
@@ -80,16 +92,40 @@ def get_averaged_channel(N, tau, T, sigma, op, omega, H_sys, alpha, beta, *, ave
         S += get_superoperator_matrix(N, tau, T, sigma, A, omega, H_sys, alpha, beta)
     S = S/averages
 
+    return S, S_params
+
+def get_superoperator_spectral_data(S,*, k_max=100):
     eigvals, eigvecs = eigs(S, k=k_max, which="LM")
 
     idx = np.argmin(np.abs(eigvals - 1))
     fixedpoint = eigvecs[:, idx]
-    target = 0.0 + 1.0j
+    target = 1.0 + 0.0j
     degeneracy = np.sum(np.isclose(eigvals, target, atol=1e-4))
 
-    ### sort eigenvals:
-    lambda2 = np.sort(abs(eigvals))[1]
+    #compute gap
+    lambda2 = np.sort(abs(eigvals))[-2]
+    return eigvals, fixedpoint, degeneracy, lambda2
 
+def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
+    N, J, h = TFIM_params
+    thermal, energy = get_gibbs(N, J, h, beta)
+    thermal, energy = np.array(thermal), float(energy)
+    
+    test_state = test_vector.reshape((2**N, 2**N))
+    test_state = 0.5 * (test_state + test_state.conj().T)
+    test_state = test_state / np.trace(test_state)
+
+    dist = trace_distace(test_state, thermal)
+    
+    return (dist<tol), test_state, dist
+
+def plot_superoperator_spectrum(S, S_params, output = True):
+    
+    N, tau, T, sigma, _, omega_max, _, alpha, beta, averages = S_params
+    eigvals, _, degeneracy, lambda2 = get_superoperator_spectral_data(S)
+
+    
+    #### PLOT ###########
     plt.scatter(eigvals.real, eigvals.imag, s=10)
     plt.axhline(0, color="k", lw=0.5)
     plt.axvline(0, color="k", lw=0.5)
@@ -97,13 +133,40 @@ def get_averaged_channel(N, tau, T, sigma, op, omega, H_sys, alpha, beta, *, ave
     plt.ylabel("Im($\\lambda$)")
     plt.gca().set_aspect("equal", adjustable="box")
 
-    info = f"degeneracy = {degeneracy}\n$\\lambda_2$ = {lambda2:.4f}"
+    info_so = f"degeneracy = {degeneracy}\n$|\\lambda_2|$ = {lambda2:.4f}"
+    info_H = f"N = {N}\nJ = {J}\nh = {h}"
+    info_ch = (
+        f"$\\beta$ = {beta}\n"
+        f"$T$ = {T}\n"
+        f"$\\tau$ = {tau}\n"
+        f"$\\omega_{{\\max}}$ = {omega_max}\n"
+        f"$\\alpha$ = {alpha}\n"
+        f"$\\sigma$ = {sigma}"
+    )
 
     ax = plt.gca()
     ax.text(
+        0.97,
+        0.97,
+        info_so,
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.6", alpha=0.9),
+    )
+    ax.text(
+        0.97,
+        0.03,
+        info_ch,
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.6", alpha=0.9),
+    )
+    ax.text(
         0.03,
         0.97,
-        info,
+        info_H,
         transform=ax.transAxes,
         ha="left",
         va="top",
@@ -121,7 +184,7 @@ def get_averaged_channel(N, tau, T, sigma, op, omega, H_sys, alpha, beta, *, ave
     if output:
         plt.show()
 
-    return S, [fixedpoint, degeneracy]
+    return None
 
 
 
@@ -130,21 +193,31 @@ if __name__ == "__main__":
 
     # generic parameters for testing
     N = 4
-    T = 10
-    alpha = 1
-    sigma = 0.5
-    omega_max = 5
-    beta = 1
-    tau = 1/2
+    T = 10.
+    alpha = 1.
+    sigma = 1.
+    omega_max = 6.
+    beta = 0.1
+    tau = 0.25
     
     op_set = construct_opset(N, type="XZ")
     A = sample_operator(op_set, seed=12)
     omega =  sample_omega(omega_max, seed=12)
 
 
-    J, h = 1, 2
+    J, h = 1., 2.
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
     averages = 50
 
-    get_averaged_channel(N, tau, T, sigma, op_set, omega, H_sys, alpha, beta)
+    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta)
+    eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(S)
+    
+    correct_fp, test_state, dist  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
+    if correct_fp:
+        print("gibbs state is fixed-point")
+    else:
+        print("wrong fixed-point")
+    print(f"tr-dist to thermal state: {dist:.4f}")
+
+    plot_superoperator_spectrum(S, S_params)
