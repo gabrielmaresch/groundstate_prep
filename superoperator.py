@@ -3,6 +3,7 @@ import pennylane.numpy as np
 import random
 import os
 import sys
+import re
 from pathlib import Path
 
 import matplotlib as mpl
@@ -11,6 +12,19 @@ import matplotlib.pyplot as plt
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
 from analytics import trace_distace
 from scipy.sparse.linalg import eigs
+
+
+################## Helper function for naming logic ###########
+def next_running_number(folder, ext="png"):
+    numbers = []
+    for file in Path(folder).glob("*."+ext):
+        match = re.search(rf"(\d+)(?=\.{ext}$)", file.name)
+        if match:
+            numbers.append(int(match.group(1)))
+    return max(numbers, default=0) + 1
+
+
+
 ##################
 from juliacall import Main as jl
 
@@ -22,6 +36,9 @@ def get_gibbs(N, J, h, beta):
     gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
     return gibbs_state, energy
 ####################
+
+
+
 
 
 def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
@@ -176,8 +193,9 @@ def plot_superoperator_spectrum(S, S_params, output = True):
     theta = np.linspace(0, 2 * np.pi, 400)
     plt.plot(np.cos(theta), np.sin(theta), "k--", lw=1)
 
-    path = Path(__file__).resolve().parent
-    file_name = "superoperator_N"+str(N)+".png" 
+    path = Path(__file__).resolve().parent / "plots" 
+    running_number = next_running_number(path)
+    file_name = "superoperator_N"+str(N)+"_"+str(running_number)+".png" 
 
     plt.savefig(path/file_name, dpi=200)
     
@@ -185,6 +203,7 @@ def plot_superoperator_spectrum(S, S_params, output = True):
         plt.show()
 
     return None
+
 
 
 

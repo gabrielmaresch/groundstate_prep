@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,13 +10,16 @@ from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel,
     get_superoperator_spectral_data,
+    next_running_number,
 )
+
+
 
 ######### the slider was implemented with the help of CODEX
 
 N = 4
-T = 5
-alpha = 1
+T = 1
+alpha = 0.25
 sigma = 1
 omega_max = 5
 tau = 0.25
@@ -23,10 +27,11 @@ J = 1
 h = 2
 averages = 25
 k_max = 150
-beta_values = np.geomspace(0.1, 50.0, 100)
+beta_values = np.geomspace(0.1, 10.0, 25)
 
-path = Path(__file__).resolve().parent
-file_name = "superoperator_N"+str(N)+"_sweep.npz"
+path = Path(__file__).resolve().parent / "data"
+running_npz = next_running_number(path, "npz")
+file_name = "superoperator_N"+str(N)+"_sweep_"+str(running_npz)+".npz"
 
 
 def precompute_sweep(op_set, h_sys):
@@ -94,7 +99,7 @@ def draw_entry(ax, bar_ax, entry, extent):
 
     info_h = f"N = {N}\nJ = {J}\nh = {h}"
     info_ch = (
-        f"$\\beta$ = {entry['beta']:.4g}\n"
+        f"$\\beta$ = {entry['beta']:.2g}\n"
         f"$T$ = {T}\n"
         f"$\\tau$ = {tau}\n"
         f"$\\omega_{{\\max}}$ = {omega_max}\n"
@@ -188,7 +193,15 @@ def main():
     if ans not in {'y', 'yes', 'Y', 'Yes'}:
         sweep_data = precompute_sweep(op_set, h_sys)
     else:
-        saved = np.load(path / file_name)
+        fallback = next_running_number(path, "npz") - 1
+        ans = input(f"running number of .npz? [{fallback}] ")
+        if ans == "":
+            ans = fallback
+        load_npz_number = int(ans)
+        matches = list(path.glob(f"superoperator_N*_sweep_{load_npz_number}.npz"))
+        if not matches:
+            matches = list(path.glob(f"superoperator_N*_sweep_{fallback}.npz"))
+        saved = np.load(matches[0])
         sweep_data = [
             {
                 "beta": beta,
@@ -212,7 +225,11 @@ def main():
     
     figure = build_figure(sweep_data)
 
-    output_path = Path(__file__).resolve().parent / "plots" / "superoperator_beta_sweep_overview.png"
+    output_folder = Path(__file__).resolve().parent / "plots" 
+    running_png = next_running_number(output_folder)
+    file_name = "superoperator_beta_sweep_overview_"+str(running_png)+".png"
+    output_path = output_folder / file_name
+
     figure.savefig(output_path, dpi=200)
     plt.show()
 
