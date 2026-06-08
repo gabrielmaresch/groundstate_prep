@@ -29,7 +29,7 @@ def nice_print_matrix(A, digits=3):
     for row in A:
         print("  ".join(fmt.format(x) for x in row))
 
-def trace_distace(A,B):
+def trace_distance(A,B):
     lambdas = np.linalg.eigvalsh(A-B)
     dist = 1/2*sum(abs(ev) for ev in lambdas)
     return dist
@@ -139,14 +139,14 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
         #is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
         #print("is diagonal:", is_diagonal)
 
-        dist = trace_distace(final_state, gibbs_state)
+        dist = trace_distance(final_state, gibbs_state)
         # print(num_timesteps, " timesteps:\t", np.round(dist,3), end ='\r')
         if not silent:
             print(num_timesteps, " timesteps:\t", np.round(dist,3)) #stable version for jupyter
     
 
         if not first_run:
-            dist_increment = trace_distace(previous_state, final_state)
+            dist_increment = trace_distance(previous_state, final_state)
             if not silent:
                 print("\t\t\t\t\t trace dist. increment", np.round(dist_increment, 3))
             tr_dist_increment.append(dist_increment)

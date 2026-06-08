@@ -82,17 +82,17 @@ def construct_environmental_hamiltonian(num_qubits:int, omega:float):
     return qml.Hamiltonian([-omega/2], [qml.PauliZ(num_qubits)])
 
 
-def construct_W_layer(num_qubits:int, m:int, tau:float, T:float, sigma:float, op:"qml.Operator", alpha:float = 1, *, mixed:bool):
-    t = (m+1)/2*tau-T
+def construct_W_layer(num_qubits:int, m:int, tau_half:float, T:float, sigma:float, op:"qml.Operator", alpha:float = 1, *, mixed:bool):
+    t = (2*m+1.)*tau_half-T
     H_int = construct_interaction_hamiltonian(num_qubits, sigma, t, op, alpha)
     
     #probably better to make this time evolution explicit
     
     if mixed:
         order = 2
-        qml.ApproxTimeEvolution(H_int, tau, order)
+        qml.ApproxTimeEvolution(H_int, tau_half, order)
     else:
-        qml.evolve(H_int, coeff=tau)
+        qml.evolve(H_int, coeff=tau_half)
     
     return None
 
@@ -103,23 +103,18 @@ def construct_U_layers(num_qubits:int, tau:float, T:float, sigma:float, op:"qml.
  
     # H_env = construct_environmental_hamiltonian(num_qubits, omega)
     
-    construct_W_layer(num_qubits, 0, tau/2, T, sigma, op, alpha, mixed=mixed)
-    for m in range(1,M+1):
-
+    for m in range(0,M+1):
+        construct_W_layer(num_qubits, m, tau/2, T, sigma, op, alpha, mixed=mixed)
+        #-------------------------------
         if mixed:
             order = 2
             qml.ApproxTimeEvolution(H_sys, tau, order)
         else:
             qml.evolve(H_sys, coeff=tau)
-
-        # time evolution for H_env is just Z-rotation
-        t = tau * (- omega) 
-        qml.RZ(t, wires=num_qubits)
-
-        if m < M:
-            construct_W_layer(num_qubits, m, tau, T, sigma, op, alpha, mixed=mixed)
-        else:
-            construct_W_layer(num_qubits, M, tau/2, T, sigma, op, alpha, mixed=mixed)
+        # time evolution for H_env is just Z-rotation 
+        qml.RZ(-tau*omega, wires=num_qubits)
+        #--------------------------------
+        construct_W_layer(num_qubits, m, tau/2, T, sigma, op, alpha, mixed=mixed)
     
     return None
 

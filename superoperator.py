@@ -10,7 +10,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
-from analytics import trace_distace
+from analytics import trace_distance
 from scipy.sparse.linalg import eigs
 
 
@@ -22,7 +22,6 @@ def next_running_number(folder, ext="png"):
         if match:
             numbers.append(int(match.group(1)))
     return max(numbers, default=0) + 1
-
 
 
 ##################
@@ -74,11 +73,31 @@ def get_choi_element(i,j, num_system_qubits, U, omega, beta):
     
     return rho_sys_out
 
+def get_krausz_blocks(num_system_qubits, U):
 
-def get_superoperator_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha, beta):
-    
-    U = get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha)
-    
+    U00 = U[::2,::2] 
+    U10 = U[1::2,::2]
+    U01 = U[::2,1::2]
+    U11 = U[1::2,1::2]
+
+    return [[U00, U01], [U10, U11]]
+
+def get_superoperator_matrix_krausz(num_system_qubits, U_blocks, beta, omega):
+    d_sys = 2 ** num_system_qubits
+
+    Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
+    p = [np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z]
+
+    S = np.zeros((d_sys**2,d_sys**2,), dtype = complex)  
+
+    for a in range(2):
+        for b in range(2):
+            S += p[b]*np.kron(U_blocks[a][b],np.conj(U_blocks[a][b])) 
+
+    return S
+
+
+def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
     d_choi = d_sys*d_sys
 
@@ -93,21 +112,36 @@ def get_superoperator_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys,
                     col = j * d_sys + b
                     choi[row, col] = sigma_ij[a, b]
 
-    J4 = choi.reshape(d_sys, d_sys, d_sys, d_sys)                       # indices: i, a, j, b
+    J4 = choi.reshape(d_sys, d_sys, d_sys, d_sys)          # indices: i, a, j, b
     S = J4.transpose(1, 3, 0, 2).reshape(d_choi, d_choi)   # indices: a, b, i, j
 
     return S
 
-def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, averages=50):
-    S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
+
+
+def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'choi'):
+    
+    rule, n_omega =  omega_quadrature
+    if rule == 'midpoint':
+        delta_omega = omega_max / n_omega
+        omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
     
     S = np.zeros((2**(2*N),2**(2*N)), dtype = complex)
 
-    for i in range(averages):
-        A = sample_operator(op_set, seed=3*i+1)
-        omega =  sample_omega(omega_max, seed=3*i+2)
-        S += get_superoperator_matrix(N, tau, T, sigma, A, omega, H_sys, alpha, beta)
+    for op in op_set:
+        for omega in omegas:
+            U = get_U_matrix(N, tau, T, sigma, op, omega, H_sys, alpha)
+            if method == 'choi':
+                S += get_superoperator_matrix_choi(N, U, omega, beta)
+            elif method == 'krausz':
+                U_blocks = get_krausz_blocks(N, U)
+                S += get_superoperator_matrix_krausz(N, U_blocks, beta, omega)
+
+
+    averages = len(op_set)*n_omega
     S = S/averages
+
+    S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
 
     return S, S_params
 
@@ -132,11 +166,11 @@ def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
     test_state = 0.5 * (test_state + test_state.conj().T)
     test_state = test_state / np.trace(test_state)
 
-    dist = trace_distace(test_state, thermal)
+    dist = trace_distance(test_state, thermal)
     
     return (dist<tol), test_state, dist
 
-def plot_superoperator_spectrum(S, S_params, output = True):
+def plot_superoperator_spectrum(S, S_params, J, h, output = True):
     
     N, tau, T, sigma, _, omega_max, _, alpha, beta, averages = S_params
     eigvals, _, degeneracy, lambda2 = get_superoperator_spectral_data(S)
@@ -218,18 +252,12 @@ if __name__ == "__main__":
     omega_max = 6.
     beta = 0.1
     tau = 0.25
-    
     op_set = construct_opset(N, type="XZ")
-    A = sample_operator(op_set, seed=12)
-    omega =  sample_omega(omega_max, seed=12)
-
-
     J, h = 1., 2.
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
-    averages = 50
 
-    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta)
+    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'krausz')
     eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(S)
     
     correct_fp, test_state, dist  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
@@ -239,4 +267,4 @@ if __name__ == "__main__":
         print("wrong fixed-point")
     print(f"tr-dist to thermal state: {dist:.4f}")
 
-    plot_superoperator_spectrum(S, S_params)
+    plot_superoperator_spectrum(S, S_params, J, h)
