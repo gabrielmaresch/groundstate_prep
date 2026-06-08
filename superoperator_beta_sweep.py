@@ -18,16 +18,16 @@ from superoperator import (
 ######### the slider was implemented with the help of CODEX
 
 N = 4
-T = 1
+T = 10
 alpha = 0.25
 sigma = 1
 omega_max = 5
 tau = 0.25
 J = 1
 h = 2
-averages = 25
+
 k_max = 150
-beta_values = np.geomspace(0.1, 10.0, 25)
+beta_values = np.geomspace(0.1, 5.0, 10)
 
 path = Path(__file__).resolve().parent / "data"
 running_npz = next_running_number(path, "npz")
@@ -48,8 +48,7 @@ def precompute_sweep(op_set, h_sys):
             omega_max,
             h_sys,
             alpha,
-            beta,
-            averages=averages,
+            beta
         )
         eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(channel, k_max=k_max)
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
@@ -109,7 +108,6 @@ def draw_entry(ax, bar_ax, entry, extent):
     info_so = (
         f"degeneracy = {degeneracy}\n"
         f"$|\\lambda_2|$ = {lambda2:.4f}\n"
-        f"averages = {averages}"
     )
 
     ax.text(
