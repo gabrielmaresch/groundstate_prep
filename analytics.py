@@ -211,13 +211,13 @@ if __name__ == "__main__":
     H_params = [1., 2., 4]
 
 ### T_params = [T, tau]
-    T_params = [1., 0.1]
+    T_params = [10., 0.25]
 
 ### C_params = [alpha, sigma, omega_max]
-    C_params = [0.25, 1.0, 6.0]
+    C_params = [0.5, 1.0, 6.0]
 
 #### inverse temperature
-    beta = 0.1
+    beta = 1.0
 
 
     t, dist, _, _ = run_TFIM(H_params, T_params, C_params, beta)

@@ -103,7 +103,7 @@ def construct_U_layers(num_qubits:int, tau:float, T:float, sigma:float, op:"qml.
  
     # H_env = construct_environmental_hamiltonian(num_qubits, omega)
     
-    for m in range(0,M+1):
+    for m in range(M):
         construct_W_layer(num_qubits, m, tau/2, T, sigma, op, alpha, mixed=mixed)
         #-------------------------------
         if mixed:
@@ -133,6 +133,7 @@ def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:boo
         qml.QubitChannel([K0, K1, K2, K3], wires=wire)
     else:
         # exp(beta Z) is diagonal, so we sample as classical mixture
+        qml.Reset(wires=wire)
         rng = random.Random(seed)
         if rng.uniform(0.0, 1.0) > p0:
             qml.PauliX(wires=wire)
@@ -167,8 +168,8 @@ op_set:List["qml.Operator"],#list of interaction operators, needs to be closed u
 alpha:int=1,                #coupling parameter system-environment
 sigma:int=1,                #inverse frequency width for gaussian filter
 *,              
-seed:int=42,                #answer to live, universe and everything
-mixed:bool=True,           #circuit transforms either density matrices or pure states
+seed:int=42,                #answer to life, universe and everything
+mixed:bool=True,            #circuit transforms either density matrices or pure states
 output:bool = False):
     
     num_auxiliary_qubits = 1
