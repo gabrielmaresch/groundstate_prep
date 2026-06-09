@@ -10,7 +10,6 @@ def test_energies():
     from juliacall import Main as jl
     jl.include(local_path / file_name)
     
-    
     #no transverse field
     _, energy = jl.get_transverse_ising_groundstate(3, 1, 0)
     assert np.isclose(energy, -3.0)
@@ -22,7 +21,6 @@ def test_energies():
     #strong transverse field:
     _, energy = jl.get_transverse_ising_groundstate(3, 1, 10)
     assert np.isclose(np.round(energy,2), -30.08)
-
 
     #only transverse field:
     _, energy = jl.get_transverse_ising_groundstate(3, 0, 1)

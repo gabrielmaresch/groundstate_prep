@@ -17,17 +17,17 @@ from superoperator import (
 
 ######### the slider was implemented with the help of CODEX
 
-N = 4
+N = 6
 T = 4.
 alpha = 0.25
 sigma = 1
 omega_max = 5
 tau = 0.25
 J = 1.
-h = 1.
+h = 2.
 
 k_max = 150
-beta_values = np.linspace(1, 10., 20)
+beta_values = np.linspace(0.5, 5., 10)
 
 path = Path(__file__).resolve().parent / "data"
 running_npz = next_running_number(path, "npz")
