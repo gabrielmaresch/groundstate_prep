@@ -18,20 +18,35 @@ from superoperator import (
 ######### the slider was implemented with the help of CODEX
 
 N = 4
-T = 10
+T = 4.
 alpha = 0.25
 sigma = 1
 omega_max = 5
 tau = 0.25
-J = 1
-h = 2
+J = 1.
+h = 1.
 
 k_max = 150
-beta_values = np.geomspace(0.1, 5.0, 10)
+beta_values = np.linspace(1, 10., 20)
 
 path = Path(__file__).resolve().parent / "data"
 running_npz = next_running_number(path, "npz")
 file_name = "superoperator_N"+str(N)+"_sweep_"+str(running_npz)+".npz"
+
+
+def save_sweep_snapshot(sweep_data):
+    snapshot_path = path / file_name
+    temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
+    np.savez_compressed(
+        temp_path,
+        beta=np.array([entry["beta"] for entry in sweep_data]),
+        channels=np.stack([entry["channel"] for entry in sweep_data]),
+        eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
+        lambda2=np.array([entry["spectrum_data"]["lambda2"] for entry in sweep_data]),
+        degeneracy=np.array([entry["spectrum_data"]["degeneracy"] for entry in sweep_data]),
+        trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
+    )
+    temp_path.replace(snapshot_path)
 
 
 def precompute_sweep(op_set, h_sys):
@@ -48,7 +63,8 @@ def precompute_sweep(op_set, h_sys):
             omega_max,
             h_sys,
             alpha,
-            beta
+            beta,
+            method='krausz'
         )
         eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(channel, k_max=k_max)
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
@@ -65,15 +81,7 @@ def precompute_sweep(op_set, h_sys):
                 },
             }
         )
-    np.savez_compressed(
-        path / file_name,
-        beta=np.array([entry["beta"] for entry in sweep_data]),
-        channels=np.stack([entry["channel"] for entry in sweep_data]),
-        eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
-        lambda2=np.array([entry["spectrum_data"]["lambda2"] for entry in sweep_data]),
-        degeneracy=np.array([entry["spectrum_data"]["degeneracy"] for entry in sweep_data]),
-        trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
-    )
+        save_sweep_snapshot(sweep_data)
     return sweep_data
 
 
@@ -98,7 +106,7 @@ def draw_entry(ax, bar_ax, entry, extent):
 
     info_h = f"N = {N}\nJ = {J}\nh = {h}"
     info_ch = (
-        f"$\\beta$ = {entry['beta']:.2g}\n"
+        f"$\\beta$ = {entry['beta']:.2f}\n"
         f"$T$ = {T}\n"
         f"$\\tau$ = {tau}\n"
         f"$\\omega_{{\\max}}$ = {omega_max}\n"
@@ -144,11 +152,11 @@ def draw_entry(ax, bar_ax, entry, extent):
     bar_ax.set_ylim(0, 1)
     bar_ax.set_xticks([])
     bar_ax.set_ylabel("trace distance")
-    bar_ax.set_title(f"$\\|\\rho^* - \\rho_\\beta\\|_1$")
+    bar_ax.set_title(r"$\|\rho_{\rm fix} - \rho_\beta\|_1$")
     bar_ax.text(0, trace_distance, f"{trace_distance:.4f}", ha="center", va="bottom")
 
 
-def build_figure(sweep_data):
+def build_figure(sweep_data, beta_grid):
     fig = plt.figure(figsize=(9.5, 8))
     gs = fig.add_gridspec(1, 2, width_ratios=[5, 1], wspace=0.3)
     ax = fig.add_subplot(gs[0, 0])
@@ -164,17 +172,17 @@ def build_figure(sweep_data):
     slider = Slider(
         ax=slider_ax,
         label=r"$\beta$",
-        valmin=beta_values[0],
-        valmax=beta_values[-1],
-        valinit=beta_values[0],
-        valstep=beta_values,
+        valmin=beta_grid[0],
+        valmax=beta_grid[-1],
+        valinit=beta_grid[0],
+        valstep=beta_grid,
         valfmt="%.2f",
     )
 
     fig._beta_slider = slider
 
     def update(beta):
-        idx = np.argmin(np.abs(beta_values - beta))
+        idx = np.argmin(np.abs(beta_grid - beta))
         draw_entry(ax, bar_ax, sweep_data[idx], extent)
         fig.canvas.draw_idle()
 
@@ -190,6 +198,7 @@ def main():
     ans = input("Load saved sweep-data? [y/n] ")
     if ans not in {'y', 'yes', 'Y', 'Yes'}:
         sweep_data = precompute_sweep(op_set, h_sys)
+        beta_grid = beta_values
     else:
         fallback = next_running_number(path, "npz") - 1
         ans = input(f"running number of .npz? [{fallback}] ")
@@ -200,6 +209,7 @@ def main():
         if not matches:
             matches = list(path.glob(f"superoperator_N*_sweep_{fallback}.npz"))
         saved = np.load(matches[0])
+        beta_grid = saved["beta"]
         sweep_data = [
             {
                 "beta": beta,
@@ -221,7 +231,7 @@ def main():
             )
         ]
     
-    figure = build_figure(sweep_data)
+    figure = build_figure(sweep_data, beta_grid)
 
     output_folder = Path(__file__).resolve().parent / "plots" 
     running_png = next_running_number(output_folder)

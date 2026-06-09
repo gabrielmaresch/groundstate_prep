@@ -38,10 +38,8 @@ def get_gibbs(N, J, h, beta):
 
 
 
-
-
-def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
-    def U_wrapper():
+def U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
+    def circuit():
         construct_U_layers(
             num_qubits=num_system_qubits,
             tau=tau,
@@ -53,8 +51,11 @@ def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
             alpha=alpha,
             mixed=False,
         )
+    return circuit
 
-    qscript = qml.tape.make_qscript(U_wrapper)()
+def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
+    circuit = U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha)
+    qscript = qml.tape.make_qscript(circuit)()
     return qml.matrix(qscript, wire_order=range(num_system_qubits + 1))
 
 def get_choi_element(i,j, num_system_qubits, U, omega, beta):
@@ -151,7 +152,7 @@ def get_superoperator_spectral_data(S,*, k_max=100):
     idx = np.argmin(np.abs(eigvals - 1))
     fixedpoint = eigvecs[:, idx]
     target = 1.0 + 0.0j
-    degeneracy = np.sum(np.isclose(eigvals, target, atol=1e-4))
+    degeneracy = np.sum(np.isclose(eigvals, target, atol=1e-3))
 
     #compute gap
     lambda2 = np.sort(abs(eigvals))[-2]
@@ -250,10 +251,10 @@ if __name__ == "__main__":
     alpha = 1.
     sigma = 1.
     omega_max = 6.
-    beta = 0.1
-    tau = 0.25
+    beta = 10.
+    tau = 0.1
     op_set = construct_opset(N, type="XZ")
-    J, h = 1., 2.
+    J, h = 1., 1.
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
