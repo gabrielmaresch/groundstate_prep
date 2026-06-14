@@ -158,15 +158,17 @@ def get_superoperator_spectral_data(S,*, k_max=100):
     lambda2 = np.sort(abs(eigvals))[-2]
     return eigvals, fixedpoint, degeneracy, lambda2
 
+def normalize_to_densitymatrix(A):
+    A_dens = 0.5 * (A + A.conj().T)
+    A_dens = A_dens / np.trace(A_dens)
+    return A_dens
+
 def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
     N, J, h = TFIM_params
     thermal, energy = get_gibbs(N, J, h, beta)
     thermal, energy = np.array(thermal), float(energy)
     
-    test_state = test_vector.reshape((2**N, 2**N))
-    test_state = 0.5 * (test_state + test_state.conj().T)
-    test_state = test_state / np.trace(test_state)
-
+    test_state = normalize_to_densitymatrix(test_vector.reshape((2**N, 2**N)))
     dist = trace_distance(test_state, thermal)
     
     return (dist<tol), test_state, dist
@@ -239,6 +241,19 @@ def plot_superoperator_spectrum(S, S_params, J, h, output = True):
 
     return None
 
+def vectorize(rho):
+    #we use row stacking
+    return rho.reshape(-1)
+
+def apply_channel(S, rho, output='matrix'):
+    rho_vec = vectorize(rho)
+    
+    if output == 'matrix':
+        rho_out = (S@rho_vec).reshape(rho.shape)
+    elif output == 'vector':
+        rho_out = (S@rho_vec)
+
+    return rho_out
 
 
 
@@ -248,24 +263,47 @@ if __name__ == "__main__":
     # generic parameters for testing
     N = 4
     T = 10.
-    alpha = 1.
+    alpha = 0.1
     sigma = 1.
     omega_max = 6.
-    beta = 10.
-    tau = 0.1
+    beta = 1.
+    tau = 0.25
     op_set = construct_opset(N, type="XZ")
-    J, h = 1., 1.
+    J, h = 1., 4.5
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
-    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'krausz')
+    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'choi')
     eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(S)
     
-    correct_fp, test_state, dist  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
+    correct_fp, test_state, dist_fp  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
     if correct_fp:
         print("gibbs state is fixed-point")
     else:
         print("wrong fixed-point")
-    print(f"tr-dist to thermal state: {dist:.4f}")
+    print(f"tr-dist to thermal state: {dist_fp:.4f}")
 
     plot_superoperator_spectrum(S, S_params, J, h)
+
+
+    # initialize rho
+    rho = np.zeros((2**N, 2**N), dtype = complex)
+    rho[0,0] = 1
+
+    eps = 1e-3
+    thermal, _ = get_gibbs(N, J, h, beta)
+    thermal = np.array(thermal)
+    fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((2**N, 2**N)))
+    dist = trace_distance(rho, fixedpoint)
+    num_iter = 0   
+    while dist > eps and num_iter < 1000:
+        num_iter += 1
+        rho = normalize_to_densitymatrix(apply_channel(S, rho))       
+        dist = trace_distance(rho, fixedpoint)
+        if num_iter%10 == 0:
+            print(f"{num_iter}: tr-dist to fixed point state: {dist:.4f}")
+    
+    dist = trace_distance(rho, thermal)
+    print(f"{num_iter}: tr-dist to thermal state: {dist:.4f}")
+
+

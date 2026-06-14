@@ -17,7 +17,7 @@ from superoperator import (
 
 ######### the slider was implemented with the help of CODEX
 
-N = 6
+N = 4
 T = 4.
 alpha = 0.25
 sigma = 1
