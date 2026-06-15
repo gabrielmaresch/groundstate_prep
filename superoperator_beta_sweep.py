@@ -119,7 +119,7 @@ def draw_entry(ax, bar_ax, entry, extent):
     info_so = (
         f"num_closer = {num_closer}\n"
         f"$\\Delta_2$ = {Delta2:.4f}\n"
-        f"$\\Delta_{{\\mathrm{th}}}$ = {Delta_th:.4f}\n"
+        f"$\\Delta_{{\\mathrm{{th}}}}$ = {Delta_th:.4f}\n"
     )
 
     ax.text(
