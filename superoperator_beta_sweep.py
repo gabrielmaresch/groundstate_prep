@@ -19,7 +19,7 @@ from superoperator import (
 
 N = 4
 T = 4.
-alpha = 0.25
+alpha = 0.5
 sigma = 1
 omega_max = 5
 tau = 0.25
@@ -42,8 +42,9 @@ def save_sweep_snapshot(sweep_data):
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack([entry["channel"] for entry in sweep_data]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
-        lambda2=np.array([entry["spectrum_data"]["lambda2"] for entry in sweep_data]),
-        degeneracy=np.array([entry["spectrum_data"]["degeneracy"] for entry in sweep_data]),
+        Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
+        Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
+        num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
     )
     temp_path.replace(snapshot_path)
@@ -66,7 +67,7 @@ def precompute_sweep(op_set, h_sys):
             beta,
             method='krausz'
         )
-        eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(channel, k_max=k_max)
+        eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J, h])
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
         sweep_data.append(
             {
@@ -75,8 +76,9 @@ def precompute_sweep(op_set, h_sys):
                 "channel_params": channel_params,
                 "spectrum_data": {
                     "eigvals": eigvals,
-                    "lambda2": float(lambda2),
-                    "degeneracy": int(degeneracy),
+                    "Delta2": float(Delta2),
+                    "Delta_th": float(Delta_th),
+                    "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
                 },
             }
@@ -87,8 +89,9 @@ def precompute_sweep(op_set, h_sys):
 
 def draw_entry(ax, bar_ax, entry, extent):
     eigvals = entry["spectrum_data"]["eigvals"]
-    lambda2 = entry["spectrum_data"]["lambda2"]
-    degeneracy = entry["spectrum_data"]["degeneracy"]
+    Delta2 = entry["spectrum_data"]["Delta2"]
+    Delta_th = entry["spectrum_data"]["Delta_th"]
+    num_closer = entry["spectrum_data"]["num_closer"]
     trace_distance = entry["spectrum_data"]["trace_distance"]
 
     ax.clear()
@@ -114,8 +117,9 @@ def draw_entry(ax, bar_ax, entry, extent):
         f"$\\sigma$ = {sigma}\n"
     )
     info_so = (
-        f"degeneracy = {degeneracy}\n"
-        f"$|\\lambda_2|$ = {lambda2:.4f}\n"
+        f"num_closer = {num_closer}\n"
+        f"$\\Delta_2$ = {Delta2:.4f}\n"
+        f"$\\Delta_{{\\mathrm{th}}}$ = {Delta_th:.4f}\n"
     )
 
     ax.text(
@@ -216,17 +220,19 @@ def main():
                 "channel": channel,
                 "spectrum_data": {
                     "eigvals": eigvals,
-                    "lambda2": float(lambda2),
-                    "degeneracy": int(degeneracy),
+                    "Delta2": float(Delta2),
+                    "Delta_th": float(Delta_th),
+                    "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
                 },
             }
-            for beta, channel, eigvals, lambda2, degeneracy, trace_distance in zip(
+            for beta, channel, eigvals, Delta2, Delta_th, num_closer, trace_distance in zip(
                 saved["beta"],
                 saved["channels"],
                 saved["eigvals"],
-                saved["lambda2"],
-                saved["degeneracy"],
+                saved["Delta2"],
+                saved["Delta_th"],
+                saved["num_closer"],
                 saved["trace_distance"],
             )
         ]

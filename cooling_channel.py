@@ -52,6 +52,12 @@ def construct_opset(num_qubits:int, *, type:str = "XX2", output:bool = False):
             for i in range(num_qubits):
                 op_set.extend([qml.PauliX(i), -qml.PauliX(i)])
                 op_set.extend([qml.PauliZ(i), -qml.PauliZ(i)])
+        
+        elif type == "XYZ":
+            for i in range(num_qubits):
+                op_set.extend([qml.PauliX(i), -qml.PauliX(i)])
+                op_set.extend([qml.PauliY(i), -qml.PauliY(i)])
+                op_set.extend([qml.PauliZ(i), -qml.PauliZ(i)])
 
     return op_set
 
