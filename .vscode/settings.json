@@ -1,5 +1,5 @@
 {
-    "julia.environmentPath": "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep/plotting_environment",
+    "julia.environmentPath": "/Users/gab/.julia/environments/v1.12",
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda"
 }

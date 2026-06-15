@@ -13,16 +13,15 @@ from superoperator import (
 
 
 N = 4
-T = 10.0
-alpha = 1.
+T = 25.0
+alpha = .25
 sigma = 1.
-omega_max = 6.
-tau = 0.25
+omega_max = 20
+tau = 0.1
 J = 1.0
 beta = 1.0
 
-k_max = 150
-h_values = np.linspace(0.25, 10.0, 40)
+h_values = np.linspace(0.25, 4.0, 16)
 
 path = Path(__file__).resolve().parent / "data"
 running_npz = next_running_number(path, "npz")
@@ -38,8 +37,9 @@ def save_sweep_snapshot(sweep_data):
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack([entry["channel"] for entry in sweep_data]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
-        lambda2=np.array([entry["spectrum_data"]["lambda2"] for entry in sweep_data]),
-        degeneracy=np.array([entry["spectrum_data"]["degeneracy"] for entry in sweep_data]),
+        Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
+        Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
+        num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
     )
     temp_path.replace(snapshot_path)
@@ -63,7 +63,7 @@ def precompute_sweep(op_set):
             beta,
             method="krausz",
         )
-        eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(channel, k_max=k_max)
+        eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J, h])
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
         sweep_data.append(
             {
@@ -73,8 +73,9 @@ def precompute_sweep(op_set):
                 "channel_params": channel_params,
                 "spectrum_data": {
                     "eigvals": eigvals,
-                    "lambda2": float(lambda2),
-                    "degeneracy": int(degeneracy),
+                    "Delta2": float(Delta2),
+                    "Delta_th": float(Delta_th),
+                    "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
                 },
             }
@@ -92,7 +93,7 @@ def main():
     if ans not in {"y", "yes", "Y", "Yes"}:
         sweep_data = precompute_sweep(op_set)
         h_grid = np.array([entry["h"] for entry in sweep_data])
-        lambda2 = np.array([entry["spectrum_data"]["lambda2"] for entry in sweep_data])
+        Delta2 = np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data])
         trace_distance = np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data])
     else:
         fallback = next_running_number(path, "npz") - 1
@@ -105,10 +106,10 @@ def main():
             matches = list(path.glob(f"superoperator_N*_h_sweep_{fallback}.npz"))
         saved = np.load(matches[0])
         h_grid = saved["h"]
-        lambda2 = saved["lambda2"]
+        Delta2 = saved["Delta2"]
         trace_distance = saved["trace_distance"]
 
-    gap = np.maximum(1.0 - np.abs(lambda2), 1e-16)
+    gap = np.maximum(1.0 - np.abs(Delta2), 1e-16)
     fig, axes = plt.subplots(1, 2, figsize=(9, 3.5))
     axes[0].semilogy(h_grid, gap, marker="o")
     axes[0].set_xlabel("h")

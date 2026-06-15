@@ -10,8 +10,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
-from analytics import trace_distance
-from scipy.sparse.linalg import eigs
+from analytics import trace_distance, extract_asymptotics
+from scipy.linalg import eig
 
 
 ################## Helper function for naming logic ###########
@@ -146,17 +146,41 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
 
     return S, S_params
 
-def get_superoperator_spectral_data(S,*, k_max=100):
-    eigvals, eigvecs = eigs(S, k=k_max, which="LM")
+def get_superoperator_spectral_data(S, beta, TFIM_params):
+    eigvals, eigvecs = eig(S)
+    N, J, h = TFIM_params
+    thermal, _ = get_gibbs(N, J, h, beta)
+    thermal = np.array(thermal)
+    closest_eval_to_thermal = identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal)
 
-    idx = np.argmin(np.abs(eigvals - 1))
-    fixedpoint = eigvecs[:, idx]
-    target = 1.0 + 0.0j
-    degeneracy = np.sum(np.isclose(eigvals, target, atol=1e-3))
+    idx = np.argsort(np.abs(eigvals - 1))
+    sorted_eigvals = eigvals[idx]
+    
+    fixedpoint = eigvecs[:, idx[0]]
+    target_ev = sorted_eigvals[0]
 
-    #compute gap
-    lambda2 = np.sort(abs(eigvals))[-2]
-    return eigvals, fixedpoint, degeneracy, lambda2
+    # how many eigenvals are closer to the fixed-point eigenvalue than the
+    # eigenvalue whose eigenvector has maximal overlap with the thermal state
+    thermal_ev = eigvals[closest_eval_to_thermal]
+    thermal_dist = abs(thermal_ev - target_ev)
+    num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
+
+    # compute distance between the two non-leading eigenvalues closest to 1
+    Delta2 = sorted_eigvals[1] - sorted_eigvals[2]
+    return eigvals, fixedpoint, num_closer, Delta2, thermal_dist
+
+def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
+        target = 1. + 0.j
+        delta = 1e-2
+        current_max = 0
+        current_idx = 0
+        for i in range(len(eigvals)):          
+            if abs(eigvals[i] - target) < delta:
+                overlap = abs(np.vdot(vectorize(thermal), eigvecs[:,i])/np.linalg.norm(eigvecs[:,i],2))
+                if overlap > current_max:
+                    current_max = overlap
+                    current_idx = i
+        return current_idx
 
 def normalize_to_densitymatrix(A):
     A_dens = 0.5 * (A + A.conj().T)
@@ -176,7 +200,7 @@ def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
 def plot_superoperator_spectrum(S, S_params, J, h, output = True):
     
     N, tau, T, sigma, _, omega_max, _, alpha, beta, averages = S_params
-    eigvals, _, degeneracy, lambda2 = get_superoperator_spectral_data(S)
+    eigvals, _, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
 
     
     #### PLOT ###########
@@ -187,7 +211,11 @@ def plot_superoperator_spectrum(S, S_params, J, h, output = True):
     plt.ylabel("Im($\\lambda$)")
     plt.gca().set_aspect("equal", adjustable="box")
 
-    info_so = f"degeneracy = {degeneracy}\n$|\\lambda_2|$ = {lambda2:.4f}"
+    info_so = (
+        f"num_closer to FP = {num_closer}\n"
+        f"$\\Delta_2$ = {np.real(Delta2):.4f}\n"
+        f"$\\Delta_{{\\mathrm{{th}}}}$ = {Delta_th:.4f}"
+    )
     info_H = f"N = {N}\nJ = {J}\nh = {h}"
     info_ch = (
         f"$\\beta$ = {beta}\n"
@@ -262,19 +290,19 @@ if __name__ == "__main__":
 
     # generic parameters for testing
     N = 4
-    T = 10.
-    alpha = 0.1
-    sigma = 1.
-    omega_max = 6.
+    T = 20.
+    alpha = .75
+    sigma = 2.
+    omega_max = 20.
     beta = 1.
-    tau = 0.25
+    tau = 0.1
     op_set = construct_opset(N, type="XZ")
-    J, h = 1., 4.5
+    J, h = 1., 3.5
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
     S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'choi')
-    eigvals, fixedpoint, degeneracy, lambda2 = get_superoperator_spectral_data(S)
+    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
     
     correct_fp, test_state, dist_fp  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
     if correct_fp:
@@ -294,16 +322,42 @@ if __name__ == "__main__":
     thermal, _ = get_gibbs(N, J, h, beta)
     thermal = np.array(thermal)
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((2**N, 2**N)))
-    dist = trace_distance(rho, fixedpoint)
+    dist = [trace_distance(rho, fixedpoint)]
     num_iter = 0   
-    while dist > eps and num_iter < 1000:
-        num_iter += 1
-        rho = normalize_to_densitymatrix(apply_channel(S, rho))       
-        dist = trace_distance(rho, fixedpoint)
-        if num_iter%10 == 0:
-            print(f"{num_iter}: tr-dist to fixed point state: {dist:.4f}")
     
-    dist = trace_distance(rho, thermal)
-    print(f"{num_iter}: tr-dist to thermal state: {dist:.4f}")
+    if correct_fp:
+        while dist[-1] > eps and num_iter < 1000:
+            num_iter += 1
+            rho = normalize_to_densitymatrix(apply_channel(S, rho))       
+            dist.append(trace_distance(rho, fixedpoint))
+            #if num_iter%10 == 0:
+            #    print(f"{num_iter}: tr-dist to fixed point state: {dist[-1]:.4f}")
+        
+        dist_th = trace_distance(rho, thermal)
+        print(f"{num_iter}: tr-dist to thermal state: {dist_th:.4f}")
 
+        
+    S_rho_thermal = normalize_to_densitymatrix(apply_channel(S, thermal))       
+    dist_res = trace_distance(S_rho_thermal, thermal)
+    print(f"tr-norm of thermal state residue: {dist_res:.6f}")
 
+    iterations = range(num_iter+1)
+    dist_fitted, p_fit, cov = extract_asymptotics(iterations, dist)
+    plt.plot(iterations, dist_fitted, color="green", linestyle=":")
+    plt.plot(iterations, dist, color="blue", linestyle="-")
+    asymptotic_value = p_fit[0]
+    plt.text(0.5, 0.85, f"Asymptotic value = {asymptotic_value:.3f}",
+        transform=plt.gca().transAxes,
+        verticalalignment="top",
+        horizontalalignment="center")
+    plt.show()
+
+    a, b, c = p_fit
+    eps = 0.05
+    if c >= 0:
+        print("fitted model is not decaying, so iterations to eps are undefined")
+    elif eps <= a:
+        print(f"eps = {eps:.1e} is below the asymptotic value {a:.3e}, so it will never be reached")
+    else:
+        n_eps = np.log((eps - a) / b) / c
+        print(f"predicted iterations to reach eps = {eps:.1e}: {n_eps:.2f}")
