@@ -109,12 +109,12 @@ def main():
         Delta2 = saved["Delta2"]
         trace_distance = saved["trace_distance"]
 
-    gap = np.maximum(1.0 - np.abs(Delta2), 1e-16)
+    gap = np.maximum(Delta2, 1e-16)
     fig, axes = plt.subplots(1, 2, figsize=(9, 3.5))
     axes[0].semilogy(h_grid, gap, marker="o")
     axes[0].set_xlabel("h")
-    axes[0].set_ylabel("spectral gap")
-    axes[0].set_title("gap vs h")
+    axes[0].set_ylabel(r"$\Delta_2$")
+    axes[0].set_title(r"$\Delta_2$ vs h")
     axes[0].grid(True, which="both", linestyle=":")
 
     axes[1].plot(h_grid, trace_distance, marker="o")
