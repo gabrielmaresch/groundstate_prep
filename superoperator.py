@@ -166,7 +166,7 @@ def get_superoperator_spectral_data(S, beta, TFIM_params):
     num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
 
     # compute distance between the two non-leading eigenvalues closest to 1
-    Delta2 = sorted_eigvals[1] - sorted_eigvals[2]
+    Delta2 = abs(sorted_eigvals[1] - sorted_eigvals[2])
     return eigvals, fixedpoint, num_closer, Delta2, thermal_dist
 
 def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
