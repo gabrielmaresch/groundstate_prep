@@ -283,6 +283,33 @@ def apply_channel(S, rho, output='matrix'):
 
     return rho_out
 
+def get_mixing_time(S, fixedpoint, *, eps=1e-2, max_iter = 5000):
+    #fixedpoint should be vectorized
+    d_vec = np.shape(fixedpoint)[0]
+    d_sys = int(np.sqrt(d_vec))
+    rho = np.zeros((d_sys, d_sys), dtype = complex)
+    rho[0,0] = 1
+    fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((d_sys, d_sys)))
+    dist = [trace_distance(rho, fixedpoint)]
+    num_iter = 0   
+    while dist[-1] > eps and num_iter < max_iter:
+        num_iter += 1
+        rho = normalize_to_densitymatrix(apply_channel(S, rho))       
+        dist.append(trace_distance(rho, fixedpoint))
+    converged = (num_iter < max_iter)
+    
+    if converged:
+        n_eps = num_iter
+    else:
+        iterations = range(max_iter+1)
+        _, p_fit, _ = extract_asymptotics(iterations, dist)
+        a, b, c = p_fit
+        if c > 0 and eps < a:
+            n_eps = np.ceil(np.log((eps - a) / b) / c)
+        else:
+            n_eps = None
+    
+    return n_eps
 
 
 if __name__ == "__main__":
