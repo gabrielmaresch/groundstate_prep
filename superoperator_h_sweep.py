@@ -15,7 +15,8 @@ from superoperator import (
 
 N = 4
 T = 25.0
-alpha = .75
+alpha = 1.
+#alpha = .75
 #alpha = .5
 #alpha = .25
 
