@@ -14,12 +14,12 @@ from superoperator import (
 
 
 N = 4
-T = 20.0
+T = 25.0
 #alpha = .75
 alpha = .5
 sigma = 2.
 omega_max = 20
-tau = 0.25
+tau = 0.1
 J = 1.0
 beta = 1.0
 eps_fit = 0.05
