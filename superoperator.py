@@ -166,7 +166,7 @@ def get_superoperator_spectral_data(S, beta, TFIM_params):
     num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
 
     # compute distance between the two non-leading eigenvalues closest to 1
-    Delta2 = abs(sorted_eigvals[1] - sorted_eigvals[2])
+    Delta2 = abs(sorted_eigvals[0] - sorted_eigvals[1])
     return eigvals, fixedpoint, num_closer, Delta2, thermal_dist
 
 def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
@@ -283,7 +283,7 @@ def apply_channel(S, rho, output='matrix'):
 
     return rho_out
 
-def get_mixing_time(S, fixedpoint, *, eps=1e-2, max_iter = 5000):
+def get_mixing_time(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
@@ -296,15 +296,21 @@ def get_mixing_time(S, fixedpoint, *, eps=1e-2, max_iter = 5000):
         num_iter += 1
         rho = normalize_to_densitymatrix(apply_channel(S, rho))       
         dist.append(trace_distance(rho, fixedpoint))
-    converged = (num_iter < max_iter)
+    converged = (num_iter < max_iter )
     
     if converged:
         n_eps = num_iter
     else:
         iterations = range(max_iter+1)
-        _, p_fit, _ = extract_asymptotics(iterations, dist)
+        
+        try:
+            # fit tail 
+            _, p_fit, _ = extract_asymptotics(iterations[1000:], dist[1000:])
+        except RuntimeError:
+            return None
+    
         a, b, c = p_fit
-        if c > 0 and eps < a:
+        if eps > a and c< 0 and (eps - a) / b > 0:
             n_eps = np.ceil(np.log((eps - a) / b) / c)
         else:
             n_eps = None
@@ -324,7 +330,7 @@ if __name__ == "__main__":
     beta = 1.
     tau = 0.1
     op_set = construct_opset(N, type="XZ")
-    J, h = 1., 3.5
+    J, h = 1., 0.5
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
@@ -340,15 +346,18 @@ if __name__ == "__main__":
 
     plot_superoperator_spectrum(S, S_params, J, h)
 
+    print('number of iterations from fit:', get_mixing_time(S, fixedpoint))
 
     # initialize rho
     rho = np.zeros((2**N, 2**N), dtype = complex)
     rho[0,0] = 1
 
-    eps = 1e-3
+    eps = 1e-2
     thermal, _ = get_gibbs(N, J, h, beta)
     thermal = np.array(thermal)
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((2**N, 2**N)))
+
+
     dist = [trace_distance(rho, fixedpoint)]
     num_iter = 0   
     
@@ -379,12 +388,5 @@ if __name__ == "__main__":
         horizontalalignment="center")
     plt.show()
 
-    a, b, c = p_fit
-    eps = 0.05
-    if c >= 0:
-        print("fitted model is not decaying, so iterations to eps are undefined")
-    elif eps <= a:
-        print(f"eps = {eps:.1e} is below the asymptotic value {a:.3e}, so it will never be reached")
-    else:
-        n_eps = np.log((eps - a) / b) / c
-        print(f"predicted iterations to reach eps = {eps:.1e}: {n_eps:.2f}")
+    
+    

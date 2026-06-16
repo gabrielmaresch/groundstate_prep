@@ -43,7 +43,11 @@ def extract_asymptotics(x, y):
     y_data = np.array(y)
 
     p_init = y_data[-1], y_data[0]-y_data[-1], -0.1
-    p_fit, cov = curve_fit(exp_model, x_data, y_data, p0=p_init)
+    p_fit, cov = curve_fit(
+        exp_model,
+        x_data, y_data,
+        p0=p_init,
+        bounds=([-np.inf, 0.0, -np.inf], [np.inf, np.inf, 0.0]))
 
     y_fit = exp_model(x_data, *p_fit)
 

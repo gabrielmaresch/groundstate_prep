@@ -19,7 +19,7 @@ from superoperator import (
 
 N = 4
 T = 4.
-alpha = 0.5
+alpha = 0.75
 sigma = 1
 omega_max = 5
 tau = 0.25
