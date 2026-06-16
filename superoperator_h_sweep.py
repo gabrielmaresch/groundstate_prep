@@ -7,6 +7,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel,
+    get_mixing_time,
     get_superoperator_spectral_data,
     next_running_number,
 )
@@ -14,14 +15,14 @@ from superoperator import (
 
 N = 4
 T = 25.0
-alpha = .25
-sigma = 1.
+alpha = .1
+sigma = 2.5
 omega_max = 20
 tau = 0.1
 J = 1.0
 beta = 1.0
 
-h_values = np.linspace(0.25, 4.0, 16)
+h_values = np.linspace(0.25, 4.0, 40)
 
 path = Path(__file__).resolve().parent / "data"
 running_npz = next_running_number(path, "npz")
@@ -41,6 +42,7 @@ def save_sweep_snapshot(sweep_data):
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
         num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
+        get_mixingtime=np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data]),
     )
     temp_path.replace(snapshot_path)
 
@@ -61,10 +63,11 @@ def precompute_sweep(op_set):
             h_sys,
             alpha,
             beta,
-            method="krausz",
+            method="choi",
         )
         eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J, h])
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
+        mixing_time = get_mixing_time(channel, fixedpoint)
         sweep_data.append(
             {
                 "h": h,
@@ -77,6 +80,7 @@ def precompute_sweep(op_set):
                     "Delta_th": float(Delta_th),
                     "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
+                    "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
                 },
             }
         )
@@ -95,6 +99,7 @@ def main():
         h_grid = np.array([entry["h"] for entry in sweep_data])
         Delta2 = np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data])
         trace_distance = np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data])
+        mixing_time = np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data])
     else:
         fallback = next_running_number(path, "npz") - 1
         ans = input(f"running number of .npz? [{fallback}] ")
@@ -108,9 +113,11 @@ def main():
         h_grid = saved["h"]
         Delta2 = saved["Delta2"]
         trace_distance = saved["trace_distance"]
+        mixing_time = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
 
     gap = np.maximum(Delta2, 1e-16)
-    fig, axes = plt.subplots(1, 2, figsize=(9, 3.5))
+    has_mixing_time = mixing_time is not None
+    fig, axes = plt.subplots(1, 3 if has_mixing_time else 2, figsize=(13.5 if has_mixing_time else 9, 3.5))
     axes[0].semilogy(h_grid, gap, marker="o")
     axes[0].set_xlabel("h")
     axes[0].set_ylabel(r"$\Delta_2$")
@@ -122,6 +129,13 @@ def main():
     axes[1].set_ylabel(r"$\|\rho_{\rm fix} - \rho_\beta\|_1$")
     axes[1].set_title("fixed point distance")
     axes[1].grid(True, linestyle=":")
+
+    if has_mixing_time:
+        axes[2].plot(h_grid, mixing_time * T, marker="o")
+        axes[2].set_xlabel("h")
+        axes[2].set_ylabel(r"$t_{\rm mix}/T$")
+        axes[2].set_title("mixing time (iterations)")
+        axes[2].grid(True, linestyle=":")
 
     info = (
         f"N = {N}\n"
