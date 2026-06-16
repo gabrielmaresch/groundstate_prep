@@ -15,8 +15,10 @@ from superoperator import (
 
 N = 4
 T = 25.0
-#alpha = .75
-alpha = .5
+alpha = .75
+#alpha = .5
+#alpha = .25
+
 sigma = 2.
 omega_max = 20
 tau = 0.1

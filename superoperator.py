@@ -74,7 +74,7 @@ def get_choi_element(i,j, num_system_qubits, U, omega, beta):
     
     return rho_sys_out
 
-def get_krausz_blocks(num_system_qubits, U):
+def get_kraus_blocks(num_system_qubits, U):
 
     U00 = U[::2,::2] 
     U10 = U[1::2,::2]
@@ -83,7 +83,7 @@ def get_krausz_blocks(num_system_qubits, U):
 
     return [[U00, U01], [U10, U11]]
 
-def get_superoperator_matrix_krausz(num_system_qubits, U_blocks, beta, omega):
+def get_superoperator_matrix_kraus(num_system_qubits, U_blocks, beta, omega):
     d_sys = 2 ** num_system_qubits
 
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
@@ -134,9 +134,9 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
             U = get_U_matrix(N, tau, T, sigma, op, omega, H_sys, alpha)
             if method == 'choi':
                 S += get_superoperator_matrix_choi(N, U, omega, beta)
-            elif method == 'krausz':
-                U_blocks = get_krausz_blocks(N, U)
-                S += get_superoperator_matrix_krausz(N, U_blocks, beta, omega)
+            elif method == 'kraus':
+                U_blocks = get_kraus_blocks(N, U)
+                S += get_superoperator_matrix_kraus(N, U_blocks, beta, omega)
 
 
     averages = len(op_set)*n_omega
@@ -323,18 +323,18 @@ if __name__ == "__main__":
 
     # generic parameters for testing
     N = 4
-    T = 20.
-    alpha = .75
+    T = 25.
+    alpha = .5
     sigma = 2.
     omega_max = 20.
     beta = 1.
     tau = 0.1
     op_set = construct_opset(N, type="XZ")
-    J, h = 1., 0.5
+    J, h = 1., 0.7
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
-    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'choi')
+    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'kraus')
     eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
     
     correct_fp, test_state, dist_fp  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
