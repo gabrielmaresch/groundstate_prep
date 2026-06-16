@@ -14,15 +14,18 @@ from superoperator import (
 
 
 N = 4
-T = 25.0
-alpha = .1
-sigma = 2.5
+T = 20.0
+#alpha = .75
+alpha = .5
+sigma = 2.
 omega_max = 20
-tau = 0.1
+tau = 0.25
 J = 1.0
 beta = 1.0
+eps_fit = 0.05
 
-h_values = np.linspace(0.25, 4.0, 40)
+#h_values = np.linspace(0.25, 1.0, 4)
+h_values = np.linspace(0.1, 2.0, 20)
 
 path = Path(__file__).resolve().parent / "data"
 running_npz = next_running_number(path, "npz")
@@ -51,7 +54,7 @@ def precompute_sweep(op_set):
     sweep_data = []
 
     for h in h_values:
-        print(f"Computing h={h:.4g}")
+        print(f"Computing h={h:.4g}", sep='\t')
         h_sys = transverse_ising_hamiltonian(J, h, N)
         channel, channel_params = get_averaged_channel(
             N,
@@ -67,7 +70,10 @@ def precompute_sweep(op_set):
         )
         eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J, h])
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
-        mixing_time = get_mixing_time(channel, fixedpoint)
+        mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
+        print(f"iterations for eps={eps_fit:.4g}: {mixing_time}")
+        
+        
         sweep_data.append(
             {
                 "h": h,
@@ -91,7 +97,7 @@ def precompute_sweep(op_set):
 
 def main():
     op_set = construct_opset(N, type="XZ")
-    print("\n\n\n")
+    print("\n"+60*'-'+"\n\n")
     ans = input("Load saved sweep-data? [y/n] ")
 
     if ans not in {"y", "yes", "Y", "Yes"}:
@@ -117,25 +123,32 @@ def main():
 
     gap = np.maximum(Delta2, 1e-16)
     has_mixing_time = mixing_time is not None
-    fig, axes = plt.subplots(1, 3 if has_mixing_time else 2, figsize=(13.5 if has_mixing_time else 9, 3.5))
-    axes[0].semilogy(h_grid, gap, marker="o")
-    axes[0].set_xlabel("h")
-    axes[0].set_ylabel(r"$\Delta_2$")
-    axes[0].set_title(r"$\Delta_2$ vs h")
-    axes[0].grid(True, which="both", linestyle=":")
+    fig, axes = plt.subplots(2, 2, figsize=(10, 7))
+    ax_gap = axes[0, 0]
+    ax_dist = axes[0, 1]
+    ax_mix = axes[1, 0]
+    ax_info = axes[1, 1]
 
-    axes[1].plot(h_grid, trace_distance, marker="o")
-    axes[1].set_xlabel("h")
-    axes[1].set_ylabel(r"$\|\rho_{\rm fix} - \rho_\beta\|_1$")
-    axes[1].set_title("fixed point distance")
-    axes[1].grid(True, linestyle=":")
+    ax_gap.semilogy(h_grid, gap, marker="o")
+    ax_gap.set_xlabel("h")
+    ax_gap.set_ylabel(r"$\Delta_2$")
+    ax_gap.set_title(r"$\Delta_2$ vs h")
+    ax_gap.grid(True, which="both", linestyle=":")
+
+    ax_dist.plot(h_grid, trace_distance, marker="o")
+    ax_dist.set_xlabel("h")
+    ax_dist.set_ylabel(r"$\|\rho_{\rm fix} - \rho_\beta\|_1$")
+    ax_dist.set_title("fixed point distance")
+    ax_dist.grid(True, linestyle=":")
 
     if has_mixing_time:
-        axes[2].plot(h_grid, mixing_time * T, marker="o")
-        axes[2].set_xlabel("h")
-        axes[2].set_ylabel(r"$t_{\rm mix}/T$")
-        axes[2].set_title("mixing time (iterations)")
-        axes[2].grid(True, linestyle=":")
+        ax_mix.plot(h_grid, mixing_time, marker="o")
+        ax_mix.set_xlabel("h")
+        ax_mix.set_ylabel(r"$t_{\rm mix}/T$")
+        ax_mix.set_title("mixing time (iterations)")
+        ax_mix.grid(True, linestyle=":")
+    else:
+        ax_mix.axis("off")
 
     info = (
         f"N = {N}\n"
@@ -147,12 +160,14 @@ def main():
         f"omega_max = {omega_max}\n"
         f"J = {J}"
     )
-    fig.text(
-        0.98,
+    ax_info.axis("off")
+    ax_info.text(
+        0.02,
         0.98,
         info,
-        ha="right",
+        ha="left",
         va="top",
+        transform=ax_info.transAxes,
         bbox=dict(boxstyle="round", facecolor="white", edgecolor="0.6", alpha=0.9),
     )
 
