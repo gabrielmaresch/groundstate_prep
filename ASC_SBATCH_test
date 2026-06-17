@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=h_sweep
+#SBATCH --output=h_sweep_%j.out
+#SBATCH --error=h_sweep_%j.err
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=4G
+
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate triqs
+
+cd /Users/gab/Library/Mobile\ Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep
+
+python superoperator_h_sweep.py \
+  --N 4 \
+  --T 25.0 \
+  --alpha 0.75 \
+  --sigma 2.0 \
+  --omega_max 20 \
+  --tau 0.1 \
+  --J 1.0 \
+  --beta 1.0 \
+  --eps_fit 0.05 \
+  --h_min 0.75 \
+  --h_max 1.25 \
+  --h_points 26

@@ -1,7 +1,8 @@
 from pathlib import Path
-import re
+import argparse
+import sys
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from matplotlib.widgets import Slider
 
@@ -13,34 +14,44 @@ from superoperator import (
     next_running_number,
 )
 
+if "--load" not in sys.argv:
+    matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 
-######### the slider was implemented with the help of CODEX
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--N", type=int, default=4)
+    parser.add_argument("--T", type=float, default=25.0)
+    parser.add_argument("--alpha", type=float, default=0.75)
+    parser.add_argument("--sigma", type=float, default=2.0)
+    parser.add_argument("--omega_max", type=float, default=20.0)
+    parser.add_argument("--tau", type=float, default=0.25)
+    parser.add_argument("--J", type=float, default=1.0)
+    parser.add_argument("--h", type=float, default=2.0)
+    parser.add_argument("--beta-min", dest="beta_min", type=float, default=0.5)
+    parser.add_argument("--beta-max", dest="beta_max", type=float, default=5.0)
+    parser.add_argument("--beta-points", dest="beta_points", type=int, default=10)
+    parser.add_argument("--load", action="store_true")
+    parser.add_argument("--npz-number", type=int, default=None)
+    parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--plot-dir", type=Path, default=Path("plots"))
+    parser.add_argument(
+        "--save-channel",
+        type=lambda value: value.lower() in {"1", "true", "yes", "y"},
+        default=True,
+        help="Whether to store the full channel matrices in the .npz file.",
+    )
+    return parser.parse_args()
 
-N = 4
-T = 4.
-alpha = 0.75
-sigma = 1
-omega_max = 5
-tau = 0.25
-J = 1.
-h = 2.
 
-k_max = 150
-beta_values = np.linspace(0.5, 5., 10)
-
-path = Path(__file__).resolve().parent / "data"
-running_npz = next_running_number(path, "npz")
-file_name = "superoperator_N"+str(N)+"_sweep_"+str(running_npz)+".npz"
-
-
-def save_sweep_snapshot(sweep_data):
-    snapshot_path = path / file_name
+def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
     temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
+    channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
     np.savez_compressed(
         temp_path,
         beta=np.array([entry["beta"] for entry in sweep_data]),
-        channels=np.stack([entry["channel"] for entry in sweep_data]),
+        channels=np.stack(channel_entries) if save_channel else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
         Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
@@ -50,8 +61,23 @@ def save_sweep_snapshot(sweep_data):
     temp_path.replace(snapshot_path)
 
 
-def precompute_sweep(op_set, h_sys):
+def precompute_sweep(
+    op_set,
+    *,
+    N,
+    T,
+    alpha,
+    sigma,
+    omega_max,
+    tau,
+    J,
+    h,
+    beta_values,
+    snapshot_path,
+    save_channel,
+):
     sweep_data = []
+    h_sys = transverse_ising_hamiltonian(J, h, N)
 
     for beta in beta_values:
         print(f"Computing beta={beta:.4g}")
@@ -65,10 +91,13 @@ def precompute_sweep(op_set, h_sys):
             h_sys,
             alpha,
             beta,
-            method='krausz'
+            method="krausz",
         )
-        eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J, h])
+        eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+            channel, beta, [N, J, h]
+        )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
+
         sweep_data.append(
             {
                 "beta": beta,
@@ -83,11 +112,12 @@ def precompute_sweep(op_set, h_sys):
                 },
             }
         )
-        save_sweep_snapshot(sweep_data)
+        save_sweep_snapshot(sweep_data, snapshot_path, save_channel)
+
     return sweep_data
 
 
-def draw_entry(ax, bar_ax, entry, extent):
+def draw_entry(ax, bar_ax, entry, extent, *, N, T, alpha, sigma, omega_max, tau, J, h):
     eigvals = entry["spectrum_data"]["eigvals"]
     Delta2 = entry["spectrum_data"]["Delta2"]
     Delta_th = entry["spectrum_data"]["Delta_th"]
@@ -160,7 +190,7 @@ def draw_entry(ax, bar_ax, entry, extent):
     bar_ax.text(0, trace_distance, f"{trace_distance:.4f}", ha="center", va="bottom")
 
 
-def build_figure(sweep_data, beta_grid):
+def build_figure(sweep_data, beta_grid, *, N, T, alpha, sigma, omega_max, tau, J, h):
     fig = plt.figure(figsize=(9.5, 8))
     gs = fig.add_gridspec(1, 2, width_ratios=[5, 1], wspace=0.3)
     ax = fig.add_subplot(gs[0, 0])
@@ -170,7 +200,20 @@ def build_figure(sweep_data, beta_grid):
     all_eigvals = np.concatenate([entry["spectrum_data"]["eigvals"] for entry in sweep_data])
     extent = max(1.05, np.max(np.abs(np.concatenate([all_eigvals.real, all_eigvals.imag]))))
 
-    draw_entry(ax, bar_ax, sweep_data[0], extent)
+    draw_entry(
+        ax,
+        bar_ax,
+        sweep_data[0],
+        extent,
+        N=N,
+        T=T,
+        alpha=alpha,
+        sigma=sigma,
+        omega_max=omega_max,
+        tau=tau,
+        J=J,
+        h=h,
+    )
 
     slider_ax = fig.add_axes([0.15, 0.07, 0.7, 0.03])
     slider = Slider(
@@ -187,7 +230,20 @@ def build_figure(sweep_data, beta_grid):
 
     def update(beta):
         idx = np.argmin(np.abs(beta_grid - beta))
-        draw_entry(ax, bar_ax, sweep_data[idx], extent)
+        draw_entry(
+            ax,
+            bar_ax,
+            sweep_data[idx],
+            extent,
+            N=N,
+            T=T,
+            alpha=alpha,
+            sigma=sigma,
+            omega_max=omega_max,
+            tau=tau,
+            J=J,
+            h=h,
+        )
         fig.canvas.draw_idle()
 
     slider.on_changed(update)
@@ -196,28 +252,41 @@ def build_figure(sweep_data, beta_grid):
 
 
 def main():
-    op_set = construct_opset(N, type="XZ")
-    h_sys = transverse_ising_hamiltonian(J, h, N)
-    print("\n\n\n")
-    ans = input("Load saved sweep-data? [y/n] ")
-    if ans not in {'y', 'yes', 'Y', 'Yes'}:
-        sweep_data = precompute_sweep(op_set, h_sys)
-        beta_grid = beta_values
-    else:
-        fallback = next_running_number(path, "npz") - 1
-        ans = input(f"running number of .npz? [{fallback}] ")
-        if ans == "":
-            ans = fallback
-        load_npz_number = int(ans)
-        matches = list(path.glob(f"superoperator_N*_sweep_{load_npz_number}.npz"))
+    args = parse_args()
+
+    N = args.N
+    T = args.T
+    alpha = args.alpha
+    sigma = args.sigma
+    omega_max = args.omega_max
+    tau = args.tau
+    J = args.J
+    h = args.h
+    beta_values = np.linspace(args.beta_min, args.beta_max, args.beta_points)
+
+    data_dir = args.data_dir
+    plot_dir = args.plot_dir
+    save_channel = args.save_channel
+
+    data_dir.mkdir(parents=True, exist_ok=True)
+    plot_dir.mkdir(parents=True, exist_ok=True)
+
+    snapshot_number = next_running_number(data_dir, "npz")
+    snapshot_path = data_dir / f"superoperator_N{N}_sweep_{snapshot_number}.npz"
+
+    if args.load:
+        fallback = snapshot_number - 1
+        load_npz_number = args.npz_number if args.npz_number is not None else fallback
+        matches = list(data_dir.glob(f"superoperator_N*_sweep_{load_npz_number}.npz"))
         if not matches:
-            matches = list(path.glob(f"superoperator_N*_sweep_{fallback}.npz"))
+            matches = list(data_dir.glob(f"superoperator_N*_sweep_{fallback}.npz"))
         saved = np.load(matches[0])
         beta_grid = saved["beta"]
+        channels = saved["channels"] if "channels" in saved.files else np.array([])
         sweep_data = [
             {
                 "beta": beta,
-                "channel": channel,
+                "channel": channel if channels.size else None,
                 "spectrum_data": {
                     "eigvals": eigvals,
                     "Delta2": float(Delta2),
@@ -228,7 +297,7 @@ def main():
             }
             for beta, channel, eigvals, Delta2, Delta_th, num_closer, trace_distance in zip(
                 saved["beta"],
-                saved["channels"],
+                channels if channels.size else [None] * len(saved["beta"]),
                 saved["eigvals"],
                 saved["Delta2"],
                 saved["Delta_th"],
@@ -236,16 +305,44 @@ def main():
                 saved["trace_distance"],
             )
         ]
-    
-    figure = build_figure(sweep_data, beta_grid)
+    else:
+        op_set = construct_opset(N, type="XZ")
+        sweep_data = precompute_sweep(
+            op_set,
+            N=N,
+            T=T,
+            alpha=alpha,
+            sigma=sigma,
+            omega_max=omega_max,
+            tau=tau,
+            J=J,
+            h=h,
+            beta_values=beta_values,
+            snapshot_path=snapshot_path,
+            save_channel=save_channel,
+        )
+        beta_grid = beta_values
 
-    output_folder = Path(__file__).resolve().parent / "plots" 
-    running_png = next_running_number(output_folder)
-    file_name = "superoperator_beta_sweep_overview_"+str(running_png)+".png"
-    output_path = output_folder / file_name
+    figure = build_figure(
+        sweep_data,
+        beta_grid,
+        N=N,
+        T=T,
+        alpha=alpha,
+        sigma=sigma,
+        omega_max=omega_max,
+        tau=tau,
+        J=J,
+        h=h,
+    )
+
+    running_png = next_running_number(plot_dir, "png")
+    output_path = plot_dir / f"superoperator_beta_sweep_overview_{running_png}.png"
 
     figure.savefig(output_path, dpi=200)
-    plt.show()
+    if args.load:
+        plt.show()
+    plt.close(figure)
 
 
 if __name__ == "__main__":
