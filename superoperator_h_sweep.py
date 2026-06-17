@@ -15,6 +15,7 @@ from superoperator import (
 
 N = 4
 T = 25.0
+
 alpha = 1.
 #alpha = .75
 #alpha = .5
@@ -99,7 +100,9 @@ def precompute_sweep(op_set):
 
 
 def main():
+    #op_set = construct_opset(N, type="XZ")
     op_set = construct_opset(N, type="XZ")
+    
     print("\n"+60*'-'+"\n\n")
     ans = input("Load saved sweep-data? [y/n] ")
 
