@@ -329,8 +329,8 @@ if __name__ == "__main__":
     omega_max = 20.
     beta = 1.
     tau = 0.1
-    op_set = construct_opset(N, type="XZ")
-    J, h = 1., 0.7
+    op_set = construct_opset(N, type="XYZ")
+    J, h = 1., 0.2
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 

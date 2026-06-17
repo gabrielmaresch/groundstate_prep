@@ -40,13 +40,15 @@ def construct_opset(num_qubits:int, *, type:str = "XX2", output:bool = False):
     with qml.QueuingManager.stop_recording():
         op_set = []
 
-        if type == "XX2":
+        if type == "XZ2":
             for i in range(num_qubits):
                 for j in range(i+1, num_qubits):
                     if output:
                         print(i,j)
                     op_set.append(qml.PauliX(i)@qml.PauliX(j))
                     op_set.append(-(qml.PauliX(i)@qml.PauliX(j)))
+                    op_set.append(qml.PauliZ(i)@qml.PauliZ(j))
+                    op_set.append(-(qml.PauliZ(i)@qml.PauliZ(j)))
 
         elif type == "XZ":
             for i in range(num_qubits):
