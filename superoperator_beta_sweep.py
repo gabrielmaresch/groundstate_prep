@@ -91,7 +91,7 @@ def precompute_sweep(
             h_sys,
             alpha,
             beta,
-            method="krausz",
+            method="choi",
         )
         eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
             channel, beta, [N, J, h]
