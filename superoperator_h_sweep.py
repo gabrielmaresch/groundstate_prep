@@ -31,46 +31,34 @@ def parse_args():
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--eps_fit", type=float, default=0.05)
-    parser.add_argument("--h_min", type=float, default=0.75)
-    parser.add_argument("--h_max", type=float, default=1.25)
-    parser.add_argument("--h_points", type=int, default=26)
-    parser.add_argument("--normalize_Jh", type=bool, default=False)
+    parser.add_argument("--h_min", type=float, default=0.1)
+    parser.add_argument("--h_max", type=float, default=2.0)
+    parser.add_argument("--h_points", type=int, default=20)
+    parser.add_argument(
+        "--normalize_Jh",
+        help="Whether to normalize the Hamiltonian.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--save-channel",
+        help="Whether to store the full channel matrices in the .npz file.",
+        action="store_true",
+    )
     parser.add_argument("--load", action="store_true")
     parser.add_argument("--npz-number", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--plot-dir", type=Path, default=Path("plots"))
     return parser.parse_args()
 
-'''
-N = 4
-T = 25.0
 
-#alpha = 1.
-alpha = .75
-#alpha = .5
-#alpha = .25
-
-sigma = 2.
-omega_max = 20
-tau = 0.1
-J = 1.0
-beta = 1.0
-eps_fit = 0.05
-
-#h_values = np.linspace(0.25, 1.0, 4)
-h_values = np.linspace(0.75, 1.25, 26)
-'''
-
-
-
-
-def save_sweep_snapshot(sweep_data, snapshot_path):
+def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
     temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
+    channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
     np.savez_compressed(
         temp_path,
         h_over_J=np.array([entry["h_over_J"] for entry in sweep_data]),
         beta=np.array([entry["beta"] for entry in sweep_data]),
-        channels=np.stack([entry["channel"] for entry in sweep_data]),
+        channels=np.stack(channel_entries) if save_channel else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
         Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
@@ -95,6 +83,7 @@ def precompute_sweep(
     eps_fit,
     h_values,
     normalize_Jh,
+    save_channel,
     snapshot_path,
 ):
     sweep_data = []
@@ -142,7 +131,7 @@ def precompute_sweep(
                 },
             }
         )
-        save_sweep_snapshot(sweep_data, snapshot_path)
+        save_sweep_snapshot(sweep_data, snapshot_path, save_channel)
 
     return sweep_data
 
@@ -159,6 +148,8 @@ def main():
     J = args.J
     beta = args.beta
     eps_fit = args.eps_fit
+    normalize_Jh = args.normalize_Jh
+    save_channel = args.save_channel
 
     h_values = np.linspace(args.h_min, args.h_max, args.h_points)
 
@@ -182,6 +173,7 @@ def main():
             matches = list(data_dir.glob(f"superoperator_N*_h_sweep_{fallback}.npz"))
         saved = np.load(matches[0])
         h_grid = saved["h_over_J"] if "h_over_J" in saved.files else saved["h"]
+        channels = saved["channels"] if "channels" in saved.files else np.array([])
         Delta2 = saved["Delta2"]
         trace_distance = saved["trace_distance"]
         mixing_time = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
@@ -198,6 +190,8 @@ def main():
             beta=beta,
             eps_fit=eps_fit,
             h_values=h_values,
+            normalize_Jh=normalize_Jh,
+            save_channel=save_channel,
             snapshot_path=snapshot_path,
         )
         h_grid = np.array([entry["h_over_J"] for entry in sweep_data])

@@ -1,10 +1,15 @@
 XZ, choi, eps = 0.05
-1, alpha = 0.25
-2, alpha = 0.50
-3, alpha = 0.75
-4, alpha = 1.00
+1, alpha = 0.25, h from 0.1 to 2.0 in 20 steps
+2, alpha = 0.50,
+3, alpha = 0.75,
+4, alpha = 1.00,
+,,
+5, alpha = 0.25, h from 0.75 to 1.25
+6, alpha = 0.75, h from 0.75 to 1.25
+,,
+7, alpha = 0.75, h = 1.2 beta from 0.5 to 5
+,,
+8, alpha = 0.1, h from 0.1 to 2.0 in 20 steps
+9, alpha = 1.5, h from 0.1 to 2.0 in 20 steps
 
-5, alpha = 0.25 h from 0.75 to 1.25
-6, alpha = 0.75 h from 0.75 to 1.25
-
-7, alpha = 0.75, h = 1.2, beta from 0.5 to 5
+10, alpha = 0.25, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored

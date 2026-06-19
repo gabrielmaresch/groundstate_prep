@@ -81,6 +81,9 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Project data outputs (keep folder, ignore contents)
+/data/**
+
 
 # IPython
 profile_default/
