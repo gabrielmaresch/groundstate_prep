@@ -1,0 +1,112 @@
+"""Exact diagonalization helpers for the transverse Ising model."""
+
+from __future__ import annotations
+
+import numpy as np
+
+
+def _kron_all(operators):
+    result = operators[0]
+    for operator in operators[1:]:
+        result = np.kron(result, operator)
+    return result
+
+
+def transverse_ising_hamiltonian(N: int, J: float, h: float):
+    """Construct the transverse Ising Hamiltonian with periodic boundary conditions."""
+    if N <= 0:
+        raise ValueError("N must be positive")
+
+    H = np.zeros((2**N, 2**N), dtype=float)
+    X = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=float)
+    Z = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=float)
+    I = np.array([[1.0, 0.0], [0.0, 1.0]], dtype=float)
+
+    for i in range(N):
+        # Sz-Sz term with periodic boundary conditions
+        if i == N - 1:
+            z_ops = [Z if (j == N - 1 or j == 0) else I for j in range(N)]
+        else:
+            z_ops = [Z if (j == i or j == i + 1) else I for j in range(N)]
+        H += -J * _kron_all(z_ops)
+
+        # Sx term
+        x_ops = [X if j == i else I for j in range(N)]
+        H += -h * _kron_all(x_ops)
+
+    return H
+
+
+def thermal_state(H: np.ndarray, beta: float):
+    """Return the Gibbs state and thermal energy for a Hermitian matrix."""
+    H = np.asarray(H)
+    if H.shape[0] != H.shape[1]:
+        raise ValueError("H must be square")
+
+    evals, evecs = np.linalg.eigh(H)
+    beta_exps = np.exp(-beta * evals)
+    Z = np.sum(beta_exps)
+    weights = beta_exps / Z
+    gibbs = (evecs * weights) @ evecs.conj().T
+    energy = np.sum(evals * beta_exps) / Z
+    return gibbs, energy
+
+
+def thermal_expectation_value(H: np.ndarray, A: np.ndarray, beta: float):
+    """Return the thermal expectation value of A."""
+    H = np.asarray(H)
+    A = np.asarray(A)
+    if H.shape[0] != H.shape[1]:
+        raise ValueError("H must be square")
+
+    evals, evecs = np.linalg.eigh(H)
+    beta_exps = np.exp(-beta * evals)
+    Z = np.sum(beta_exps)
+
+    expectation = 0.0
+    for i in range(H.shape[0]):
+        ket = evecs[:, i]
+        expectation += (beta_exps[i] / Z) * (ket.conj().T @ A @ ket)
+    return expectation
+
+
+def ground_state(H: np.ndarray):
+    """Return the ground-state vector and energy."""
+    H = np.asarray(H)
+    if H.shape[0] != H.shape[1]:
+        raise ValueError("H must be square")
+
+    evals, evecs = np.linalg.eigh(H)
+    return evecs[:, 0], evals[0]
+
+
+def ground_state_expectation_value(H: np.ndarray, A: np.ndarray):
+    """Return the ground-state expectation value of A."""
+    H = np.asarray(H)
+    A = np.asarray(A)
+    if H.shape[0] != H.shape[1]:
+        raise ValueError("H must be square")
+
+    _, evecs = np.linalg.eigh(H)
+    gs = evecs[:, 0]
+    return gs.conj().T @ A @ gs
+
+
+def get_transverse_ising_groundstate(N: int, J: float, h: float):
+    """Convenience wrapper returning the ground state and its energy."""
+    H = transverse_ising_hamiltonian(N, J, h)
+    return ground_state(H)
+
+
+def get_transverse_ising_gibbsstate(N: int, J: float, h: float, beta: float):
+    """Convenience wrapper returning the Gibbs state and its energy."""
+    H = transverse_ising_hamiltonian(N, J, h)
+    return thermal_state(H, beta)
+
+
+def get_spectrum(H: np.ndarray):
+    """Return the eigenvalues of H in ascending order."""
+    H = np.asarray(H)
+    if H.shape[0] != H.shape[1]:
+        raise ValueError("H must be square")
+    return np.linalg.eigvalsh(H)

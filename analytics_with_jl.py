@@ -12,16 +12,16 @@ from typing import Any, List
 from cooling_channel import create_circuit_diagram, create_cooling_circuit, transverse_ising_hamiltonian, construct_opset
 from scipy.optimize import curve_fit
 
-from ed import get_transverse_ising_gibbsstate
-
+#__________________________________ JULIA ED ________________________________________
+from juliacall import Main as jl
 
 local_path = Path(__file__).resolve().parent
-
+file_name = "ed.jl" 
+jl.include(str(local_path/file_name))
 
 def get_gibbs(N, J, h, beta):
-    gibbs_state, energy = get_transverse_ising_gibbsstate(N, J, h, beta)
+    gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
     return gibbs_state, energy
-
 
 def nice_print_matrix(A, digits=3):
     A = np.asarray(A)
@@ -29,33 +29,30 @@ def nice_print_matrix(A, digits=3):
     for row in A:
         print("  ".join(fmt.format(x) for x in row))
 
-
-def trace_distance(A, B):
-    lambdas = np.linalg.eigvalsh(A - B)
-    dist = 1 / 2 * sum(abs(ev) for ev in lambdas)
+def trace_distance(A,B):
+    lambdas = np.linalg.eigvalsh(A-B)
+    dist = 1/2*sum(abs(ev) for ev in lambdas)
     return dist
 
-
 def exp_model(x, a, b, c):
-    return a + b * np.exp(c * x)
-
+        return a+b*np.exp(c*x)
 
 def extract_asymptotics(x, y):
+
     x_data = np.array(x)
     y_data = np.array(y)
 
-    p_init = y_data[-1], y_data[0] - y_data[-1], -0.1
+    p_init = y_data[-1], y_data[0]-y_data[-1], -0.1
     p_fit, cov = curve_fit(
         exp_model,
-        x_data,
-        y_data,
+        x_data, y_data,
         p0=p_init,
-        bounds=([-np.inf, 0.0, -np.inf], [np.inf, np.inf, 0.0]),
-    )
+        bounds=([-np.inf, 0.0, -np.inf], [np.inf, np.inf, 0.0]))
 
     y_fit = exp_model(x_data, *p_fit)
 
     return y_fit, p_fit, cov
+
 
 
 #'____________________________ COOLING CICUIT EXECUTION _____________________________'
@@ -64,7 +61,7 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
 
     assert len(H_params) == 3
     J, h, N = H_params
-    H_sys = transverse_ising_hamiltonian(J, h, N)
+    H_sys  = transverse_ising_hamiltonian(J, h, N)
     gibbs_state, energy = get_gibbs(N, J, h, beta)
     
 
@@ -97,7 +94,7 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
         print("Start calculation")
         print(80 * "-")
 
-        print("\nTransversal Ising XXZ model on", N, "qubits with J =", J, ", h =", h, ":\n")
+        print("\nTransversal Ising XXZ model on", N,"qubits with J =", J, ", h =", h, ":\n")
         print("H_sys =", H_sys, "\n")
         if show_gibbs:
             print(f"\nGibbs state for β = {beta}\n")
@@ -141,9 +138,16 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
 
         final_state = circuit()
         
+        #nice_print_matrix(final_state)
+        #print("\ntrace =", np.round(np.real(np.trace(final_state)),3))
+        #is_diagonal = np.allclose(final_state, np.diag(np.diagonal(final_state)))
+        #print("is diagonal:", is_diagonal)
+
         dist = trace_distance(final_state, gibbs_state)
+        # print(num_timesteps, " timesteps:\t", np.round(dist,3), end ='\r')
         if not silent:
-            print(num_timesteps, " timesteps:\t", np.round(dist, 3))
+            print(num_timesteps, " timesteps:\t", np.round(dist,3)) #stable version for jupyter
+    
 
         if not first_run:
             dist_increment = trace_distance(previous_state, final_state)
@@ -164,7 +168,7 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
         f"$\\alpha$ = {alpha}\n"
         f"$\\sigma$ = {sigma}"
     )
-    if plots and len(times) > 2:
+    if plots and len(times)>2:
     
         plt.scatter(times, tr_dist_gibbs)
         plt.xlabel("number of timesteps")
@@ -193,8 +197,8 @@ def run_TFIM(H_params, T_params, C_params, beta, ops='XZ', *, timesteps=None, mi
          horizontalalignment="center")
 
         pic_dir = "plots"
-        pic_name = "trace_distance_" + str(max_timesteps) + "timesteps.png"
-        plt.savefig(local_path / pic_dir / pic_name, dpi=200)
+        pic_name = "trace_distance_"+str(max_timesteps)+"timesteps.png"
+        plt.savefig(local_path/pic_dir/pic_name, dpi=200)
         if not silent:
             plt.show()
 
@@ -214,6 +218,15 @@ if __name__ == "__main__":
     T_params = [10., 0.25]
 
 ### C_params = [alpha, sigma, omega_max]
-    C_params = [0.75, 2., 20.]
+    C_params = [0.5, 1.0, 6.0]
 
-    run_TFIM(H_params, T_params, C_params, beta=0.5, timesteps=20)
+#### inverse temperature
+    beta = 1.0
+
+
+    t, dist, _, _ = run_TFIM(H_params, T_params, C_params, beta)
+
+    dist_fitted, p_fit, cov = extract_asymptotics(t,dist)
+    print(p_fit, cov)
+
+# sys.stdout.flush()
