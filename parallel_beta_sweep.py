@@ -165,7 +165,7 @@ def main():
     data_dir.mkdir(parents=True, exist_ok=True)
 
     snapshot_number = next_running_number(data_dir, "npz")
-    snapshot_path = data_dir / f"superoperator_N{N}_beta_sweep_{snapshot_number}.npz"
+    snapshot_path = data_dir / f"superoperator_N{N}_beta_sweep_ASC{snapshot_number}.npz"
 
     sweep_data = compute_sweep(
         N=N,
