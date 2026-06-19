@@ -38,9 +38,8 @@ def parse_args():
     parser.add_argument("--plot-dir", type=Path, default=Path("plots"))
     parser.add_argument(
         "--save-channel",
-        type=lambda value: value.lower() in {"1", "true", "yes", "y"},
-        default=True,
         help="Whether to store the full channel matrices in the .npz file.",
+        action="store_true",
     )
     return parser.parse_args()
 

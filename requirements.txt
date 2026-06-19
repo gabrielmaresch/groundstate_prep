@@ -1,5 +1,8 @@
 pennylane==0.44.1
 matplotlib==3.10.9
-plotly==6.1.2
+scipy
 pytest==9.0.3
 juliacall
+ipython
+pandas
+seaborn
