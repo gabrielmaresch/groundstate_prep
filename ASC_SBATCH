@@ -1,0 +1,80 @@
+#!/bin/bash
+#SBATCH --job-name=logs/h_sweep_N4_test
+#SBATCH --output=logs/h_sweep_N4_test_%j.out
+#SBATCH --error=logs/h_sweep_N4_test_%j.err
+
+#SBATCH --partition=zen3_0512
+#SBATCH --qos=zen3_0512
+
+## Devel-QoS variant for very short tests:
+##SBATCH --qos=zen3_0512_devel
+##SBATCH --time=00:10:00
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+##SBATCH --mem=8G
+
+module purge
+module load miniforge3
+
+
+
+# print some information
+echo "=== FIRST PATH CHECK ==="
+echo "$PATH" | tr ':' '\n'
+
+# activate conda
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate cooling
+
+# load julia
+#module load julia/1.10.9-gcc-12.2.0-ajiw47t
+#which julia
+#julia --version
+
+# print some more information
+echo "=== SECOND PATH CHECK ==="
+echo "$PATH" | tr ':' '\n'
+
+# print even more information
+echo "=== Diagnostics ==="
+echo "HOSTNAME: $(hostname)"
+echo "CONDA_PREFIX: $CONDA_PREFIX"
+
+echo "=== EXECUTE PYTHON ==="
+which python
+
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export VECLIB_MAXIMUM_THREADS=1
+
+cd /home/fs71925/gmaresch/groundstate_prep
+
+echo "PWD=$(pwd)"
+echo "SLURM_CPUS_PER_TASK=${SLURM_CPUS_PER_TASK}"
+
+DATA_DIR=/gpfs/data/fs71925/gmaresch/data
+
+#JULIA_DEPOT="$DATA_DIR/julia_depot:"
+#export JULIA_DEPOT_PATH="$JULIA_DEPOT"
+#echo "=== JULIA DEPOT ==="
+#echo "JULIA_DEPOT_PATH=$JULIA_DEPOT_PATH"
+
+"$CONDA_PREFIX/bin/python" parallel_h_sweep.py \
+  --N 4 \
+  --T 25.0 \
+  --alpha 0.75 \
+  --sigma 2.0 \
+  --omega_max 20 \
+  --tau 0.1 \
+  --J 1.0 \
+  --beta 1.0 \
+  --eps_fit 0.05 \
+  --h_min 0.5 \
+  --h_max 2.0 \
+  --h_points 4 \
+  --data-dir "$DATA_DIR" \
+  --workers "${SLURM_CPUS_PER_TASK}"

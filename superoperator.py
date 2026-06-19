@@ -25,14 +25,11 @@ def next_running_number(folder, ext="png"):
 
 
 ##################
-from juliacall import Main as jl
+from ed import get_transverse_ising_gibbsstate
 
-local_path = Path(__file__).resolve().parent
-file_name = "ed.jl" 
-jl.include(str(local_path/file_name))
 
 def get_gibbs(N, J, h, beta):
-    gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
+    gibbs_state, energy = get_transverse_ising_gibbsstate(N, J, h, beta)
     return gibbs_state, energy
 ####################
 

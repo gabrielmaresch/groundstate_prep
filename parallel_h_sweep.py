@@ -78,7 +78,7 @@ def compute_single_h(
     print(f"Computing h={h:.4g}", flush=True)
     J_hot, h_hot = J, h
     if normalize_Jh:
-        H_norm = N * (abs(J_hot) + abs(h_hot))
+        H_norm = N * np.sqrt(J_hot**2 + h_hot**2)
         J_hot = J_hot / H_norm
         h_hot = h_hot / H_norm
 
@@ -181,7 +181,8 @@ def main():
 
     snapshot_number = next_running_number(data_dir, "npz")
     snapshot_path = data_dir / f"superoperator_N{N}_h_sweep_{snapshot_number}.npz"
-
+    print("File will be saved as", snapshot_path)
+    
     sweep_data = compute_sweep(
         N=N,
         T=T,
