@@ -41,6 +41,7 @@ def parse_args():
     )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--save-as-nr", type=int, default=-1)
     return parser.parse_args()
 
 
@@ -170,6 +171,7 @@ def main():
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
     workers = args.workers
+    save_as_nr = args.save_as_nr
 
     h_values = np.linspace(args.h_min, args.h_max, args.h_points)
 
@@ -179,7 +181,11 @@ def main():
 
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    snapshot_number = next_running_number(data_dir, "npz")
+    if save_as_nr == -1:
+        snapshot_number = next_running_number(data_dir, "npz")
+    else:
+        snapshot_number = save_as_nr
+
     snapshot_path = data_dir / f"superoperator_N{N}_h_sweep_ASC{snapshot_number}.npz"
     print("File will be saved as", snapshot_path)
     
