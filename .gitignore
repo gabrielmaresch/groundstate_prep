@@ -84,6 +84,9 @@ target/
 # Project data outputs (keep folder, ignore contents)
 # /data/**
 
+# Project data logfiles
+logs/
+
 
 # IPython
 profile_default/

@@ -3,16 +3,16 @@
 #SBATCH --output=logs/h_sweep_N4_test_%j.out
 #SBATCH --error=logs/h_sweep_N4_test_%j.err
 
+
+## Devel-QoS variant for very short tests:
 #SBATCH --partition=zen3_0512
-#SBATCH --qos=zen3_0512
-#SBATCH --time=01:00:00
+#SBATCH --qos=zen3_0512_devel
+#SBATCH --time=00:05:00
 
-
-
-#SBATCH --array=21-24
+#SBATCH --array=1-4
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=4
 
 module purge
 module load miniforge3
@@ -33,16 +33,16 @@ conda activate cooling
 #julia --version
 
 # print some more information
-# echo "=== SECOND PATH CHECK ==="
-# echo "$PATH" | tr ':' '\n'
+echo "=== SECOND PATH CHECK ==="
+echo "$PATH" | tr ':' '\n'
 
 # print even more information
-# echo "=== Diagnostics ==="
-# echo "HOSTNAME: $(hostname)"
-# echo "CONDA_PREFIX: $CONDA_PREFIX"
+echo "=== Diagnostics ==="
+echo "HOSTNAME: $(hostname)"
+echo "CONDA_PREFIX: $CONDA_PREFIX"
 
-# echo "=== EXECUTE PYTHON ==="
-# which python
+echo "=== EXECUTE PYTHON ==="
+which python
 
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -74,10 +74,11 @@ alpha=$(awk -v tid="$SLURM_ARRAY_TASK_ID" 'BEGIN { printf "%.6f", 0.25 * tid }')
   --J 1.0 \
   --beta 1.0 \
   --eps_fit 0.05 \
-  --h_min 0.1 \
-  --h_max 2.0 \
-  --h_points 20 \
+  --h_min 0.5 \
+  --h_max 1.5 \
+  --h_points 2 \
   --normalize_Jh \
   --data-dir "$DATA_DIR" \
   --workers "${SLURM_CPUS_PER_TASK}" \
   --save-as-nr "$SLURM_ARRAY_TASK_ID"
+  
