@@ -1,5 +1,5 @@
 {
-    "julia.environmentPath": "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum/codebase/groundstate_prep/plotting_environment",
+    "julia.environmentPath": "/Users/gab/Library/Mobile Documents/com~apple~CloudDocs/QuIST/Projekt-Praktikum",
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
     "python.defaultInterpreterPath": "/usr/local/Caskroom/miniforge/base/envs/cooling/bin/python",

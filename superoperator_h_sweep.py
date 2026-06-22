@@ -69,7 +69,7 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
     temp_path.replace(snapshot_path)
 
 
-def precompute_sweep(
+def compute_sweep(
     op_set,
     *,
     N,
@@ -87,6 +87,8 @@ def precompute_sweep(
     snapshot_path,
 ):
     sweep_data = []
+
+    print("Sweep over h:", h_values)
 
     for h in h_values:
         print(f"Computing h={h:.4g}", sep="\t")
@@ -135,97 +137,24 @@ def precompute_sweep(
 
     return sweep_data
 
-
-def main():
-    args = parse_args()
-
-    N = args.N
-    T = args.T
-    alpha = args.alpha
-    sigma = args.sigma
-    omega_max = args.omega_max
-    tau = args.tau
-    J = args.J
-    beta = args.beta
-    eps_fit = args.eps_fit
-    normalize_Jh = args.normalize_Jh
-    save_channel = args.save_channel
-
-    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
-
-    print("Sweep over h:", h_values)
-
-    data_dir = args.data_dir
-    plot_dir = args.plot_dir
-
-    data_dir.mkdir(parents=True, exist_ok=True)
-    plot_dir.mkdir(parents=True, exist_ok=True)
-
-    op_set = construct_opset(N, type="XZ")
-    snapshot_number = next_running_number(data_dir, "npz")
-    snapshot_path = data_dir / f"superoperator_N{N}_h_sweep_{snapshot_number}.npz"
-
-    if args.load:
-        fallback = snapshot_number - 1
-        load_npz_number = args.npz_number if args.npz_number is not None else fallback
-        matches = list(data_dir.glob(f"superoperator_N*_h_sweep_{load_npz_number}.npz"))
-        if not matches:
-            matches = list(data_dir.glob(f"superoperator_N*_h_sweep_{fallback}.npz"))
-        saved = np.load(matches[0])
-        h_grid = saved["h_over_J"] if "h_over_J" in saved.files else saved["h"]
-        channels = saved["channels"] if "channels" in saved.files else np.array([])
-        Delta2 = saved["Delta2"]
-        trace_distance = saved["trace_distance"]
-        mixing_time = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
-    else:
-        sweep_data = precompute_sweep(
-            op_set,
-            N=N,
-            T=T,
-            alpha=alpha,
-            sigma=sigma,
-            omega_max=omega_max,
-            tau=tau,
-            J=J,
-            beta=beta,
-            eps_fit=eps_fit,
-            h_values=h_values,
-            normalize_Jh=normalize_Jh,
-            save_channel=save_channel,
-            snapshot_path=snapshot_path,
-        )
-        h_grid = np.array([entry["h_over_J"] for entry in sweep_data])
-        Delta2 = np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data])
-        trace_distance = np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data])
-        mixing_time = np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data])
-    
-    
-    #print("\n"+60*'-'+"\n\n")
-    #ans = input("Load saved sweep-data? [y/n] ")
-
-    #if ans not in {"y", "yes", "Y", "Yes"}:
-    #    sweep_data = precompute_sweep(op_set)
-    #    h_grid = np.array([entry["h"] for entry in sweep_data])
-    #    Delta2 = np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data])
-    #    trace_distance = np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data])
-    #    mixing_time = np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data])
-    #else:
-    #    fallback = next_running_number(path, "npz") - 1
-    #    ans = input(f"running number of .npz? [{fallback}] ")
-    #    if ans == "":
-    #        ans = fallback
-    #    load_npz_number = int(ans)
-    #    matches = list(path.glob(f"superoperator_N*_h_sweep_{load_npz_number}.npz"))
-    #    if not matches:
-    #        matches = list(path.glob(f"superoperator_N*_h_sweep_{fallback}.npz"))
-    #    saved = np.load(matches[0])
-    #    h_grid = saved["h"]
-    #    Delta2 = saved["Delta2"]
-    #    trace_distance = saved["trace_distance"]
-    #    mixing_time = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
-
+def show_plots(
+    *,
+    N,
+    T,
+    beta,
+    tau,
+    alpha,
+    sigma,
+    omega_max,
+    J,
+    h_grid,
+    Delta2,
+    trace_distance,
+    mixing_time,
+    plot_dir,
+    show_window=False,
+):
     gap = np.maximum(Delta2, 1e-16)
-    has_mixing_time = mixing_time is not None
     fig, axes = plt.subplots(2, 2, figsize=(10, 7))
     ax_gap = axes[0, 0]
     ax_dist = axes[0, 1]
@@ -244,7 +173,7 @@ def main():
     ax_dist.set_title("fixed point distance")
     ax_dist.grid(True, linestyle=":")
 
-    if has_mixing_time:
+    if mixing_time is not None:
         ax_mix.plot(h_grid, mixing_time, marker="o")
         ax_mix.set_xlabel(r"$h/J$")
         ax_mix.set_ylabel(r"$t_{\rm mix}/T$")
@@ -278,9 +207,88 @@ def main():
 
     plot_number = next_running_number(plot_dir, "png")
     fig.savefig(plot_dir / f"superoperator_N{N}_h_sweep_{plot_number}.png", dpi=200, bbox_inches="tight")
-    if args.load:
+    if show_window:
         plt.show()
     plt.close(fig)
+
+def main():
+    args = parse_args()
+
+    N = args.N
+    T = args.T
+    alpha = args.alpha
+    sigma = args.sigma
+    omega_max = args.omega_max
+    tau = args.tau
+    J = args.J
+    beta = args.beta
+    eps_fit = args.eps_fit
+    normalize_Jh = args.normalize_Jh
+    save_channel = args.save_channel
+
+    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
+
+    data_dir = args.data_dir
+    plot_dir = args.plot_dir
+
+    data_dir.mkdir(parents=True, exist_ok=True)
+    plot_dir.mkdir(parents=True, exist_ok=True)
+
+    op_set = construct_opset(N, type="XZ")
+    snapshot_number = next_running_number(data_dir, "npz")
+    snapshot_path = data_dir / f"superoperator_N{N}_h_sweep_{snapshot_number}.npz"
+
+    if args.load:
+        fallback = snapshot_number - 1
+        load_npz_number = args.npz_number if args.npz_number is not None else fallback
+        matches = list(data_dir.glob(f"superoperator_N*_h_sweep_{load_npz_number}.npz"))
+        if not matches:
+            matches = list(data_dir.glob(f"superoperator_N*_h_sweep_{fallback}.npz"))
+        saved = np.load(matches[0])
+        h_grid = saved["h_over_J"] if "h_over_J" in saved.files else saved["h"]
+        # channels = saved["channels"] if "channels" in saved.files else np.array([])
+        Delta2 = saved["Delta2"]
+        trace_distance = saved["trace_distance"]
+        mixing_time = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
+    else:
+        sweep_data = compute_sweep(
+            op_set,
+            N=N,
+            T=T,
+            alpha=alpha,
+            sigma=sigma,
+            omega_max=omega_max,
+            tau=tau,
+            J=J,
+            beta=beta,
+            eps_fit=eps_fit,
+            h_values=h_values,
+            normalize_Jh=normalize_Jh,
+            save_channel=save_channel,
+            snapshot_path=snapshot_path,
+        )
+        h_grid = np.array([entry["h_over_J"] for entry in sweep_data])
+        Delta2 = np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data])
+        trace_distance = np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data])
+        mixing_time = np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data])
+    
+    show_plots(
+        N=N,
+        T=T,
+        beta=beta,
+        tau=tau,
+        alpha=alpha,
+        sigma=sigma,
+        omega_max=omega_max,
+        J=J,
+        h_grid=h_grid,
+        Delta2=Delta2,
+        trace_distance=trace_distance,
+        mixing_time=mixing_time,
+        plot_dir=plot_dir,
+        show_window=args.load,
+    )
+
 
 
 if __name__ == "__main__":
