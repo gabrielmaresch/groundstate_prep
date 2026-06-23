@@ -87,7 +87,6 @@ target/
 # Project data logfiles
 logs/
 
-
 # IPython
 profile_default/
 ipython_config.py

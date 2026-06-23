@@ -10,8 +10,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
-from analytics import trace_distance, extract_asymptotics
+from path_analysis import trace_distance, extract_asymptotics
+
 from scipy.linalg import eig
+from scipy.sparse.linalg import eigs
 
 
 ################## Helper function for naming logic ###########
@@ -143,8 +145,12 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
 
     return S, S_params
 
-def get_superoperator_spectral_data(S, beta, TFIM_params):
-    eigvals, eigvecs = eig(S)
+def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False):
+    if not full_spectrum:
+        eigvals, eigvecs = eigs(S, k=8, sigma = 1.0)
+    else:
+        eigvals, eigvecs = eig(S)
+    
     N, J, h = TFIM_params
     thermal, _ = get_gibbs(N, J, h, beta)
     thermal = np.array(thermal)
