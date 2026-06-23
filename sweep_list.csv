@@ -13,3 +13,27 @@ XZ, choi, eps = 0.05
 9, alpha = 1.5, h from 0.1 to 2.0 in 20 steps
 
 10, alpha = 0.25, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored
+
+"$CONDA_PREFIX/bin/python" parallel_h_sweep.py \
+  --N 4 \
+  --T 25.0 \
+  --sigma 2.0 \
+  --omega_max 8.0 \
+  --tau 0.1 \
+  --J 1.0 \
+  --beta 1.0 \
+  --eps_fit 0.05 \
+  --h_min 0.1 \
+  --h_max 2.0 \
+  --h_points 20 \
+  --normalize_Jh \
+
+11, alpha = 0.25, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+12, alpha = 0.50, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+13, alpha = 0.75, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+14, alpha = 1.00, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+
+15, alpha = 0.50, sigma = 0.5, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+16, alpha = 0.50, sigma = 1.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+17, alpha = 0.50, sigma = 2.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+18, alpha = 0.50, sigma = 4.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
