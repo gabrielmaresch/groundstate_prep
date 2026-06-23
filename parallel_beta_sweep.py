@@ -34,6 +34,13 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--method",
+        type=str,
+        default="choi",
+        choices=("choi", "kraus"),
+        help="Channel construction method.",
+    )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     return parser.parse_args()
@@ -67,6 +74,7 @@ def compute_single_beta(
     J,
     h,
     eps_fit,
+    method,
     save_channel,
 ):
     print(f"Computing beta={beta:.4g}", flush=True)
@@ -83,9 +91,13 @@ def compute_single_beta(
         h_sys,
         alpha,
         beta,
-        method="choi",
+        method=method,
     )
-    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J, h])
+    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+        channel,
+        beta,
+        [N, J, h],
+    )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
     mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
     print(f"iterations for eps={eps_fit:.4g}: {mixing_time}", flush=True)
@@ -120,6 +132,7 @@ def compute_sweep(
     J,
     h,
     eps_fit,
+    method,
     beta_values,
     save_channel,
     workers,
@@ -135,6 +148,7 @@ def compute_sweep(
         J=J,
         h=h,
         eps_fit=eps_fit,
+        method=method,
         save_channel=save_channel,
     )
     with ProcessPoolExecutor(max_workers=workers) as executor:
@@ -153,6 +167,7 @@ def main():
     J = args.J
     h = args.h
     eps_fit = args.eps_fit
+    method = args.method
     save_channel = args.save_channel
     workers = args.workers
 
@@ -177,6 +192,7 @@ def main():
         J=J,
         h=h,
         eps_fit=eps_fit,
+        method=method,
         beta_values=beta_values,
         save_channel=save_channel,
         workers=workers,

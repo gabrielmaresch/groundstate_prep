@@ -39,6 +39,13 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--method",
+        type=str,
+        default="choi",
+        choices=("choi", "kraus"),
+        help="Channel construction method.",
+    )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--save-as-nr", type=int, default=-1)
@@ -61,7 +68,7 @@ def save_sweep(sweep_data, snapshot_path, save_channel):
     )
 
 
-def compute_single_h(
+def compute_single_hJ(
     h,
     *,
     N,
@@ -73,10 +80,13 @@ def compute_single_h(
     J,
     beta,
     eps_fit,
+    method,
     normalize_Jh,
     save_channel,
 ):
     print(f"Computing h={h:.4g}", flush=True)
+    
+
     J_hot, h_hot = J, h
     if normalize_Jh:
         H_norm = N * np.sqrt(J_hot**2 + h_hot**2)
@@ -95,9 +105,13 @@ def compute_single_h(
         h_sys,
         alpha,
         beta,
-        method="choi",
+        method=method,
     )
-    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J_hot, h_hot])
+    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+        channel,
+        beta,
+        [N, J_hot, h_hot],
+    )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
     print(f"iterations for eps={eps_fit:.4g}: {mixing_time}", flush=True)
@@ -133,13 +147,14 @@ def compute_sweep(
     J,
     beta,
     eps_fit,
+    method,
     h_values,
     normalize_Jh,
     save_channel,
     workers,
 ):
     worker = partial(
-        compute_single_h,
+        compute_single_hJ,
         N=N,
         T=T,
         alpha=alpha,
@@ -149,6 +164,7 @@ def compute_sweep(
         J=J,
         beta=beta,
         eps_fit=eps_fit,
+        method=method,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
         )
@@ -168,6 +184,7 @@ def main():
     J = args.J
     beta = args.beta
     eps_fit = args.eps_fit
+    method = args.method
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
     workers = args.workers
@@ -199,6 +216,7 @@ def main():
         J=J,
         beta=beta,
         eps_fit=eps_fit,
+        method=method,
         h_values=h_values,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
