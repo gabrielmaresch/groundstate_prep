@@ -9,8 +9,7 @@
 
 
 
-#SBATCH --array=21-24
-#SBATCH --nodes=1
+#SBATCH --array=1-4
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 
