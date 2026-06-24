@@ -273,9 +273,7 @@ def create_circuit_diagram(qc_name:str, path, file_name:str = "", *, num_timeste
     fig.savefig(path+file_name, dpi=200)
     plt.close(fig)
 
-if __name__ == "__main__":
-
-
+def main():
     # generic parameters for testing
     output = True
     N = 3
@@ -333,3 +331,5 @@ if __name__ == "__main__":
         local_path = Path(__file__).resolve().parent
         create_circuit_diagram(circuit, local_path, num_timesteps=num_timesteps, tau=tau, mixed=mixed)
     
+if __name__ == "__main__":
+    main()
