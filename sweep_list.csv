@@ -35,5 +35,9 @@ XZ, choi, eps = 0.05
 
 15, alpha = 0.50, sigma = 0.5, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
 16, alpha = 0.50, sigma = 1.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
-17, alpha = 0.50, sigma = 2.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+17, alpha = 0.50, sigma = 2.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored
 18, alpha = 0.50, sigma = 4.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+19, alpha = 0.50, sigma = 3.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, 
+
+20, alpha = 0.50, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
+20, alpha = 0.25, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
