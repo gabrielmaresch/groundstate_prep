@@ -29,6 +29,11 @@ def parse_args():
     parser.add_argument("--tau", type=float, default=0.25)
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--h", type=float, default=2.0)
+    parser.add_argument(
+        "--normalize_Jh",
+        help="Whether to normalize the Hamiltonian.",
+        action="store_true",
+    )
     parser.add_argument("--beta-min", dest="beta_min", type=float, default=0.5)
     parser.add_argument("--beta-max", dest="beta_max", type=float, default=5.0)
     parser.add_argument("--beta-points", dest="beta_points", type=int, default=10)
@@ -71,12 +76,19 @@ def precompute_sweep(
     tau,
     J,
     h,
+    normalize_Jh,
     beta_values,
     snapshot_path,
     save_channel,
 ):
     sweep_data = []
-    h_sys = transverse_ising_hamiltonian(J, h, N)
+    J_hot, h_hot = J, h
+    if normalize_Jh:
+        H_norm = N * np.sqrt(J_hot**2 + h_hot**2)
+        J_hot = J_hot / H_norm
+        h_hot = h_hot / H_norm
+
+    h_sys = transverse_ising_hamiltonian(J_hot, h_hot, N)
 
     for beta in beta_values:
         print(f"Computing beta={beta:.4g}")
@@ -93,9 +105,9 @@ def precompute_sweep(
             method="choi",
         )
         eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
-            channel, beta, [N, J, h]
+            channel, beta, [N, J_hot, h_hot]
         )
-        _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
+        _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
 
         sweep_data.append(
             {
@@ -261,6 +273,7 @@ def main():
     tau = args.tau
     J = args.J
     h = args.h
+    normalize_Jh = args.normalize_Jh
     beta_values = np.linspace(args.beta_min, args.beta_max, args.beta_points)
 
     data_dir = args.data_dir
@@ -316,6 +329,7 @@ def main():
             tau=tau,
             J=J,
             h=h,
+            normalize_Jh=normalize_Jh,
             beta_values=beta_values,
             snapshot_path=snapshot_path,
             save_channel=save_channel,

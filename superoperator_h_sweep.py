@@ -94,7 +94,7 @@ def compute_sweep(
         print(f"Computing h={h:.4g}", sep="\t")
         J_hot, h_hot = J, h
         if normalize_Jh:
-            H_norm = N*(abs(J_hot)+abs(h_hot))
+            H_norm = N * np.sqrt(J_hot**2 + h_hot**2)
             J_hot = J_hot / H_norm
             h_hot = h_hot / H_norm
         h_sys = transverse_ising_hamiltonian(J_hot, h_hot, N)

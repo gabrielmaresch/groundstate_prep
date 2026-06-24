@@ -87,12 +87,19 @@ target/
 # Project data logfiles
 logs/
 
+# Generated plots
+/plots/**
+
 # IPython
 profile_default/
 ipython_config.py
 
 # Visual Studio Code
 .vscode/
+
+# Local review artifacts
+docu/repo_improvements_report.md
+docu/repo_improvements_report.pdf
 
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
