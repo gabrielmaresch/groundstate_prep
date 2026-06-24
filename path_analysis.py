@@ -36,6 +36,28 @@ def trace_distance(A, B):
     return dist
 
 
+def psd_sqrt(rho):
+    vals, vecs = np.linalg.eigh((rho + rho.conj().T) / 2)
+    vals = np.clip(vals.real, 0, None)
+    return (vecs * np.sqrt(vals)) @ vecs.conj().T
+
+def fidelity(rho, sigma):
+    srho = psd_sqrt(rho)
+    A = srho @ sigma @ srho
+    A = (A + A.conj().T) / 2
+
+    vals = np.linalg.eigvalsh(A)
+    vals = np.clip(vals.real, 0, None)
+
+    return float(np.sum(np.sqrt(vals))**2)
+
+def fidelity_to_gibbs(rho, N, J, h, beta):
+    sigma, _ = get_gibbs(N, J, h, beta)
+
+    return fidelity(rho, sigma)
+
+
+
 def exp_model(x, a, b, c):
     return a + b * np.exp(c * x)
 

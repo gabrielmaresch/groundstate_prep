@@ -43,6 +43,7 @@ def parse_args():
     )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
+    parser.add_argument("--save-as-nr", type=int, default=-1)
     return parser.parse_args()
 
 
@@ -170,8 +171,9 @@ def main():
     method = args.method
     save_channel = args.save_channel
     workers = args.workers
+    save_as_nr = args.save_as_nr
 
-    beta_values = np.linspace(args.beta_min, args.beta_max, args.beta_points)
+    beta_values = np.geomspace(args.beta_min, args.beta_max, args.beta_points)
 
     print("Sweep over beta:", beta_values)
 
@@ -179,8 +181,13 @@ def main():
 
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    snapshot_number = next_running_number(data_dir, "npz")
+    if save_as_nr == -1:
+        snapshot_number = next_running_number(data_dir, "npz")
+    else:
+        snapshot_number = save_as_nr
+
     snapshot_path = data_dir / f"superoperator_N{N}_beta_sweep_ASC{snapshot_number}.npz"
+    print("File will be saved as", snapshot_path)
 
     sweep_data = compute_sweep(
         N=N,
