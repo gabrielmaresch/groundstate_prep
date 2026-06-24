@@ -30,6 +30,11 @@ def parse_args():
     parser.add_argument("--beta_max", type=float, default=2.0)
     parser.add_argument("--beta_points", type=int, default=20)
     parser.add_argument(
+        "--normalize_Jh",
+        help="Whether to normalize the Hamiltonian.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--save-channel",
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
@@ -76,12 +81,19 @@ def compute_single_beta(
     h,
     eps_fit,
     method,
+    normalize_Jh,
     save_channel,
 ):
     print(f"Computing beta={beta:.4g}", flush=True)
 
+    J_hot, h_hot = J, h
+    if normalize_Jh:
+        H_norm = N * np.sqrt(J_hot**2 + h_hot**2)
+        J_hot = J_hot / H_norm
+        h_hot = h_hot / H_norm
+
     op_set = construct_opset(N, type="XZ")
-    h_sys = transverse_ising_hamiltonian(J, h, N)
+    h_sys = transverse_ising_hamiltonian(J_hot, h_hot, N)
     channel, channel_params = get_averaged_channel(
         N,
         tau,
@@ -97,9 +109,9 @@ def compute_single_beta(
     eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
         channel,
         beta,
-        [N, J, h],
+        [N, J_hot, h_hot],
     )
-    _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
+    _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
     print(f"iterations for eps={eps_fit:.4g}: {mixing_time}", flush=True)
 
@@ -134,6 +146,7 @@ def compute_sweep(
     h,
     eps_fit,
     method,
+    normalize_Jh,
     beta_values,
     save_channel,
     workers,
@@ -150,6 +163,7 @@ def compute_sweep(
         h=h,
         eps_fit=eps_fit,
         method=method,
+        normalize_Jh=normalize_Jh,
         save_channel=save_channel,
     )
     with ProcessPoolExecutor(max_workers=workers) as executor:
@@ -169,6 +183,7 @@ def main():
     h = args.h
     eps_fit = args.eps_fit
     method = args.method
+    normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
     workers = args.workers
     save_as_nr = args.save_as_nr
@@ -200,6 +215,7 @@ def main():
         h=h,
         eps_fit=eps_fit,
         method=method,
+        normalize_Jh=normalize_Jh,
         beta_values=beta_values,
         save_channel=save_channel,
         workers=workers,
