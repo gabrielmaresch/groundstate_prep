@@ -10,6 +10,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel,
+    get_mixing_time,
     get_superoperator_spectral_data,
     next_running_number,
 )
@@ -25,17 +26,17 @@ def parse_args():
     parser.add_argument("--T", type=float, default=25.0)
     parser.add_argument("--alpha", type=float, default=0.75)
     parser.add_argument("--sigma", type=float, default=2.0)
-    parser.add_argument("--omega_max", type=float, default=20.0)
+    parser.add_argument("--omega_max", type=float, default=8.0)
     parser.add_argument("--tau", type=float, default=0.25)
     parser.add_argument("--J", type=float, default=1.0)
-    parser.add_argument("--h", type=float, default=2.0)
+    parser.add_argument("--h", type=float, default=1.2)
     parser.add_argument(
         "--normalize_Jh",
         help="Whether to normalize the Hamiltonian.",
         action="store_true",
     )
     parser.add_argument("--beta-min", dest="beta_min", type=float, default=0.5)
-    parser.add_argument("--beta-max", dest="beta_max", type=float, default=5.0)
+    parser.add_argument("--beta-max", dest="beta_max", type=float, default=20.0)
     parser.add_argument("--beta-points", dest="beta_points", type=int, default=10)
     parser.add_argument("--load", action="store_true")
     parser.add_argument("--npz-number", type=int, default=None)
@@ -61,6 +62,7 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
         num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
+        get_mixingtime=np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data]),
     )
     temp_path.replace(snapshot_path)
 
@@ -108,6 +110,7 @@ def precompute_sweep(
             channel, beta, [N, J_hot, h_hot]
         )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
+        mixing_time = get_mixing_time(channel, fixedpoint)
 
         sweep_data.append(
             {
@@ -120,6 +123,7 @@ def precompute_sweep(
                     "Delta_th": float(Delta_th),
                     "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
+                    "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
                 },
             }
         )
@@ -295,6 +299,7 @@ def main():
         saved = np.load(matches[0])
         beta_grid = saved["beta"]
         channels = saved["channels"] if "channels" in saved.files else np.array([])
+        mixing_times = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
         sweep_data = [
             {
                 "beta": beta,
@@ -305,9 +310,10 @@ def main():
                     "Delta_th": float(Delta_th),
                     "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
+                    "get_mixingtime": np.nan if mix_time is None else float(mix_time),
                 },
             }
-            for beta, channel, eigvals, Delta2, Delta_th, num_closer, trace_distance in zip(
+            for beta, channel, eigvals, Delta2, Delta_th, num_closer, trace_distance, mix_time in zip(
                 saved["beta"],
                 channels if channels.size else [None] * len(saved["beta"]),
                 saved["eigvals"],
@@ -315,6 +321,7 @@ def main():
                 saved["Delta_th"],
                 saved["num_closer"],
                 saved["trace_distance"],
+                mixing_times if mixing_times is not None else [np.nan] * len(saved["beta"]),
             )
         ]
     else:
