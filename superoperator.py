@@ -88,11 +88,21 @@ def get_superoperator_matrix_kraus(num_system_qubits, U_blocks, beta, omega):
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
     p = [np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z]
 
-    S = np.zeros((d_sys**2,d_sys**2,), dtype = np.complex64)  
+    S = np.zeros((d_sys**2, d_sys**2), dtype=np.complex64)
+
+    # for a in range(2):
+    #     for b in range(2):
+    #         S += p[b] * np.kron(U_blocks[a][b], np.conj(U_blocks[a][b]))
 
     for a in range(2):
         for b in range(2):
-            S += p[b]*np.kron(U_blocks[a][b],np.conj(U_blocks[a][b])) 
+            A = U_blocks[a][b]
+            A_conj = np.conj(A)
+            for i in range(d_sys):
+                row = slice(i * d_sys, (i + 1) * d_sys)
+                for j in range(d_sys):
+                    col = slice(j * d_sys, (j + 1) * d_sys)
+                    S[row, col] += p[b] * A[i, j] * A_conj
 
     return S
 
@@ -101,19 +111,16 @@ def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
     d_choi = d_sys*d_sys
 
-    choi  = np.zeros((d_choi, d_choi), dtype = np.complex64)
+    S = np.zeros((d_choi, d_choi), dtype=np.complex64)
 
     for i in range(d_sys):
         for j in range(d_sys):
             sigma_ij = get_choi_element(i, j, num_system_qubits, U, omega, beta)
             for a in range(d_sys):
                 for b in range(d_sys):
-                    row = i * d_sys + a
-                    col = j * d_sys + b
-                    choi[row, col] = sigma_ij[a, b]
-
-    J4 = choi.reshape(d_sys, d_sys, d_sys, d_sys)          # indices: i, a, j, b
-    S = J4.transpose(1, 3, 0, 2).reshape(d_choi, d_choi)   # indices: a, b, i, j
+                    row = a * d_sys + b
+                    col = i * d_sys + j
+                    S[row, col] = sigma_ij[a, b]
 
     return S
 
