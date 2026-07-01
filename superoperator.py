@@ -55,11 +55,11 @@ def U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, a
 def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
     circuit = U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha)
     qscript = qml.tape.make_qscript(circuit)()
-    return qml.matrix(qscript, wire_order=range(num_system_qubits + 1))
+    return qml.matrix(qscript, wire_order=range(num_system_qubits + 1)).astype(np.complex64)
 
 def get_choi_element(i,j, num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
-    rho_sys  = np.zeros((d_sys, d_sys), dtype=complex)
+    rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex64)
     rho_sys[i,j]  = 1 
 
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
@@ -88,7 +88,7 @@ def get_superoperator_matrix_kraus(num_system_qubits, U_blocks, beta, omega):
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
     p = [np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z]
 
-    S = np.zeros((d_sys**2,d_sys**2,), dtype = complex)  
+    S = np.zeros((d_sys**2,d_sys**2,), dtype = np.complex64)  
 
     for a in range(2):
         for b in range(2):
@@ -101,7 +101,7 @@ def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
     d_choi = d_sys*d_sys
 
-    choi  = np.zeros((d_choi, d_choi), dtype=complex)
+    choi  = np.zeros((d_choi, d_choi), dtype = np.complex64)
 
     for i in range(d_sys):
         for j in range(d_sys):
@@ -126,7 +126,7 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
         delta_omega = omega_max / n_omega
         omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
     
-    S = np.zeros((2**(2*N),2**(2*N)), dtype = complex)
+    S = np.zeros((2**(2*N),2**(2*N)), dtype = np.complex64)
 
     for op in op_set:
         for omega in omegas:
@@ -146,10 +146,15 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
     return S, S_params
 
 def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False):
+    S = np.asarray(S, dtype=np.complex64)
+
     if not full_spectrum:
         eigvals, eigvecs = eigs(S, k=8, sigma = 1.0)
     else:
         eigvals, eigvecs = eig(S)
+
+    eigvals = eigvals.astype(np.complex64)
+    eigvecs = eigvecs.astype(np.complex64)
     
     N, J, h = TFIM_params
     thermal, _ = get_gibbs(N, J, h, beta)
@@ -290,7 +295,7 @@ def get_mixing_time(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
-    rho = np.zeros((d_sys, d_sys), dtype = complex)
+    rho = np.zeros((d_sys, d_sys), dtype = np.complex64)
     rho[0,0] = 1
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((d_sys, d_sys)))
     dist = [trace_distance(rho, fixedpoint)]
@@ -352,7 +357,7 @@ if __name__ == "__main__":
     print('number of iterations from fit:', get_mixing_time(S, fixedpoint))
 
     # initialize rho
-    rho = np.zeros((2**N, 2**N), dtype = complex)
+    rho = np.zeros((2**N, 2**N), dtype = np.complex64)
     rho[0,0] = 1
 
     eps = 1e-2

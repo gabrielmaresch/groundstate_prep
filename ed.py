@@ -17,10 +17,10 @@ def transverse_ising_hamiltonian(N: int, J: float, h: float):
     if N <= 0:
         raise ValueError("N must be positive")
 
-    H = np.zeros((2**N, 2**N), dtype=float)
-    X = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=float)
-    Z = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=float)
-    I = np.array([[1.0, 0.0], [0.0, 1.0]], dtype=float)
+    H = np.zeros((2**N, 2**N), dtype=np.complex64)
+    X = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex64)
+    Z = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex64)
+    I = np.array([[1.0, 0.0], [0.0, 1.0]], dtype=np.complex64)
 
     for i in range(N):
         # Sz-Sz term with periodic boundary conditions
@@ -39,23 +39,23 @@ def transverse_ising_hamiltonian(N: int, J: float, h: float):
 
 def thermal_state(H: np.ndarray, beta: float):
     """Return the Gibbs state and thermal energy for a Hermitian matrix."""
-    H = np.asarray(H)
+    H = np.asarray(H, dtype=np.complex64)
     if H.shape[0] != H.shape[1]:
         raise ValueError("H must be square")
 
     evals, evecs = np.linalg.eigh(H)
     beta_exps = np.exp(-beta * evals)
     Z = np.sum(beta_exps)
-    weights = beta_exps / Z
-    gibbs = (evecs * weights) @ evecs.conj().T
-    energy = np.sum(evals * beta_exps) / Z
+    weights = np.asarray(beta_exps / Z, dtype=np.complex64)
+    gibbs = ((evecs.astype(np.complex64) * weights) @ evecs.conj().T).astype(np.complex64)
+    energy = np.complex64(np.sum(evals * beta_exps) / Z)
     return gibbs, energy
 
 
 def thermal_expectation_value(H: np.ndarray, A: np.ndarray, beta: float):
     """Return the thermal expectation value of A."""
-    H = np.asarray(H)
-    A = np.asarray(A)
+    H = np.asarray(H, dtype=np.complex64)
+    A = np.asarray(A, dtype=np.complex64)
     if H.shape[0] != H.shape[1]:
         raise ValueError("H must be square")
 
@@ -63,33 +63,33 @@ def thermal_expectation_value(H: np.ndarray, A: np.ndarray, beta: float):
     beta_exps = np.exp(-beta * evals)
     Z = np.sum(beta_exps)
 
-    expectation = 0.0
+    expectation = np.complex64(0.0)
     for i in range(H.shape[0]):
         ket = evecs[:, i]
-        expectation += (beta_exps[i] / Z) * (ket.conj().T @ A @ ket)
-    return expectation
+        expectation += np.complex64(beta_exps[i] / Z) * np.complex64(ket.conj().T @ A @ ket)
+    return np.complex64(expectation)
 
 
 def ground_state(H: np.ndarray):
     """Return the ground-state vector and energy."""
-    H = np.asarray(H)
+    H = np.asarray(H, dtype=np.complex64)
     if H.shape[0] != H.shape[1]:
         raise ValueError("H must be square")
 
     evals, evecs = np.linalg.eigh(H)
-    return evecs[:, 0], evals[0]
+    return evecs[:, 0].astype(np.complex64), np.complex64(evals[0])
 
 
 def ground_state_expectation_value(H: np.ndarray, A: np.ndarray):
     """Return the ground-state expectation value of A."""
-    H = np.asarray(H)
-    A = np.asarray(A)
+    H = np.asarray(H, dtype=np.complex64)
+    A = np.asarray(A, dtype=np.complex64)
     if H.shape[0] != H.shape[1]:
         raise ValueError("H must be square")
 
     _, evecs = np.linalg.eigh(H)
-    gs = evecs[:, 0]
-    return gs.conj().T @ A @ gs
+    gs = evecs[:, 0].astype(np.complex64)
+    return np.complex64(gs.conj().T @ A @ gs)
 
 
 def get_transverse_ising_groundstate(N: int, J: float, h: float):
@@ -106,7 +106,7 @@ def get_transverse_ising_gibbsstate(N: int, J: float, h: float, beta: float):
 
 def get_spectrum(H: np.ndarray):
     """Return the eigenvalues of H in ascending order."""
-    H = np.asarray(H)
+    H = np.asarray(H, dtype=np.complex64)
     if H.shape[0] != H.shape[1]:
         raise ValueError("H must be square")
     return np.linalg.eigvalsh(H)
