@@ -39,13 +39,6 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
-    parser.add_argument(
-        "--method",
-        type=str,
-        default="choi",
-        choices=("choi", "kraus"),
-        help="Channel construction method.",
-    )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--save-as-nr", type=int, default=-1)
@@ -80,7 +73,6 @@ def compute_single_beta(
     J,
     h,
     eps_fit,
-    method,
     normalize_Jh,
     save_channel,
 ):
@@ -104,7 +96,6 @@ def compute_single_beta(
         h_sys,
         alpha,
         beta,
-        method=method,
     )
     eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
         channel,
@@ -145,7 +136,6 @@ def compute_sweep(
     J,
     h,
     eps_fit,
-    method,
     normalize_Jh,
     beta_values,
     save_channel,
@@ -162,7 +152,6 @@ def compute_sweep(
         J=J,
         h=h,
         eps_fit=eps_fit,
-        method=method,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
     )
@@ -182,7 +171,6 @@ def main():
     J = args.J
     h = args.h
     eps_fit = args.eps_fit
-    method = args.method
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
     workers = args.workers
@@ -214,7 +202,6 @@ def main():
         J=J,
         h=h,
         eps_fit=eps_fit,
-        method=method,
         normalize_Jh=normalize_Jh,
         beta_values=beta_values,
         save_channel=save_channel,
