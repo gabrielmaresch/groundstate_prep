@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
-    get_averaged_channel,
+    get_averaged_channel_matrix,
     get_mixing_time,
     get_superoperator_spectral_data,
     next_running_number,
@@ -98,7 +98,7 @@ def compute_sweep(
             J_hot = J_hot / H_norm
             h_hot = h_hot / H_norm
         h_sys = transverse_ising_hamiltonian(J_hot, h_hot, N)
-        channel, channel_params = get_averaged_channel(
+        channel, channel_params = get_averaged_channel_matrix(
             N,
             tau,
             T,

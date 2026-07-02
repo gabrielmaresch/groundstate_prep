@@ -13,7 +13,7 @@ from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, co
 from path_analysis import trace_distance, extract_asymptotics
 
 from scipy.linalg import eig
-from scipy.sparse.linalg import eigs
+from scipy.sparse.linalg import eigs, LinearOperator
 
 
 ################## Helper function for naming logic ###########
@@ -106,6 +106,30 @@ def get_superoperator_matrix_kraus(num_system_qubits, U_blocks, beta, omega):
 
     return S
 
+def superoperator_as_linop(num_system_qubits, U, omega, beta):
+    # this works only with kraus method
+    d_sys = 2 ** num_system_qubits
+    d_so = d_sys * d_sys
+
+    Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
+    p = np.array([np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z], dtype=np.complex64)
+
+    U_blocks = get_kraus_blocks(num_system_qubits, U)
+
+    def matvec(vec):
+        rho = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+
+        for b in range(2):
+            for a in range(2):
+                A = U_blocks[a][b]
+                out += p[b] * (A @ rho @ A.conj().T)
+        
+        return out.reshape(-1)
+
+    return LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+
+
 
 def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
@@ -126,7 +150,7 @@ def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
 
 
 
-def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'choi'):
+def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'choi'):
     
     rule, n_omega =  omega_quadrature
     if rule == 'midpoint':
@@ -152,11 +176,45 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
 
     return S, S_params
 
+def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10)):
+    
+    rule, n_omega =  omega_quadrature
+    if rule == 'midpoint':
+        delta_omega = omega_max / n_omega
+        omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
+
+    # precompute once — circuit simulation happens here, not inside matvec
+    linops = [
+        superoperator_as_linop(N, get_U_matrix(N, tau, T, sigma, op, omega, H_sys, alpha), omega, beta)
+        for op in op_set
+        for omega in omegas
+    ]
+
+    averages = len(op_set)*n_omega
+    d_sys = 2 ** N
+    d_so = d_sys * d_sys
+    
+    def matvec(vec):
+        out = np.zeros(d_so, dtype=np.complex64)
+        for linop in linops:
+                out += linop @ vec
+               
+        return (out / averages)
+
+    S = LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+    S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
+    return S, S_params
+
+
 def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False):
-    S = np.asarray(S, dtype=np.complex64)
+
+    #doublecheck
+    full_spectrum = full_spectrum and not isinstance(S, LinearOperator)
+
 
     if not full_spectrum:
-        eigvals, eigvecs = eigs(S, k=8, sigma = 1.0)
+        k = min(8, S.shape[0]-1)
+        eigvals, eigvecs = eigs(S, k=k, sigma = 1.0)
     else:
         eigvals, eigvecs = eig(S)
 
@@ -349,7 +407,7 @@ if __name__ == "__main__":
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
-    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'kraus')
+    S, S_params = get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'kraus')
     eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
     
     correct_fp, test_state, dist_fp  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])

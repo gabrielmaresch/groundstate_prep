@@ -9,7 +9,7 @@ from matplotlib.widgets import Slider
 from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
-    get_averaged_channel,
+    get_averaged_channel_matrix,
     get_mixing_time,
     get_superoperator_spectral_data,
     next_running_number,
@@ -94,7 +94,7 @@ def precompute_sweep(
 
     for beta in beta_values:
         print(f"Computing beta={beta:.4g}")
-        channel, channel_params = get_averaged_channel(
+        channel, channel_params = get_averaged_channel_matrix(
             N,
             tau,
             T,
