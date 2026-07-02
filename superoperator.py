@@ -211,12 +211,20 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
     #doublecheck
     full_spectrum = full_spectrum and not isinstance(S, LinearOperator)
 
-
-    if not full_spectrum:
-        k = min(8, S.shape[0]-1)
-        eigvals, eigvecs = eigs(S, k=k, sigma = 1.0)
-    else:
-        eigvals, eigvecs = eig(S)
+    # to hande nan exceptions when using parallel workers ##
+    try:
+        if not full_spectrum:
+            k = min(8, S.shape[0]-1)
+            eigvals, eigvecs = eigs(S, k=k, which='LM')
+        else:
+            eigvals, eigvecs = eig(S)
+    except ArpackNoConvergence:
+        # Return dummy values instead of crashing worker process
+        d_so = S.shape[0]
+        eigvals = np.array([np.nan] * 8, dtype=np.complex64)
+        eigvecs = np.zeros((d_so, 8), dtype=np.complex64)
+        return eigvals, eigvecs, np.nan, np.nan, np.nan
+    
 
     eigvals = eigvals.astype(np.complex64)
     eigvecs = eigvecs.astype(np.complex64)
@@ -263,7 +271,7 @@ def normalize_to_densitymatrix(A):
 def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
     N, J, h = TFIM_params
     thermal, energy = get_gibbs(N, J, h, beta)
-    thermal, energy = np.array(thermal), float(energy)
+    thermal, energy = np.array(thermal), energy
     
     test_state = normalize_to_densitymatrix(test_vector.reshape((2**N, 2**N)))
     dist = trace_distance(test_state, thermal)
