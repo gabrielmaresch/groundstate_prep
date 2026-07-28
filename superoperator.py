@@ -13,7 +13,7 @@ from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, co
 from path_analysis import trace_distance, extract_asymptotics
 
 from scipy.linalg import eig
-from scipy.sparse.linalg import eigs, LinearOperator
+from scipy.sparse.linalg import eigs, LinearOperator, ArpackNoConvergence
 
 
 ################## Helper function for naming logic ###########
@@ -214,16 +214,17 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
     # to hande nan exceptions when using parallel workers ##
     try:
         if not full_spectrum:
-            k = min(8, S.shape[0]-1)
+            k = min(4, S.shape[0]-1)
             eigvals, eigvecs = eigs(S, k=k, which='LM')
         else:
             eigvals, eigvecs = eig(S)
     except ArpackNoConvergence:
         # Return dummy values instead of crashing worker process
         d_so = S.shape[0]
-        eigvals = np.array([np.nan] * 8, dtype=np.complex64)
-        eigvecs = np.zeros((d_so, 8), dtype=np.complex64)
-        return eigvals, eigvecs, np.nan, np.nan, np.nan
+        n_eigvals = min(4, d_so - 1)
+        eigvals = np.full(n_eigvals, np.nan, dtype=np.complex64)
+        fixedpoint = np.full(d_so, np.nan, dtype=np.complex64)
+        return eigvals, fixedpoint, np.nan, np.nan, np.nan
     
 
     eigvals = eigvals.astype(np.complex64)

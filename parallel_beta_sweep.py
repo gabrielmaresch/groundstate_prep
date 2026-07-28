@@ -45,6 +45,15 @@ def parse_args():
     return parser.parse_args()
 
 
+def validate_save_channel_size(N, save_channel, *, max_dense_dim=4096):
+    d_so = 2 ** (2 * N)
+    if save_channel and d_so > max_dense_dim:
+        raise ValueError(
+            f"--save-channel would require a dense {d_so}x{d_so} channel. "
+            f"Refusing because max_dense_dim={max_dense_dim}."
+        )
+
+
 def save_sweep(sweep_data, snapshot_path, save_channel):
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
     np.savez_compressed(
@@ -173,6 +182,7 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
+    validate_save_channel_size(N, save_channel)
     workers = args.workers
     save_as_nr = args.save_as_nr
 
