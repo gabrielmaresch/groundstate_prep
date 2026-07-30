@@ -10,8 +10,10 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
-from analytics import trace_distance, extract_asymptotics
+from path_analysis import trace_distance, extract_asymptotics
+
 from scipy.linalg import eig
+from scipy.sparse.linalg import eigs, LinearOperator, ArpackNoConvergence
 
 
 ################## Helper function for naming logic ###########
@@ -25,14 +27,11 @@ def next_running_number(folder, ext="png"):
 
 
 ##################
-from juliacall import Main as jl
+from ed import get_transverse_ising_gibbsstate
 
-local_path = Path(__file__).resolve().parent
-file_name = "ed.jl" 
-jl.include(str(local_path/file_name))
 
 def get_gibbs(N, J, h, beta):
-    gibbs_state, energy = jl.get_transverse_ising_gibbsstate(N, J, h, beta)
+    gibbs_state, energy = get_transverse_ising_gibbsstate(N, J, h, beta)
     return gibbs_state, energy
 ####################
 
@@ -56,11 +55,11 @@ def U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, a
 def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
     circuit = U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha)
     qscript = qml.tape.make_qscript(circuit)()
-    return qml.matrix(qscript, wire_order=range(num_system_qubits + 1))
+    return qml.matrix(qscript, wire_order=range(num_system_qubits + 1)).astype(np.complex64)
 
 def get_choi_element(i,j, num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
-    rho_sys  = np.zeros((d_sys, d_sys), dtype=complex)
+    rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex64)
     rho_sys[i,j]  = 1 
 
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
@@ -89,45 +88,76 @@ def get_superoperator_matrix_kraus(num_system_qubits, U_blocks, beta, omega):
     Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
     p = [np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z]
 
-    S = np.zeros((d_sys**2,d_sys**2,), dtype = complex)  
+    S = np.zeros((d_sys**2, d_sys**2), dtype=np.complex64)
+
+    # for a in range(2):
+    #     for b in range(2):
+    #         S += p[b] * np.kron(U_blocks[a][b], np.conj(U_blocks[a][b]))
 
     for a in range(2):
         for b in range(2):
-            S += p[b]*np.kron(U_blocks[a][b],np.conj(U_blocks[a][b])) 
+            A = U_blocks[a][b]
+            A_conj = np.conj(A)
+            for i in range(d_sys):
+                row = slice(i * d_sys, (i + 1) * d_sys)
+                for j in range(d_sys):
+                    col = slice(j * d_sys, (j + 1) * d_sys)
+                    S[row, col] += p[b] * A[i, j] * A_conj
 
     return S
+
+def superoperator_as_linop(num_system_qubits, U, omega, beta):
+    # this works only with kraus method
+    d_sys = 2 ** num_system_qubits
+    d_so = d_sys * d_sys
+
+    Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
+    p = np.array([np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z], dtype=np.complex64)
+
+    U_blocks = get_kraus_blocks(num_system_qubits, U)
+
+    def matvec(vec):
+        rho = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+
+        for b in range(2):
+            for a in range(2):
+                A = U_blocks[a][b]
+                out += p[b] * (A @ rho @ A.conj().T)
+        
+        return out.reshape(-1)
+
+    return LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+
 
 
 def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
     d_choi = d_sys*d_sys
 
-    choi  = np.zeros((d_choi, d_choi), dtype=complex)
+    S = np.zeros((d_choi, d_choi), dtype=np.complex64)
 
     for i in range(d_sys):
         for j in range(d_sys):
             sigma_ij = get_choi_element(i, j, num_system_qubits, U, omega, beta)
             for a in range(d_sys):
                 for b in range(d_sys):
-                    row = i * d_sys + a
-                    col = j * d_sys + b
-                    choi[row, col] = sigma_ij[a, b]
-
-    J4 = choi.reshape(d_sys, d_sys, d_sys, d_sys)          # indices: i, a, j, b
-    S = J4.transpose(1, 3, 0, 2).reshape(d_choi, d_choi)   # indices: a, b, i, j
+                    row = a * d_sys + b
+                    col = i * d_sys + j
+                    S[row, col] = sigma_ij[a, b]
 
     return S
 
 
 
-def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'choi'):
+def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'choi'):
     
     rule, n_omega =  omega_quadrature
     if rule == 'midpoint':
         delta_omega = omega_max / n_omega
         omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
     
-    S = np.zeros((2**(2*N),2**(2*N)), dtype = complex)
+    S = np.zeros((2**(2*N),2**(2*N)), dtype = np.complex64)
 
     for op in op_set:
         for omega in omegas:
@@ -146,8 +176,60 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
 
     return S, S_params
 
-def get_superoperator_spectral_data(S, beta, TFIM_params):
-    eigvals, eigvecs = eig(S)
+def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10)):
+    
+    rule, n_omega =  omega_quadrature
+    if rule == 'midpoint':
+        delta_omega = omega_max / n_omega
+        omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
+
+    # precompute once — circuit simulation happens here, not inside matvec
+    linops = [
+        superoperator_as_linop(N, get_U_matrix(N, tau, T, sigma, op, omega, H_sys, alpha), omega, beta)
+        for op in op_set
+        for omega in omegas
+    ]
+
+    averages = len(op_set)*n_omega
+    d_sys = 2 ** N
+    d_so = d_sys * d_sys
+    
+    def matvec(vec):
+        out = np.zeros(d_so, dtype=np.complex64)
+        for linop in linops:
+                out += linop @ vec
+               
+        return (out / averages)
+
+    S = LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+    S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
+    return S, S_params
+
+
+def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False):
+
+    #doublecheck
+    full_spectrum = full_spectrum and not isinstance(S, LinearOperator)
+
+    # to hande nan exceptions when using parallel workers ##
+    try:
+        if not full_spectrum:
+            k = min(4, S.shape[0]-1)
+            eigvals, eigvecs = eigs(S, k=k, which='LM')
+        else:
+            eigvals, eigvecs = eig(S)
+    except ArpackNoConvergence:
+        # Return dummy values instead of crashing worker process
+        d_so = S.shape[0]
+        n_eigvals = min(4, d_so - 1)
+        eigvals = np.full(n_eigvals, np.nan, dtype=np.complex64)
+        fixedpoint = np.full(d_so, np.nan, dtype=np.complex64)
+        return eigvals, fixedpoint, np.nan, np.nan, np.nan
+    
+
+    eigvals = eigvals.astype(np.complex64)
+    eigvecs = eigvecs.astype(np.complex64)
+    
     N, J, h = TFIM_params
     thermal, _ = get_gibbs(N, J, h, beta)
     thermal = np.array(thermal)
@@ -190,7 +272,7 @@ def normalize_to_densitymatrix(A):
 def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
     N, J, h = TFIM_params
     thermal, energy = get_gibbs(N, J, h, beta)
-    thermal, energy = np.array(thermal), float(energy)
+    thermal, energy = np.array(thermal), energy
     
     test_state = normalize_to_densitymatrix(test_vector.reshape((2**N, 2**N)))
     dist = trace_distance(test_state, thermal)
@@ -287,7 +369,7 @@ def get_mixing_time(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
-    rho = np.zeros((d_sys, d_sys), dtype = complex)
+    rho = np.zeros((d_sys, d_sys), dtype = np.complex64)
     rho[0,0] = 1
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((d_sys, d_sys)))
     dist = [trace_distance(rho, fixedpoint)]
@@ -329,12 +411,12 @@ if __name__ == "__main__":
     omega_max = 20.
     beta = 1.
     tau = 0.1
-    op_set = construct_opset(N, type="XZ")
-    J, h = 1., 0.7
+    op_set = construct_opset(N, type="XYZ")
+    J, h = 1., 0.2
     H_sys  = transverse_ising_hamiltonian(J, h, N)
 
 
-    S, S_params = get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'kraus')
+    S, S_params = get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'kraus')
     eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
     
     correct_fp, test_state, dist_fp  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
@@ -349,7 +431,7 @@ if __name__ == "__main__":
     print('number of iterations from fit:', get_mixing_time(S, fixedpoint))
 
     # initialize rho
-    rho = np.zeros((2**N, 2**N), dtype = complex)
+    rho = np.zeros((2**N, 2**N), dtype = np.complex64)
     rho[0,0] = 1
 
     eps = 1e-2

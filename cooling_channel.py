@@ -40,13 +40,15 @@ def construct_opset(num_qubits:int, *, type:str = "XX2", output:bool = False):
     with qml.QueuingManager.stop_recording():
         op_set = []
 
-        if type == "XX2":
+        if type == "XZ2":
             for i in range(num_qubits):
                 for j in range(i+1, num_qubits):
                     if output:
                         print(i,j)
                     op_set.append(qml.PauliX(i)@qml.PauliX(j))
                     op_set.append(-(qml.PauliX(i)@qml.PauliX(j)))
+                    op_set.append(qml.PauliZ(i)@qml.PauliZ(j))
+                    op_set.append(-(qml.PauliZ(i)@qml.PauliZ(j)))
 
         elif type == "XZ":
             for i in range(num_qubits):
@@ -132,10 +134,10 @@ def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:boo
     assert np.isclose(p0+p1, 1)
 
     if mixed:
-        K0 = np.sqrt(p0) * np.array([[1, 0], [0, 0]], dtype=complex)
-        K1 = np.sqrt(p0) * np.array([[0, 1], [0, 0]], dtype=complex)
-        K2 = np.sqrt(p1) * np.array([[0, 0], [1, 0]], dtype=complex)
-        K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype=complex)
+        K0 = np.sqrt(p0) * np.array([[1, 0], [0, 0]], dtype = np.complex64)
+        K1 = np.sqrt(p0) * np.array([[0, 1], [0, 0]], dtype = np.complex64)
+        K2 = np.sqrt(p1) * np.array([[0, 0], [1, 0]], dtype = np.complex64)
+        K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype = np.complex64)
         qml.QubitChannel([K0, K1, K2, K3], wires=wire)
     else:
         # exp(beta Z) is diagonal, so we sample as classical mixture
@@ -271,9 +273,7 @@ def create_circuit_diagram(qc_name:str, path, file_name:str = "", *, num_timeste
     fig.savefig(path+file_name, dpi=200)
     plt.close(fig)
 
-if __name__ == "__main__":
-
-
+def main():
     # generic parameters for testing
     output = True
     N = 3
@@ -331,3 +331,5 @@ if __name__ == "__main__":
         local_path = Path(__file__).resolve().parent
         create_circuit_diagram(circuit, local_path, num_timesteps=num_timesteps, tau=tau, mixed=mixed)
     
+if __name__ == "__main__":
+    main()
