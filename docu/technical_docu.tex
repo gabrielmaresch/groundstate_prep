@@ -78,10 +78,127 @@ Algorithms for State Preparation}
 \begin{document}
 
 \maketitle
-
+\begin{abstract}
 In Ding et.al. a cooling protocol is proposed and realized as an averages quantum channel. The convergence of power iterions of this channel to a thermal state resp. the groundstate is shown (end-to-end guarantees). The dynamics of this cooling channel are analyzed by relating them to a Lindbladian approximation. Theorems in Ding show that there exists parameter choices that (1) the thermal state is a fixed point of the Lindbladian and (2) the Lindbladian approximates the cooling channel arbitrarily well thus implying that also the cooling channel has a thermal fixed point. The actual parameters however turn out to be both hard to find (the have to be sent through a self-consistency loop) and to suffer from the precondition (2) which effectively forces the coupling to be weak. We show evidence that the channels cools to a thermal state also in a non-weak regime for which the validity of Lindbladian approximation is not a given, the advantage being that far fewer iterations are necessary than in the weak-coupling regime. While Ding et al give guarantees which necessarily have to include the worst case, we present evidence that the average or ideal case is far better than the guarantees.
+\end{abstract}
+
+\section*{Introduction}
+
+Quantum mechanics connects with the tangible physical world by predicting  numerical values of actual measured quantities, i.e. by providing expectation values $\langle \mathcal{O} \rangle$ for the observables of interest. These expectation values only make sense once that state of the system, either pure or mixed is fixed. A well known result from statistical mechanics is, that for systems that are in thermal equilibrium, the states under consideration are precisely the Gibbs states $\rho_{\beta}$ in the case of finite temperature or the ground-state $\ket{\Psi_0}$ in the case of zero-temperature. 
+
+In particular, the temporal resp. retarded Greens-function of a many body Hamiltonian $H$ at a given inverse temperature $\beta$ is the expectation value for the observable $\mathcal{O}_{\rm temp}= -i \mathcal{T} c_i(t) c_j^{\dagger}(t') $ resp. $\mathcal{O}_{\rm ret}=-i \theta(t-t_j)\{c_i(t), c_j^{\dagger}(t')\}$. Once the (site dependent) Greens-function $G_{i,j}^T(t-t')$ resp. $G_{i,j}^R(t-t')$ is known, several important one-particle properties can be effectively computed, e.g.
+\begin{description}
+    \item[Spectral function:] $A_{ij}(\omega)=\frac{1}{\pi} {\rm Im } G_{i,j}^R(\omega)$ 
+    \item[Density of states:] $\rho(\omega) = -\frac{1}{\pi N}   \tr {\rm Im }  G_R(\omega)$
+    \item[Particle density:] $n_i = - i G_{ii}^T(0^-)$
+    \item[Self energy:] $\Sigma = G_0^{-1}-G^{-1}$.
+\end{description}
+
+One way to obtain thermal states is not by using some truncation or approximation scheme, but to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a system has the advantage of being easily implementable on a quantum computer or quantum simulator, and allow for running times that often are merely polynomial in the system's parameters. 
+
+The total system's Hamiltonian can be split in three parts:
+\begin{align}\label{hamiltonian_parts}
+    H_{\rm cooling} = H_0 + H_{\rm int} + H_{\rm bath} 
+\end{align}
+and a cooling protocol would typically look like
+\begin{align}\label{qu_channel}
+\ket{\phi}=\ket{\phi_0}\otimes\ket{\phi_b} \longrightarrow e^{-\frac{t}{\hbar} H}\ket{\phi}  =: \ket{\psi } \longrightarrow \Tr_{\mathcal H_{\rm bath}} \ket{\psi}  =: \ket{\phi_1},
+\end{align}
+which corresponds to the following steps:
+\begin{enumerate}
+    \item Prepare both the systems that is to be cooled and the bath in fiduciary states $\ket{\phi_0}$ and $\ket{\phi_b}$.
+    \item  Let the full system evolve for some time $t>0$.
+    \item Discard the bath-subsystem.
+\end{enumerate}
+Note, that the last step will in general produce a density matrix rather than a pure state. Thus, if we think of repeated application of this scheme, all involved states will be non-pure. The restricted action of \autoref{qu_channel} on the unperturbed state-space $\mathcal{H}_0$ is usually called a quantum channel and exhibits richer dynamics than a purely unitary evolution. 
+
+In this project work we report on the implementation of the cooling scheme proposed in \cite{} which follows along the lines of \eqref{} and validate it against a known system Hamiltonian, the TFIM (transverse field Ising model) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state $\rho_{\beta}$ may explicitly be calculated. Then $H_0 = H_{\rm TFIM}^{(h,J)}$ is a $2^N \times 2^N$ matrix. The bath can be taken to be a generic two-level system at inverse temperature $\beta$, $H_{\rm bath}^{\beta}$ a $2\times 2$ matrix and $H_{\rm}^{(\alpha, \sigma, f, g)}$ is  a block off-diagonal $2^{N+1} \times 2^{N+1}$ matrix that couples the two systems. 
 
 
+\section{Cooling as quantum operation}
+The two-level system utilized as bath is fully described by its eigenenergies: here they are taken as $\pm \tfrac{\omega}{2}$, where $\omega>0$ is a parameter. The fiduciary state for the bath subsystem is the two-dimensional Gibbs-state $e^{\beta \tfrac{Z}{2}}$.
+
+The basic building blocks for the coupling terms are of the form
+\begin{align}\label{single_cooling_process}
+    A_S \otimes \sigma_+ +A_S^{\dagger} \otimes \sigma_- 
+\end{align}
+each of which describes the physical-process of removing resp. creating one  $A_S$ mediated excitation from the system and creating resp. removing one excitation in the bath and thus transferring energy to and from the system. There a few requirements, both technical and heuristic on how the operator $A_S$ is chosen. Most importantly $A_S$ itself should be treated as parameter and is chosen from some agreed upon set of operators $\mathcal{A}$. To declutter the analysis of the algorithms $\mathcal{A}$ is usually chosen to be invariant under Hermitian conjugations and sign inversion. Furthermore $\|A\|\le 1$, i.e. the spectra should be universally bounded. It is essential that $\mathcal{A}$ contains operators that are not diagonal in the energy-eigenbasis and thus connects state of different energies, making cooling possible in the first place. This is particularly important if $\mathcal{A}$ exhibits the same symmetries as $H_0$
+
+The term \autoref{hamiltonian_parts} is multiplied with $\alpha f(t)$, where $\alpha >0$ is a fixed and $f(t)$ a time-dependent coupling strength. We require $\int dt \, |f(t)|^2  = 1$, so $f(t)$ resp. its Fourier-transform $f(\omega)$ should be thought as frequency filter and is usually taken as square-root of a Gaussian $\mathcal{N}(0,\sigma^2)$. $f$ suppresses transitions from the system to the bath and vice versa that correspond to Bohr-frequencies $\omega$ exceeding the scale set by $\sigma$. Thus $H_{\rm int} =  H_{\rm int}(\alpha, \sigma, A)$. 
+
+For the time evolution a duration $T>0$ is fixed and the fiduciary states are evolved from $-T$ to $T$. Note that the negative times are not essential and could easily be avoided by redefining $f$, but prove computationally advantageous. The full Hamiltonian however is now time dependent which makes the computation of the time-propagation more intricate:
+
+
+While an analog simulation would produce the correct time evolution intrinsically, on a digital quantum simulator we have to program the time evolution explicitly and do so with second order Trotterization. We divide the time interval $[-T, T]$ in $M+1$ subintervalls of length $\tau$ and 
+then approximate 
+\begin{align}\label{trotterization}
+U(m\tau\rightarrow (m+1)\tau)\approx e^{-\tfrac{i}{\hbar}H_{\rm int}\cdot\tfrac{\tau}{2}} e^{-\tfrac{i}{\hbar}(H_0 + H_{\rm bath})\cdot\tau}e^{-\tfrac{i}{\hbar}H_{\rm int}\cdot\tfrac{\tau}{2}}.
+\end{align}
+
+\section{Transverse field Ising model}
+The benchmark system which is used for validation is given by the Hamiltonian
+\begin{align*}
+    H(J,h) = -J\sum_{<i,j>} \sigma^{(z)}_{i}\sigma^{(z)}_{j} - h\sum_{i=0}^{N-1} \sigma^{(x)}_i 
+\end{align*} 
+and models a 1D-chain of spins in $z$-direction in a homogeneous magnetic field $h$ that is aligned transversally with respect to the orientation of the spins. For simplicity we only consider periodic boundary conditions and an even number of sites. The relevant parameter of this system is $J/h$, the ratio of the energy scale of the spin-spin interaction to the potential energy of the spins in the magnetic field. To keep the energy-scales of $H(J,h)$ comparable while sweeping $J$ and $h$, we usually will impose the normalization
+\begin{align*}
+    J \to J/\sqrt{J^2+h^2}\\
+    h \to h/\sqrt{J^2+h^2}
+\end{align*} which leaves the underlying physics unchanged. For $J\ll h$ a configuration with all spins aligned in $\ket{\uparrow}_x$ is favored (paramagnetic phase) and the spectrum is gapped with $\Delta \approx 2|h|$. 
+
+For $J\gg h$ the ground-state is twofold degenerate where for $J>0$ all spins are either aligned in $\ket{\uparrow}_z$ direction or in $\ket{\uparrow}_z$ direction (ferromagnetic phase) resp. aligned alternately for $J<0$. The gap to the first excited state is $\Delta \approx 2 |J|$
+
+The gaps remain finite as long as the order parameter $J/h$ stays away from the quantum critical region $J\approx h$. Here the gap closes. 
+
+The spectrum of $H(J,h)$ can be computed exactly by mapping the TFIM to a free fermionic system
+\begin{align*}
+    H = \sum_k \varepsilon_k (J,h)\left( \hat{n}_k - \frac12\right), \quad
+    \varepsilon_k(J,h) = 2\sqrt{(h-J\cos k)^2 -J^2\sin^2 k}.
+\end{align*}
+In particular for $J=h$ one gets
+\begin{align*}
+    H = \sum_k 4J \left| \sin \frac{k}{2}\right| \left( \hat{n}_k - \frac12\right)
+\end{align*} which turns out to exhibit conformal symmetry in the limit for $k\approx 0$ and $N\to \infty$, however we will not make use of this fact in the present work. The equivalence of TFIM to a free fermionic Hamiltonian on the other hand allows for a-priori estimates on the integer mixing time of the cooling algorithm, that would be much harder to come by for other models.
+
+\section{Parameter dependance}
+Let us quickly review the parameters we encountered so far:
+
+\begin{description}
+    \item[coupling strength $\alpha$] determines the magnitude of the interaction part in the cooling Hamiltonian, i.e. the maximal rate at which cooling processes mediated by the bath can take place. To allow for the description of the cooling process via perturbative Lindblad dynamics $\alpha$ is treated as small parameter in \cite. However, larger coupling allows for higher energy transfer from the system to the bath and therefore increases cooling. In \cite the validity of the cooling scheme is established also for $\alpha = O(1)$. The numerical experiments of this work underscore these findings.  
+    \item[frequency cutoff $\sigma$], where $\sigma$ denotes standard deviation of a Gaussian function in frequency space. Tunes scale at which transitions with Bohr-frequencies bigger than $\sigma$ are suppressed. A safe choice is 
+    $\|H_0\|$ resp. the energy bandwidth of the system that is to be cooled.
+    
+\end{description}
+
+\section{Implementation as quantum circuit}
+In this project the pennylange python package was used to implement concrete realizations of the quantum channel. Here 'concrete' means, that the total cooling Hamiltonian $H$ is built using a specific jump-operator $A\in \mathcal{A}$ and a specific Bohr frequency $\omega\in [0, \omega_0]$ and evolved from time $t=-T$ to time $t=T$. The second order Trotterization from eq (4) is directly implemented into the circuit, meaning
+once the total evolution time $2T$ and the substep time $\tau$ is chosen, the quantum circuit is built according to this specifications. It consists of $M+1$ layers, each effecting a time increment of $\tau$. In \autoref{}
+a circuit which implements four cooling steps each of which is uses individual second order Trotter steps of length $\tau = T/2$. Here $W(\tau)$ denotes the time-evolution of $H_{\rm int}$, whereas the time evolution of $H_{\rm bath}$ is implemented directly as $Z$-rotation and the time evolution of $H_0$ is obtained by second order Trotterization with the same step size $\tau$.
+
+After each cooling step, the auxilary qubit is measured and prepared in the same Gibbs-state of the two-level system. Pennylane offers two approaches on how to implement this reset:
+
+\begin{itemize}
+    \item we choose the inital state of the auxilary qubit probabilistically according to the statistics of the Gibbs state, i.e. 
+    \begin{align}
+        p_0=p(\ket{0}) = \frac{2 e^{-\beta \tfrac{\omega}{2}}}{\cosh{\beta \tfrac{\omega}{2}}} \quad\mbox{resp.}\quad p_1=p(\ket{1}) = \frac{2 e^{\beta \tfrac{\omega}{2}}}{\cosh{\beta \tfrac{\omega}{2}}}.
+    \end{align}
+    \item we run the simulation in mixed mode, meaning states are not assumed to be pure but mixed instead. In this case we can implement the constant 2-dimensional quantum channel 
+    \begin{align*}
+        \rho \mapsto \sum_{i,j} p_i \underbrace{\ket{i}\bra{j}}_{K_{ij}} \rho \underbrace{\ket{j}\bra{i}}_{K_{ij}^{\dagger}} = \sum_{i} p_i \ket{i}\bra{i}\, \rm{Tr}\rho = \rho_{\beta \tfrac{\omega}{2}},
+    \end{align*} where we have used the channel representation with Kraus-operators, which can be implemented directly in pennylane.
+\end{itemize}
+
+Nota bene: Simulation of the quantum circuit makes it necessary to decide in advance how many iteration steps shall be undertaken. In a physical quantum computer the gate sequence which constitutes one cooling step, would instead be applied iteratively (e.g. a fixed sequence of laser pulses) in a trapped ion or neutral atom setup.
+
+Furthermore, since for simulation all iteration steps have to be pre-determined, meaning a specific sequence $(A_n,\omega_n)\in \mathcal{A}\times [0, \omega_{\rm max}]$ has to be chosen in advance. In the present implementation this is done with a random seed, in order to allow for reproducability.
+
+
+\section{Simulation using superoperator representation}
+A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called "vectorization".
+
+\section{Numerical Experiments}
+
+\section{Results}
 
 
 \end{document}
