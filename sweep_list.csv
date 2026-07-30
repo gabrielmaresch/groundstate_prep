@@ -1,0 +1,50 @@
+XZ, choi, eps = 0.05
+1, alpha = 0.25, h from 0.1 to 2.0 in 20 steps
+2, alpha = 0.50,
+3, alpha = 0.75,
+4, alpha = 1.00,
+,,
+5, alpha = 0.25, h from 0.75 to 1.25
+6, alpha = 0.75, h from 0.75 to 1.25
+,,
+7, alpha = 0.75, h = 1.2 beta from 0.5 to 5
+,,
+8, alpha = 0.1, h from 0.1 to 2.0 in 20 steps
+9, alpha = 1.5, h from 0.1 to 2.0 in 20 steps
+
+10, alpha = 0.25, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored
+
+"$CONDA_PREFIX/bin/python" parallel_h_sweep.py \
+  --N 4 \
+  --T 25.0 \
+  --sigma 2.0 \
+  --omega_max 8.0 \
+  --tau 0.1 \
+  --J 1.0 \
+  --beta 1.0 \
+  --eps_fit 0.05 \
+  --h_min 0.1 \
+  --h_max 2.0 \
+  --h_points 20 \
+  --normalize_Jh \
+
+11, alpha = 0.25, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+12, alpha = 0.50, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+13, alpha = 0.75, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+14, alpha = 1.00, h from 0.1 to 2.0 in 20 steps, normalize, channel not stored, from ASC
+
+15, alpha = 0.50, sigma = 0.5, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+16, alpha = 0.50, sigma = 1.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+17, alpha = 0.50, sigma = 2.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored
+18, alpha = 0.50, sigma = 4.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, from ASC
+19, alpha = 0.50, sigma = 3.0, h from 0.2 to 2.0 in 10 steps, normalize, channel not stored, 
+
+20, alpha = 0.50, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
+21, alpha = 0.25, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
+22, alpha = 0.75, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
+23, alpha = 1.00, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
+24, alpha = 0.35, sigma = 2.0, b from 0.1 to 100 in 20 steps, J=1, h=1.2, channel not stored
+
+26 betasweep with standard values and h=1.2
+27 betasweep now with h=0.4
+28 betasweep now with h=0.8

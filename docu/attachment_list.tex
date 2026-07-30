@@ -1,0 +1,172 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\setmainfont[Path=/Library/Fonts/]{DejaVuSans.ttf}
+\setmonofont[Path=/Library/Fonts/]{DejaVuSansMono.ttf}
+\setlist[itemize]{leftmargin=*, itemsep=0.3em, topsep=0.3em}
+\setlist[enumerate]{leftmargin=*, itemsep=0.3em, topsep=0.3em}
+
+\begin{document}
+
+ Below is a pragmatic report design tailored to this repo. The central narrative should be: 
+ We implement and numerically study a quantum-channel cooling algorithm for preparing thermal and ground states of small transverse-field Ising systems, using exact diagonalization and superoperator spectral analysis to test convergence toward Gibbs states.
+
+\begin{itemize}
+  \item \textbf{Proposed Title}
+  \begin{itemize}
+    \item “Numerical Study of Quantum-Channel Cooling for Thermal and Ground-State Preparation”
+    \item Subtitle: “Exact-diagonalization benchmarks for the transverse-field Ising model”
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+  \item \textbf{Report Structure}
+  \begin{enumerate}
+    \item \textbf{Abstract}
+    \begin{itemize}
+      \item 150–250 words.
+      \item State problem: preparing low-temperature/thermal quantum states.
+      \item State method: averaged cooling channel with auxiliary qubit.
+      \item State benchmark: transverse-field Ising model, exact Gibbs states.
+      \item State main findings: convergence behavior, fixed-point quality, spectral gap/mixing-time dependence on parameters.
+    \end{itemize}
+
+    \item \textbf{Introduction}
+    \begin{itemize}
+      \item Motivation: ground-state and thermal-state preparation are central for quantum simulation.
+      \item Explain why cooling channels are useful compared with direct variational/state-preparation approaches.
+      \item Position this as an exploratory implementation for small systems, consistent with README.md:2.
+      \item End with concrete research questions:Does the implemented averaged channel converge to the Gibbs state?
+      \item How do beta, h/J, alpha, sigma, T, and tau affect convergence?
+      \item Is convergence still good outside the weak-coupling regime suggested by theory?
+    \end{itemize}
+
+    \item \textbf{Theoretical Background}
+    \begin{itemize}
+      \item Quantum states and density matricesDefine pure/mixed states, density matrix $\rho$, trace preservation, positivity.
+      \item Thermal statesDefine Gibbs state:
+      \[
+      \rho_\beta = \frac{e^{-\beta H}}{Z}, \qquad Z=\mathrm{Tr}(e^{-\beta H})
+      \]
+      \item Relate $\beta \to \infty$ to ground-state preparation.
+      \item This is directly benchmarked in \texttt{ed.py:40}.
+      \item Transverse-field Ising modelUse:
+      \[
+      H = -J\sum_i Z_i Z_{i+1} - h\sum_i X_i
+      \]
+      \item Periodic boundary conditions are implemented in \texttt{cooling\_channel.py:15} and \texttt{ed.py:15}.
+      \item Discuss phases qualitatively: ferromagnetic regime, paramagnetic regime, critical region near h/J≈1 in the thermodynamic limit.
+      \item Quantum channelsDefine completely positive trace-preserving maps:
+      \[
+      \rho \mapsto \mathcal{E}(\rho)=\sum_k K_k\rho K_k^\dagger
+      \]
+      \item Explain fixed points: $\rho_*$ such that E($\rho_*$) = $\rho_*$.
+      \item Explain convergence via repeated application and spectral gap.
+      \item Cooling-channel ideaSystem couples to one auxiliary qubit sampled from a thermal environment.
+      \item Each step samples an interaction operator A and frequency $\omega$; see \texttt{cooling\_channel.py:196}.
+      \item The environment qubit is initialized thermally according to $\beta$ and $\omega$; see \texttt{cooling\_channel.py:130}.
+      \item The joint evolution alternates interaction, system evolution, environment phase evolution, and interaction again; see \texttt{cooling\_channel.py:107}.
+      \item Superoperator representationVectorize density matrices and represent the channel as a matrix S.
+      \item Explain Choi/Kraus construction.
+      \item The repo constructs both Kraus and Choi forms in \texttt{superoperator.py:85} and \texttt{superoperator.py:100}.
+      \item The averaged channel over operators/frequencies is built in \texttt{superoperator.py:122}.
+    \end{itemize}
+
+    \item \textbf{Implementation}
+    \begin{itemize}
+      \item Software architecture \texttt{cooling\_channel.py}: circuit/channel construction.
+      \item ed.py: exact diagonalization and target Gibbs/ground states.
+      \item \texttt{superoperator.py}: averaged channel, spectrum, fixed-point analysis.
+      \item \texttt{path\_analysis.py}: direct repeated-channel simulations and metrics.
+      \item \texttt{*\_sweep.py}: parameter sweeps.
+      \item ModelSmall N, usually N=4 or N=6, due to exponential Hilbert-space scaling.
+      \item Channel parameters$\beta$: inverse temperature.
+      \item $\alpha$: system-environment coupling.
+      \item $\sigma$: Gaussian time/frequency width.
+      \item T: total interaction window.
+      \item $\tau$: Trotter/internal timestep.
+      \item $\omega_\text{max}$: maximum sampled bath frequency.
+      \item op\_set: sampled system coupling operators, e.g. XZ, XYZ; see \texttt{cooling\_channel.py:39}.
+      \item Numerical validationExact Gibbs target from diagonalization.
+      \item Trace distance:
+      \[
+      D(\rho,\sigma)=\frac12\|\rho-\sigma\|_1
+      \]
+      \item Fixed-point check implemented in \texttt{superoperator.py:193}.
+      \item Spectral quantities extracted in \texttt{superoperator.py:148}.
+    \end{itemize}
+
+    \item \textbf{Numerical Experiments}
+    \begin{itemize}
+      \item Experiment 1: Direct cooling trajectoryStart from a simple initial state.
+      \item Apply increasing numbers of cooling steps.
+      \item Plot trace distance to Gibbs state versus number of steps.
+      \item Use existing figures like \texttt{docu/distance\_to\_gibbs.png}.
+      \item Experiment 2: Superoperator spectrumBuild averaged channel S.
+      \item Plot eigenvalues in the complex plane.
+      \item Identify eigenvalue near 1 and associated fixed point.
+      \item Use $\Delta_2$ as convergence proxy.
+      \item Experiment 3: $\beta$ sweepStudy lower-temperature behavior.
+      \item Plot trace distance of fixed point to Gibbs state versus $\beta$.
+      \item Plot spectral gap/mixing time versus $\beta$.
+      \item Use existing \texttt{data/superoperator\_N4\_beta\_sweep\_*.npz}.
+      \item Experiment 4: h/J sweepSweep transverse field.
+      \item Look for harder convergence near the TFIM critical region.
+      \item Use \texttt{superoperator\_h\_sweep.py}.
+      \item Experiment 5: Coupling/time-width regimeCompare weak versus stronger coupling.
+      \item This connects to the existing technical-doc claim that stronger coupling may converge faster than conservative guarantees suggest in \texttt{docu/technical\_docu.tex:77}.
+    \end{itemize}
+
+    \item \textbf{Results}
+    \begin{itemize}
+      \item Organize by metrics, not by scripts:Fixed-point accuracy: D($\rho_\text{fix}$, $\rho_\beta$).
+      \item Mixing time: iterations to reach chosen $\epsilon$.
+      \item Spectral gap proxy: distance between leading and subleading eigenvalues.
+      \item Parameter sensitivity: $\beta$, h/J, $\alpha$, $\sigma$, T, $\tau$.
+      \item Good core figures:Trace distance to Gibbs vs iterations.
+      \item Spectrum of averaged superoperator.
+      \item Fixed-point trace distance vs $\beta$.
+      \item Mixing time vs h/J.
+      \item Gap proxy vs h/J or $\beta$.
+    \end{itemize}
+
+    \item \textbf{Discussion}
+    \begin{itemize}
+      \item Interpret whether the cooling channel finds the correct thermal fixed point.
+      \item Explain when convergence slows down.
+      \item Discuss finite-size limitations.
+      \item Be explicit that exact diagonalization limits this to small systems.
+      \item Discuss discrepancy between theoretical weak-coupling assumptions and observed stronger-coupling performance.
+    \end{itemize}
+
+    \item \textbf{Limitations}
+    \begin{itemize}
+      \item Small system sizes only.
+      \item Trotterization and quadrature errors.
+      \item Random/operator sampling choices may bias convergence.
+      \item Current work focuses on TFIM; impurity/DMFT milestone is planned but not yet central, per README.md:15.
+      \item No hardware noise model yet, despite being listed as an open question in README.md:20.
+    \end{itemize}
+
+    \item \textbf{Conclusion and Outlook}
+    \begin{itemize}
+      \item Summarize implementation and numerical evidence.
+      \item State whether the channel reliably approaches Gibbs states in tested regimes.
+      \item Future work:Larger systems.
+      \item Noise/NISQ simulation.
+      \item Impurity model.
+      \item Hybrid cooling + filtering.
+      \item Resource estimation.
+    \end{itemize}
+  \end{enumerate}
+\end{itemize}
+
+
+\end{document}
