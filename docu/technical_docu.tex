@@ -33,6 +33,7 @@
 
 % Figures and tables
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{tabularx}
@@ -102,7 +103,7 @@ The total system's Hamiltonian can be split in three parts:
 \end{align}
 and a cooling protocol would typically look like
 \begin{align}\label{qu_channel}
-\ket{\phi}=\ket{\phi_0}\otimes\ket{\phi_b} \longrightarrow e^{-\frac{t}{\hbar} H}\ket{\phi}  =: \ket{\psi } \longrightarrow \Tr_{\mathcal H_{\rm bath}} \ket{\psi}  =: \ket{\phi_1},
+\rho=\ket{\phi_0}\bra{\phi_0}\otimes\rho_b \longrightarrow e^{-i\frac{t}{\hbar} H}\rho e^{i\frac{t}{\hbar} H}=\Tilde{\rho}  \longrightarrow \Tr_{\mathcal H_{\rm bath}} \Tilde{\rho}  =: \Lambda[\rho]
 \end{align}
 which corresponds to the following steps:
 \begin{enumerate}
@@ -153,11 +154,11 @@ The gaps remain finite as long as the order parameter $J/h$ stays away from the 
 The spectrum of $H(J,h)$ can be computed exactly by mapping the TFIM to a free fermionic system
 \begin{align*}
     H = \sum_k \varepsilon_k (J,h)\left( \hat{n}_k - \frac12\right), \quad
-    \varepsilon_k(J,h) = 2\sqrt{(h-J\cos k)^2 -J^2\sin^2 k}.
+    \varepsilon_k(J,h) = 2\sqrt{(h-J\cos k)^2 + J^2\sin^2 k}.
 \end{align*}
 In particular for $J=h$ one gets
 \begin{align*}
-    H = \sum_k 4J \left| \sin \frac{k}{2}\right| \left( \hat{n}_k - \frac12\right)
+    H = \sum_k 4J \big| \sin \frac{k}{2}\big| \left( \hat{n}_k - \frac12\right)
 \end{align*} which turns out to exhibit conformal symmetry in the limit for $k\approx 0$ and $N\to \infty$, however we will not make use of this fact in the present work. The equivalence of TFIM to a free fermionic Hamiltonian on the other hand allows for a-priori estimates on the integer mixing time of the cooling algorithm, that would be much harder to come by for other models.
 
 \section{Parameter dependance}
@@ -180,7 +181,7 @@ After each cooling step, the auxilary qubit is measured and prepared in the same
 \begin{itemize}
     \item we choose the inital state of the auxilary qubit probabilistically according to the statistics of the Gibbs state, i.e. 
     \begin{align}
-        p_0=p(\ket{0}) = \frac{2 e^{-\beta \tfrac{\omega}{2}}}{\cosh{\beta \tfrac{\omega}{2}}} \quad\mbox{resp.}\quad p_1=p(\ket{1}) = \frac{2 e^{\beta \tfrac{\omega}{2}}}{\cosh{\beta \tfrac{\omega}{2}}}.
+        p_0=p(\ket{0}) = \frac{e^{-\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}} \quad\mbox{resp.}\quad p_1=p(\ket{1}) = \frac{e^{\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}}.
     \end{align}
     \item we run the simulation in mixed mode, meaning states are not assumed to be pure but mixed instead. In this case we can implement the constant 2-dimensional quantum channel 
     \begin{align*}
@@ -194,9 +195,73 @@ Furthermore, since for simulation all iteration steps have to be pre-determined,
 
 
 \section{Simulation using superoperator representation}
-A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called "vectorization".
+A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called ,,vectorization''.
+
+\subsection{Choi representation}
+
+\subsection{Kraus representation}
+Every quantum channel has also - at least one - Kraus representation, i.e. can be written in the form
+\begin{align*}
+    \Lambda[\rho] = \sum_i K_i \rho K_i^{\dagger}.
+\end{align*}
+
+Since the systems's state space $\mathcal{H}=\mathcal{H}_0\otimes \mathcal{H}_b$, where the bath's state space is just two-dimensional, this allows for some simplification: Let us denote by $U=U(t_m,t_{m+1}$ the time evolution of composite system including bath for a particular time interval. We can write
+\begin{align*}
+U =
+\begin{pmatrix}
+U_{00} & U_{10} \\
+U_{01} & U_{11},
+\end{pmatrix}
+\end{align*}
+where $U_{ij} = \bra{i}_{b} U  \ket{j}_{b}$ is an operator $\mathcal{H}_0 \to \mathcal{H}_0$, i.e. a $2^N \times 2^N$ matrix. Applying $U\rho U^{\dagger}$ to a density matrix of the form $\rho_0 \otimes \sum_{i} p_i  \ket{i}_{b}\bra{i}_{b}$ we get
+\begin{align*}
+     \Tr_{\mathcal H_{\rm bath}} U\rho U^{\dagger} = \sum_{ij} p_j  U_{ij}\rho_0 U_{ij}^{\dagger}.
+\end{align*} This involves only matrix-products of $2^N \times 2^N$ matrices, which is advantageous to multiplying $2^{N+1} \times 2^{N+1}$ matrices.
+
+
 
 \section{Numerical Experiments}
+\subsection{h-sweep}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{docu/iterations_normalized.png}
+        \caption{First subplot.}
+        \label{fig:subplot1}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{docu/iterations_log_normalized.png}
+        \caption{Second subplot.}
+        \label{fig:subplot2}
+    \end{subfigure}
+
+    \caption{Overall caption.}
+    \label{fig:subplots}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{docu/gap_normalized.png}
+    \caption{Description of the image.}
+    \label{fig:image-label}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{docu/distance_to_gibbs_normalized.png}
+    \caption{Description of the image.}
+    \label{fig:image-label}
+\end{figure}
+
+\subsection{$\sigma$-sweep}
+\subsection{$\beta$-sweep}
+
+
 
 \section{Results}
 
