@@ -36,7 +36,7 @@ def evaluate_sqrt_gaussian(sigma:float, t:float):
 
 
 ### this is a very particular op_set for testing 
-def construct_opset(num_qubits:int, *, type:str = "XX2", output:bool = False):
+def construct_opset(num_qubits:int, *, type:str = "XZ", output:bool = False):
     with qml.QueuingManager.stop_recording():
         op_set = []
 
@@ -140,11 +140,13 @@ def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:boo
         K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype = np.complex64)
         qml.QubitChannel([K0, K1, K2, K3], wires=wire)
     else:
+        raise NotImplementedError('pure state simulation not supported')
         # exp(beta Z) is diagonal, so we sample as classical mixture
-        qml.Reset(wires=wire)
-        rng = random.Random(seed)
-        if rng.uniform(0.0, 1.0) > p0:
-            qml.PauliX(wires=wire)
+        #qml.Reset(wires=wire)
+        #qml.measure(wires=wire, reset=True)
+        #rng = random.Random(seed)
+        #if rng.uniform(0.0, 1.0) > p0:
+        #    qml.PauliX(wires=wire)
 
     return None
 
