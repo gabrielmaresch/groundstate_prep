@@ -11,7 +11,7 @@
 \usepackage[margin=2cm,top=3cm,bottom=3cm]{geometry}
 \usepackage{parskip}
 \usepackage{setspace}
-%\onehalfspacing
+\onehalfspacing
 
 % Mathematics
 \usepackage{amsmath}
@@ -118,35 +118,45 @@ and a cooling protocol would typically look like
 which corresponds to the following steps:
 \begin{enumerate}
     \item prepare both the systems that is to be cooled and the bath: the first in a state $\rho$ and the latter in a thermal state $\rho_b$.
-    \item  let the full system evolve for some time $t>0$. Here $U(t) = e^{-i t H}$ for time-independent Hamiltonians resp. $U(t)=\mathcal{T} \exp\left(-i \int_{0}^{ t} dt' H_{\rm cooling} (t') \right)$ for the general case. Also note that we are working in natural units where $\hbar = 1$.
+    \item  let the full system evolve for some time $t>0$. Here $U(t) = e^{-i t H}$ for time-independent Hamiltonians resp. $U(t)=\mathcal{T} \exp\left(-i \int_{0}^{ t} dt' H_{\rm cooling} (t') \right)$ for the general case. Also note, that we are working in natural units where $\hbar = 1$.
     \item discard the bath-subsystem.
 \end{enumerate}
 Note, that the last step will in general produce a density matrix rather than a pure state even if the initial state $\rho$ has been pure. Thus, if we think of repeated application of this scheme, all involved states will be non-pure. The restricted action of \autoref{eq:qu_channel} on the isolated state-space $\mathcal{H}_0$ is usually called a quantum channel ($\Lambda[\,\cdot\,]$) and exhibits richer dynamics than a purely unitary evolution. 
 
-In this project work we report on the implementation of the cooling scheme proposed in \cite{ding2025} which follows along the lines of \autoref{eq:qu_channel} and validate it against a known system Hamiltonian, the TFIM (transverse field Ising model) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state $\rho_{\beta}= \frac{e^{-\beta H_0}}{{\rm Tr}\, e^{-\beta H_0}}$ may explicitly be calculated. 
-
-In this situation $H_0 = H_{\rm TFIM}^{(h,J)}$ is actually a $2^N \times 2^N$ matrix, where $(h,J)$ are the parameters of the model (see \autoref{sec:TFIM}). The bath can be taken as generic two-level system at inverse temperature $\beta$, and its Hamiltonian $H_{\rm bath}$  is just a $2\times 2$ matrix. The interaction Hamiltonian $H_{\rm}^{(\alpha, A, f, g)}$ is  a block off-diagonal $2^{N+1} \times 2^{N+1}$ matrix that couples the two systems (again $\alpha, A, f, g$ are specific parameters of the coupling and will be explained later).
+In this project work we report on the implementation of the cooling scheme proposed in \cite{ding2025} which follows along the lines of \autoref{eq:qu_channel} and validate it against a known system Hamiltonian, the TFIM (transverse field Ising model) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state 
+\begin{align}\label{eq:gibbs_state}
+\rho_{\beta}= \frac{e^{-\beta H_0}}{{\rm Tr}\, e^{-\beta H_0}}
+\end{align}
+may explicitly be calculated.  In this situation $H_0 = H_{\rm TFIM}^{(h,J)}$ is actually a $2^N \times 2^N$ matrix, where $(h,J)$ are the parameters of the model (see \autoref{sec:TFIM}). The bath can be taken as generic two-level system at inverse temperature $\beta$, and its Hamiltonian $H_{\rm bath}$  is just a $2\times 2$ matrix. The interaction Hamiltonian $H_{\rm int}^{(\alpha, A, f, g)}$ is  a block off-diagonal $2^{N+1} \times 2^{N+1}$ matrix that couples the two systems (again $\alpha, A, f, g$ are specific parameters of the coupling and will be explained later).
 
 
 \section{Cooling as quantum operation}
-The two-level system utilized as bath is fully described by its eigenenergies: here they are taken as $\pm \tfrac{\omega}{2}\beta$, where $\omega>0$ is a frequency-parameter. The fiduciary state for the bath subsystem is the two-dimensional Gibbs-state $e^{-\tfrac{\omega}{2}\beta Z }$.
+The two-level system utilized as bath is fully described by its eigenenergies: here they are taken as $\pm \tfrac{\omega}{2}$, where $\omega>0$ is a frequency-parameter. The fiduciary state for the bath subsystem is the two-dimensional Gibbs-state $\rho_{\beta}\propto e^{\tfrac{\omega}{2}\beta Z }$.
 
 The basic building blocks for the coupling terms are of the form
-\begin{align}\label{single_cooling_process}
+\begin{align}\label{eq:single_cooling_process}
     A_S \otimes \sigma_+ +A_S^{\dagger} \otimes \sigma_- 
 \end{align}
-each of which describes the physical process of removing resp. creating one  $A_S$ mediated ''quasi excitation'' from the system and creating resp. removing one ''quasi excitation'' in the bath and thus transferring energy to and from the system. There are few requirements, both technical and heuristic on how the operator $A_S$ is chosen. Most importantly $A_S$ itself should be treated as parameter and is chosen from pre-specified set of operators $\mathcal{A}$. To de-clutter the analysis of the algorithms, $\mathcal{A}$ is usually chosen to be invariant under Hermitian conjugations and sign inversion. Furthermore $\|A\|\le 1$, i.e. the spectra should be universally bounded. It is essential that $\mathcal{A}$ contains operators that are not diagonal in the energy-eigenbasis and but connects state from different energies, making cooling possible in the first place. In the case that $H_0$ exhibits different symmetry sectors, it is essential that that $\mathcal{A}$ mixes those sectors, e.g. if we have a translation-invariant chain of spins, the operators from $\mathcal{A}$ should adress the sites individually.  
+each of which describes the physical process of transferring energy from the system to the bath and vice versa. There are a few requirements, both technical and heuristic on how the operator $A_S$ is chosen. Most importantly $A_S$ itself should be treated as parameter and is chosen from pre-specified set of operators $\mathcal{A}$. To de-clutter the algorithms, $\mathcal{A}$ is usually chosen to be invariant under Hermitian conjugation and sign inversion. Furthermore $\|A\|\le 1$, in particular the spectra should be universally bounded. It is essential that $\mathcal{A}$ contains operators that are not diagonal in the energy-eigenbasis and but connects states from different energies, making cooling possible in the first place. In the case that $H_0$ exhibits different symmetry sectors, it is essential that $\mathcal{A}$ mixes those sectors, e.g. if we have a translation-invariant chain of spins, the operators from $\mathcal{A}$ should address the sites individually.  
 
-The term \autoref{hamiltonian_parts} is multiplied with $\alpha f(t)$, where $\alpha >0$ is a fixed and $f(t)$ a time-dependent coupling strength. We require $\int dt \, |f(t)|^2  = 1$, so $f(t)$ resp. its Fourier-transform $f(\omega)$ should be thought as frequency filter and is usually taken as square-root of a Gaussian $\mathcal{N}(0,\sigma^2)$. $f$ suppresses transitions from the system to the bath and vice versa that correspond to Bohr-frequencies $\omega$ exceeding the scale set by $\Delta \omega \sim \frac{1}{\sigma}$. Thus $H_{\rm int} =  H_{\rm int}(\alpha, \sigma, A)$. 
+The term \autoref{eq:single_cooling_process} is multiplied with $\alpha f(t)$, where $\alpha >0$ is fixed and $f(t)$ a time-dependent coupling strength. We require $\int dt \, |f(t)|^2  = 1$, so $f(t)$ resp. its Fourier-transform $\hat{f}(\omega)$ should be thought of as frequency filter and is usually taken as square-root of a Gaussian $\mathcal{N}(0,\sigma^2)$. $\hat{f}(\omega)$ suppresses transitions from the system to the bath and vice versa that correspond to a maximally allowed detuning of Bohr-frequencies from the bath frequency on a scale set by $\Delta \omega \sim \frac{1}{\sigma}$. Thus $H_{\rm int}(t) =  H_{\rm int}^{(\alpha, A, \sigma)}(t)$. 
 
-For the time evolution a duration $T>0$ is fixed and the fiduciary states are evolved from $-T$ to $T$. Note that the negative times are not essential and could easily be avoided by redefining $f$, but prove computationally advantageous. The full Hamiltonian however is now time dependent which makes the computation of the time-propagation more intricate:
-
-
-While an analog simulation would produce the correct time evolution intrinsically, on a digital quantum simulator we have to program the time evolution explicitly and do so with second order Trotterization. We divide the time interval $[-T, T]$ in $M+1$ subintervalls of length $\tau$ and 
-then approximate 
-\begin{align}\label{trotterization}
-U(m\tau\rightarrow (m+1)\tau)\approx e^{-\tfrac{i}{\hbar}H_{\rm int}\cdot\tfrac{\tau}{2}} e^{-\tfrac{i}{\hbar}(H_0 + H_{\rm bath})\cdot\tau}e^{-\tfrac{i}{\hbar}H_{\rm int}\cdot\tfrac{\tau}{2}}.
+For the time evolution a duration $T>0$ is fixed and the fiduciary states are evolved from $-T$ to $T$. Note, that the negative times are not essential and could easily be avoided by redefining $f$. However it is beneficial to preserve symmetry of $f$ via $f(-t)=f(t)$ over the time interval $[-T,T]$. The full Hamiltonian, however, is now time dependent which makes the computation of the time-propagation more intricate:
+\begin{align}\label{eq:timedependent_H}
+U(t_0 \rightarrow t_1) = \mathcal{T}\exp\left(-i \int_{t_0}^{ t_1} d\tau \left(H_0 +  \alpha f(\tau)( A_S \otimes \sigma_+ +A_S^{\dagger} \otimes \sigma_- )+
+H_{\rm bath}\right) \right)
 \end{align}
+
+
+While an analog simulation would produce the correct time evolution intrinsically, on a digital quantum simulator we have to program the time evolution explicitly and do so with second order Trotterization for some time $\Delta t$
+\begin{align}\label{eq:trotterization}\notag
+U(t\rightarrow t+\Delta t)&\approx \exp\left(-i\int_{t+\tfrac 12 \Delta t}^{t+\Delta t}d\tau H_{\rm int}(\tau)\right)e^{-i(H_0+H_{\rm bath})\Delta t} \exp\left(-i\int_{t}^{t+\tfrac 12 \Delta t}d\tau H_{\rm int}(\tau)\right)\\
+\end{align}
+and then approximate the integrals by using the value at the midpoint as constant approximation in order to preserve symmetry:
+\begin{align}\label{eq:trotterization_with_freezing}
+U(t\rightarrow t+\Delta t)&\approx e^{-i H_{\rm int}(t+\tfrac 12 \Delta t)\tfrac 12 \Delta t}e^{-i(H_0+H_{\rm bath})\Delta t} e^{-i H_{\rm int}(t+\tfrac 12 \Delta t)\tfrac 12 \Delta t}.
+\end{align}
+In the cooling algorithm itself, the interval $[-T,T]$ is divided into $M$ subintervals of length $\tau$ and each subinterval is evolved according to \autoref{eq:trotterization_with_freezing}. Note, that freezing $H_{\rm int}$ at the subinterval-midpoint is just a convenient numerical choice, but not necessarily optimal. Using different evaluation points for the quadrature of $f$, or even exact evaluation of the $f$-integration, would also be a second order approximation, but with potentially reduced constant of the error term. However, we will not pursue this particular direction further.
 
 \section{Transverse field Ising model}\label{sec:TFIM}
 The benchmark system which is used for validation is given by the Hamiltonian
