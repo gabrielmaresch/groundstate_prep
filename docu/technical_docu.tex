@@ -369,7 +369,14 @@ In \autoref{fig:num_iterations} we see that the number of iterations necessary t
 We also see quite different qualitative behavior for the four tested coupling strengths $\alpha = 0.25, 0.5., 0.75$ and $1.0$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional relationship changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \autoref{fig:iterations_logplot}) where as $\alpha = 0.75$ and $\alpha = 1.0$ display a nonlinear approach to a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have slightly different slopes in the para- resp. ferromagnetic region.
 The number of iterations till fixed-point closeness does not decrease uniformly across the parameter space. In the non ferromagnetic regimen higher coupling means faster convergence, although there is only marginal improvement from $\alpha = 0.75$ out on. Qualitatively a transition from log-linear to non-linear takes place between $0.5\le \alpha \le 0.75$.
 
-It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \autoref{fig:distance_to_gibbs} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\epsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alphga$ need more iterations.  
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{docu/gap_normalized.png}
+    \caption{Description of the image.}
+    \label{fig:image-label}
+\end{figure}
+
+It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \autoref{fig:distance_to_gibbs} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\epsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alpha$ need more iterations.  
 
 
 
@@ -380,12 +387,7 @@ It is important to keep in mind, that the fixed point of a given channel is not 
     \label{fig:distance_to_gibbs}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{docu/gap_normalized.png}
-    \caption{Description of the image.}
-    \label{fig:image-label}
-\end{figure}
+
 
 \subsection{$\sigma$-sweep}
 \subsection{$\beta$-sweep}
