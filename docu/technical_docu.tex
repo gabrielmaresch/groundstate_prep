@@ -341,7 +341,7 @@ $T=25$ with $\tau = 0.1$ (i.e. $250$ sub-steps per Trotterization), $\sigma = 2$
 
 Convergence is measured in number of iterations starting from the pure state $\rho_0=\ket{0000}\bra{0000}$ till the trace distance
 \begin{align}\label{eq:tracedistance}
-    D(\overline{\Lambda}^n[\rho_0],\rho_*) = \tfrac 12 \left| \overline{\Lambda}^n[\rho_0] - \rho_*\right|_1
+    D(\overline{\Lambda}^n[\rho_0],\rho_*) = \tfrac 12 \left\| \overline{\Lambda}^n[\rho_0] - \rho_*\right\|_1
 \end{align} is less than $\epsilon = 0.05$. We note that this notion of convergence differs from the one used in \cite{ding2025} insofar as no supremum over initial states is taken. Instead, as is common in quantum computation, the initial state $\ket{0000}$ is fixed.
 
 \begin{figure}[htbp]
@@ -366,14 +366,14 @@ Convergence is measured in number of iterations starting from the pure state $\r
 
 In \autoref{fig:num_iterations} we see that the number of iterations necessary to get $\epsilon$-close to the fixed point decreases almost monotonically with $h/J$, meaning convergence is reached faster in the paramagnetic regimen than in the ferromagnetic regimen. In particular there seems to be nothing special about the critical region $h/J\approx 1$. However, it should be noted, that the Hamiltonians are all normalized according to \autoref{eq:JHnormalization} in order to avoid different energy scales of the systems.
 
-We also see quite different qualitative behavior for the four tested coupling strengths $\alpha = 0.25, 0.5., 0.75$ and $1.0$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional relationship changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \autoref{fig:iterations_logplot}) where as $\alpha = 0.75$ and $\alpha = 1.0$ display a nonlinear approach to a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have slightly different slopes in the para- resp. ferromagnetic region.
+We also see quite different qualitative behavior for the four tested coupling strengths $\alpha = 0.25, 0.5., 0.75$ and $1.0$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional relationship changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \autoref{fig:iterations_logplot}) where as $\alpha = 0.75$ and $\alpha = 1.0$ display a nonlinear approach to a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have slightly different slopes in the para- resp. ferromagnetic region, see \autoref{fig:iterations_fitted}.
 The number of iterations till fixed-point closeness does not decrease uniformly across the parameter space. In the non ferromagnetic regimen higher coupling means faster convergence, although there is only marginal improvement from $\alpha = 0.75$ out on. Qualitatively a transition from log-linear to non-linear takes place between $0.5\le \alpha \le 0.75$.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{docu/gap_normalized.png}
+    \includegraphics[width=0.8\textwidth]{docu/iterations_fit_normalized.png}
     \caption{Description of the image.}
-    \label{fig:image-label}
+    \label{fig:iterations_fitted}
 \end{figure}
 
 It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \autoref{fig:distance_to_gibbs} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\epsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alpha$ need more iterations.  
