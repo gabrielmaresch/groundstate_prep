@@ -97,8 +97,9 @@ def construct_W_layer(num_qubits:int, m:int, tau_half:float, T:float, sigma:floa
     #probably better to make this time evolution explicit
     
     if mixed:
-        order = 2
-        qml.ApproxTimeEvolution(H_int, tau_half, order)
+        # for commuting terms even 1st order approx is exact
+        n=1
+        qml.ApproxTimeEvolution(H_int, tau_half, 1)
     else:
         qml.evolve(H_int, coeff=tau_half)
     
@@ -115,8 +116,12 @@ def construct_U_layers(num_qubits:int, tau:float, T:float, sigma:float, op:"qml.
         construct_W_layer(num_qubits, m, tau/2, T, sigma, op, alpha, mixed=mixed)
         #-------------------------------
         if mixed:
-            order = 2
-            qml.ApproxTimeEvolution(H_sys, tau, order)
+            # first order with two slices
+            #n = 2
+            #qml.ApproxTimeEvolution(H_sys, tau, n)
+
+            #second order with one slice
+            qml.adjoint(qml.TrotterProduct(H_sys, tau, n=1, order=2))
         else:
             qml.evolve(H_sys, coeff=tau)
         # time evolution for H_env is just Z-rotation 
