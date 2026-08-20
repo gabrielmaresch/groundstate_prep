@@ -215,16 +215,23 @@ Let us quickly review the parameters we encountered so far:
 
 \begin{figure}[htbp]
     \centering
-     \includegraphics[width=\linewidth]{docu/bohr_density_plot.png}
-        \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J=1.2$}
-    \label{fig:bohr_bandwiths}
-\end{figure}
 
-\begin{figure}[t]
-    \centering
-     \includegraphics[width=\linewidth]{docu/bohr_quantiles_plot.png}
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{docu/bohr_density_plot.png}
+        \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J=1.2$.}
+        \label{fig:bohr_bandwiths}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{docu/bohr_quantiles_plot.png}
         \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J$ between $0$ and $2$.}
-    \label{fig:bohr_quantiles}
+        \label{fig:bohr_quantiles}
+    \end{subfigure}
+
+    \caption{Heuristics for the choice of $\omega_{\rm max}$.}
+    \label{fig:bohr_heuristics}
 \end{figure}
     
     \item[interaction time $T$] determines the finite time interval $[-T,T]$ during which system and bath interact. During the interaction the coupling constant is modulated with the Gaussian $f$. Increasing $T$ decreases the error due to ignoring $f$ outside $[-T,T]$ but increases the simulation time necessary to evolve the combined Hamiltonian $H_{\rm cooling}$ which itself is subject to discretization a Trotterization errors. In \cite{ding2025} it is assumed that $T\gg \sigma$ in order to give convergence guarantees.
@@ -260,10 +267,9 @@ is proven that under certain conditions a matrix norm, namely $\| X\| = \|\rho_{
 \pagebreak
 
 \section{Implementation as quantum circuit}
-The \textsc{pennylange} python package was used to implement concrete realizations of the quantum channel. Here 'concrete' means, that the total cooling Hamiltonian $H$ is built using a specific jump-operator $A\in \mathcal{A}$ and a specific Bohr frequency $\omega\in [0, \omega_0]$ and evolved from time $t=-T$ to time $t=T$. The second order Trotterization from eq (4) is directly implemented into the circuit, meaning once the total evolution time $2T$ and the sub-step time $\tau$ is chosen, the quantum circuit is built according to this specifications. It consists of $M+1$ layers, each effecting a time increment of $\tau$. In \autoref{}
-a circuit which implements four cooling steps each of which is uses individual second order Trotter steps of length $\tau = T/2$. Here $W(\tau)$ denotes the time-evolution of $H_{\rm int}$, whereas the time evolution of $H_{\rm bath}$ is implemented directly as $Z$-rotation and the time evolution of $H_0$ is obtained by second order Trotterization with the same step size $\tau$.
+The \textsc{pennylane} python package was used to implement concrete realizations of the quantum channel. Here 'concrete' means, that the total cooling Hamiltonian $H$ is built using a specific jump-operator $A\in \mathcal{A}$ and a specific Bohr frequency $\omega\in [0, \omega_0]$ and evolved from time $t=-T$ to time $t=T$. The second order Trotterization from eq (4) is directly implemented into the circuit, meaning once the total evolution time $2T$ and the sub-step time $\tau$ is chosen, the quantum circuit is built according to this specifications. It consists of $M+1$ layers, each effecting a time increment of $\tau$. In \autoref{fig:qc} a circuit which implements two cooling steps each of which is uses individual second order Trotter steps of length $\tau = T/2$. Here $W(\tau)$ denotes the time-evolution of $H_{\rm int}$, whereas the time evolution of $H_{\rm bath}$ is implemented directly as $Z$-rotation and the time evolution of $H_0$ is obtained by second order Trotterization with the same step size $\tau$.
 
-After each cooling step, the auxiliary qubit is measured and prepared in the same Gibbs-state of the two-level system. Pennylane offers two approaches on how to implement this reset:
+After each cooling step, the auxiliary qubit is measured and prepared in the same Gibbs-state of the two-level system. The \textsc{pennylane} framework offers two approaches on how to implement this reset:
 
 \begin{itemize}
     \item we choose the initial state of the auxiliary qubit probabilistically according to the statistics of the Gibbs state, i.e. 
@@ -272,9 +278,16 @@ After each cooling step, the auxiliary qubit is measured and prepared in the sam
     \end{align}
     \item we run the simulation in mixed mode, meaning states are not assumed to be pure but mixed instead. In this case we can implement the constant 2-dimensional quantum channel 
     \begin{align}\label{eq:constant_channel}
-        \rho \mapsto \sum_{i,j} p_i \underbrace{\ket{i}\bra{j}}_{K_{ij}} \rho \underbrace{\ket{j}\bra{i}}_{K_{ij}^{\dagger}} = \sum_{i} p_i \ket{i}\bra{i}\, \rm{Tr}\rho = \rho_{\beta \tfrac{\omega}{2}},
-    \end{align} where we have used the channel representation with Kraus-operators, which can be implemented directly in pennylane.
+        \rho \mapsto \sum_{i,j}  \underbrace{\sqrt{p_i}\ket{i}\bra{j}}_{K_{ij}}\,\rho\, \underbrace{\sqrt{p_i}\ket{j}\bra{i}}_{K_{ij}^{\dagger}} = \sum_{i} p_i \ket{i}\bra{i}\, \rm{Tr}\rho = \rho_{\left(\beta \tfrac{\omega}{2}\right)},
+    \end{align} where we have used the channel representation with Kraus-operators, which can be implemented directly in \textsc{pennylane}.
 \end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{docu/circuit_2_steps.png}
+     \caption{Quantum Circuit constructed using  the\textsc{pennylane} framework}
+     \label{fig:qc}
+\end{figure}
 
 Nota bene: Simulation of the quantum circuit makes it necessary to decide in advance how many iteration steps shall be undertaken. In a physical quantum computer the gate sequence which constitutes one cooling step, would instead be applied iteratively (e.g. a fixed sequence of laser pulses) in a trapped ion or neutral atom setup.
 
@@ -336,7 +349,7 @@ up to order $O(\tfrac{1}{k^2})$. Thus the number of individual contributions for
 
 \section{Numerical Experiments}
 \subsection{h-sweep}
-As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \autoref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\overline{\Lambda}$ is constructed explicitly according to \autoref{eq:averaged_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare four different coupling strengths $\alpha=0.25,0.5,0.75,1.0$, while all remaining parameters of the cooling channel are kept fixed:
+As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \autoref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\overline{\Lambda}$ is constructed explicitly according to \autoref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare four different coupling strengths $\alpha=0.25,0.5,0.75,1.0$, while all remaining parameters of the cooling channel are kept fixed:
 $T=25$ with $\tau = 0.1$ (i.e. $250$ sub-steps per Trotterization), $\sigma = 2$ ensuring that the temporal window $[-T,T]$ is large compared to $\frac{1}{\sigma}$. The frequency cutoff is chosen near the systems bandwidth $\omega_{\max}=8$ and inverse temperature is set to $\beta=1$.
 
 Convergence is measured in number of iterations starting from the pure state $\rho_0=\ket{0000}\bra{0000}$ till the trace distance
@@ -371,22 +384,47 @@ The number of iterations till fixed-point closeness does not decrease uniformly 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{docu/iterations_fit_normalized.png}
+    \includegraphics[width=0.65\textwidth]{docu/iterations_fit_normalized.png}
     \caption{Description of the image.}
     \label{fig:iterations_fitted}
 \end{figure}
 
 It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \autoref{fig:distance_to_gibbs} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\epsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alpha$ need more iterations.  
-
-
-
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{docu/distance_to_gibbs_normalized.png}
     \caption{Description of the image.}
     \label{fig:distance_to_gibbs}
 \end{figure}
+To study the spectral properties of the channel with respect to its fixed point behavior we introduce the quantity
+\begin{align}\label{eq:spectral_separation}
+    \Delta_2 = \min_{\lambda\neq 1}|1-\lambda|.
+\end{align} Note that \autoref{eq:spectral_separation} is in general different from the spectral \emph{gap}
+\begin{align}\label{eq:spectral_gap}
+    \Delta_{\rm gap} = 1- \min_{\lambda\neq 1}|\lambda|\le \Delta_2,
+\end{align}
+only for real nonnegative subleading eigenvalue the two notion coincide. Since, by perturbative arguments we know that - at least in the weak coupling regime - the channel is guaranteed to have am almost thermal fixed point, we are mostly interested in the local behavior around this fixed point rather than in the global gap. However, numerical inspection of explicit spectra indicate $\lambda_2$ being positive and real, so that $\Delta_2 \approx \Delta_{\rm gap}$ is a sensible working hypothesis for our experimental runs, cf. \autoref{fig:spectrum_example}.
 
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{docu/gap_normalized.png}
+        \caption{Spectral separation from channel fixed point}
+        \label{fig:sep_vs_iterations}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{docu/superoperator_N4_1.png}
+        \caption{Spectrum for concrete instance of averaged cooling superoperator.}
+        \label{fig:spectrum_example}
+    \end{subfigure}
+
+    \caption{TFIM for $N=4$}
+    \label{fig:spectral_separation}
+\end{figure}
+The h-sweep therefore eludes to the the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small. %The tipping point where accuracy is lost is the really interesting thing
 
 
 \subsection{$\sigma$-sweep}
@@ -394,7 +432,7 @@ It is important to keep in mind, that the fixed point of a given channel is not 
 
 
 
-\section{Results}
+\section{Conclusion}
 
 
 
