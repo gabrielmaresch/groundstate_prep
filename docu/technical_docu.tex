@@ -88,14 +88,14 @@ Algorithms for Quantum State Preparation}
 \maketitle
 \begin{abstract}
 We numerically study a bath-assisted quantum cooling channel for finite transverse-field Ising models with $N=4$–$8$ spins. The channel is implemented by simulating the system–bath evolution with a two-level thermal ancilla, followed by ancilla reset, and is averaged over local Pauli coupling operators and bath frequencies as suggested in %following the work of 
-\cite{ding2025}. Using exact diagonalization, we compute the channel fixed point and compare it with the exact Gibbs state. For the parameter regimes investigated, increasing the coupling strength generally reduces the number of channel iterations required for convergence but increases the fixed-point error relative to the Gibbs state. Intermediate coupling strengths provide a favorable empirical compromise between these effects.
-%The applicability of the cooling channel beyond weak-coupling is treated in \cite{wang2025}. Our observations for the chosen model also go along these lines and extend the weak-coupling analysis into a finite-size numerical regime, while remaining subject to discretization, frequency-quadrature, and finite-size effects. 
-\SA{reformulated (I would leave the details to the results and conclusion)}
-Concerning the applicability of the cooling channel beyond weak-coupling, our numerical results for the transverse field Ising model are consistent with the predictions of \cite{wang2025}. 
+\cite{ding2025}. Using exact diagonalization, we compute the channel fixed point and compare it with the exact Gibbs state. %For the parameter regimes investigated, increasing the coupling strength generally reduces the number of channel iterations required for convergence but increases the fixed-point error relative to the Gibbs state. Intermediate coupling strengths provide a favorable empirical compromise between these effects.
 
+%In this work we numerically investigate the cooling channel for finite transverse-field Ising models, including parameter regimes beyond the weak-coupling regime of the original analysis. We find evidence that stronger coupling can maintain a fixed point close to the thermal state while requiring far fewer iterations than in the weak-coupling regime. 
 
-%In this work we numerically investigate the cooling channel for finite transverse-field Ising models, including parameter regimes beyond the weak-coupling regime of the original analysis. We find evidence that stronger coupling can maintain a fixed point close to the thermal state while requiring far fewer iterations than in the weak-coupling regime. Our numerical results are consistent with the theoretical picture developed in the follow-up work and allow us to study quantitatively how fixed-point accuracy and convergence behavior change as the coupling strength is increased.
+While applicability of the cooling channel beyond weak-coupling is treated in \cite{wang2025} our observations for the chosen model also go along these lines and extend the weak-coupling analysis into a finite-size numerical regime, while remaining subject to discretization, frequency-quadrature, and finite-size effects. 
 
+%\SA{reformulated (I would leave the details to the results and conclusion)}
+%Concerning the applicability of the cooling channel beyond weak-coupling, our numerical results for the transverse field Ising model are consistent with the predictions of \cite{wang2025}. 
 \end{abstract}
 
 \section*{Introduction}
@@ -120,7 +120,7 @@ Once the (site-dependent) Green's function $G_{i,j}^T(t-t')$ (resp. $G_{i,j}^R(t
     \item[\qquad Self-energy:] $\Sigma(\omega) = G_0(\omega)^{-1}-G(\omega)^{-1}$.
 \end{description}
 
-One way to obtain thermal states is %not by using some truncation or approximation scheme, but 
+In concluding macro- and mesoscopic properties of a system, it is therefore essential to have reasonably accurate approximations of theses thermal states resp. the ground state available. One way to obtain thermal states is not by using some truncation or approximation scheme, but 
 to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a system has the advantage of being easily implementable on a quantum computer or quantum simulator, and allows for running times that often are merely polynomial in the system's parameters. 
 In this case, the total system's Hamiltonian has three contributions:
 \begin{align}\label{eq:hamiltonian_parts}
@@ -137,9 +137,9 @@ which corresponds to the following steps:
     in natural units where $\hbar = 1$);
     \item discard the bath. %-subsystem.
 \end{enumerate}
-Note, that the last step will in general produce a density matrix rather than a pure state even if the initial state $\rho$ has been pure. Thus, if we think of repeated applications of this scheme, all involved states will be non-pure. 
+Note, that the last step will in general produce a density matrix rather than a pure state even if the initial state $\rho$ has been pure. Thus, if we think of repeated applications of this scheme, none of the involved states needs to necessarily be pure. 
 
-The restricted action of \cref{eq:qu_channel} on the state-space $\mathcal{H}_0$ is usually called a quantum channel ($\Lambda[\,\cdot\,]$) and exhibits richer dynamics than a purely unitary evolution. 
+The restricted action of \cref{eq:qu_channel} on the state-space $\mathcal{H}_0$ is usually called a quantum channel ($\Lambda[\,\cdot\,]$) and exhibits far richer dynamics than a purely unitary evolution. 
 
 In this project work we report on the implementation of the cooling scheme proposed in \cite{ding2025} which follows along the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state 
 \begin{align}\label{eq:gibbs_state}
@@ -150,7 +150,7 @@ explicitly be calculated.  In this situation $H_0 = H_{\rm TFIM}^{(h,J)}$ is act
 
 
 \section{Cooling as quantum operation}
-The two-level system utilized as bath is fully described by its eigenenergies: here they are taken as $\pm\omega/2$, where $\omega>0$ is a frequency parameter. The fiduciary state for the bath subsystem is the two-dimensional Gibbs-state $\rho_{\beta}\propto e^{\tfrac{\omega}{2}\beta Z }$.
+The two-level system utilized as bath is fully described by its eigenenergies: here they are taken as $\pm\omega/2$, where $\omega>0$ is a frequency parameter. The fiducial state for the bath subsystem is the two-dimensional Gibbs-state $\rho_{\beta}\propto e^{\tfrac{\omega}{2}\beta Z }$.
 
 The basic building blocks for the coupling terms are of the form
 \begin{align}\label{eq:single_cooling_process}
@@ -160,7 +160,7 @@ each of which describes the physical process of transferring energy from the sys
 
 The term in \cref{eq:single_cooling_process} is multiplied with $\alpha f(t)$, where $\alpha >0$ is fixed and $f(t)$ a time-dependent coupling strength. We require $\int dt \, |f(t)|^2  = 1$, so $f(t)$ resp. its Fourier-transform $\hat{f}(\omega)$ should be thought of as frequency filter and is usually taken as square-root of a Gaussian $\mathcal{N}(0,\sigma^2)$. $\hat{f}(\omega)$ suppresses transitions from the system to the bath and vice versa that correspond to an allowed detuning of Bohr-frequencies from the bath frequency on a scale set by $1/\sigma$. Thus $H_{\rm int}(t) =  H_{\rm int}^{(\alpha, A, \sigma)}(t)$. 
 
-For the time evolution a duration $T>0$ is fixed and the fiduciary states are evolved from $-T$ to $T$. Note, that the negative times are not essential and could easily be avoided by redefining $f$. However, it is beneficial to preserve the symmetry of $f$ via $f(-t)=f(t)$ over the time interval $[-T,T]$ \SA{add ref.?}. The full Hamiltonian %, however, 
+For the time evolution a duration $T>0$ is fixed and the fiducial states are evolved from $-T$ to $T$. Note, that the negative times are not essential and could easily be avoided by redefining $f$. However, it is beneficial to preserve the symmetry of $f$ via $f(-t)=f(t)$ over the time interval $[-T,T]$: In this case also the Fourier transform $\hat{f}(\omega)$ is again real (and even) and thus allows for an easy interpretation as frequency filter-function. The full Hamiltonian %, however, 
 is now time dependent which makes the computation of the time-propagation more intricate:
 \begin{align}\label{eq:timedependent_H}
 U(t_0 \rightarrow t_1) = \mathcal{T}\exp\left(-i \int_{t_0}^{ t_1} d\tau \left(H_0 +  \alpha f(\tau)( A_S \otimes \sigma_+ +A_S^{\dagger} \otimes \sigma_- )+
@@ -170,13 +170,13 @@ H_{\rm bath}\right) \right).
 
 While an analog simulation would produce the correct time evolution intrinsically, on a digital quantum simulator we have to program the time evolution explicitly and do so with second order Trotterization for some time $\Delta t$
 \begin{align}\label{eq:trotterization}\notag
-U(t\rightarrow t+\Delta t)&\approx \exp\left(-i\int_{t+\tfrac 12 \Delta t}^{t+\Delta t}d\tau H_{\rm int}(\tau)\right)e^{-i(H_0+H_{\rm bath})\Delta t} \exp\left(-i\int_{t}^{t+\tfrac 12 \Delta t}d\tau H_{\rm int}(\tau)\right)\\
+U(t\rightarrow t+\Delta t)&\approx \exp\left(-i\int_{t+\tfrac{\Delta t}{2}}^{t+\Delta t}d\tau H_{\rm int}(\tau)\right)e^{-i(H_0+H_{\rm bath})\Delta t} \exp\left(-i\int_{t}^{t+\tfrac{\Delta t}{2}}d\tau H_{\rm int}(\tau)\right)\\
 \end{align}
 and then approximate the integrals by using the value at the midpoint as constant approximation in order to preserve symmetry: \SA{maybe explain importance}
 \begin{align}\label{eq:trotterization_with_freezing}
-U(t\rightarrow t+\Delta t)&\approx e^{-i H_{\rm int}(t+\tfrac 12 \Delta t)\tfrac 12 \Delta t}e^{-i(H_0+H_{\rm bath})\Delta t} e^{-i H_{\rm int}(t+\tfrac 12 \Delta t)\tfrac 12 \Delta t}.
+U(t\rightarrow t+\Delta t)&\approx e^{-i H_{\rm int}(t+\tfrac{\Delta t}{2})\tfrac{\Delta t}{2}}e^{-i(H_0+H_{\rm bath})\Delta t} e^{-i H_{\rm int}(t+\tfrac{\Delta t}{2})\tfrac{\Delta t}{2}}.
 \end{align}
-\SA{($\frac{1}{2}\Delta t \to \Delta t /2 $?)}
+%\SA{($\frac{1}{2}\Delta t \to \Delta t /2 $?)}
 In the cooling algorithm itself, the interval $[-T,T]$ is divided into $M$ subintervals of length $\tau$ and each subinterval is evolved according to \cref{eq:trotterization_with_freezing}. Note, that freezing $H_{\rm int}$ at the subinterval-midpoint is just a convenient numerical choice, but not necessarily optimal. Using different evaluation points for the quadrature of $f$, or even exact evaluation of the $f$-integration, would not necessarily improve the order of the approximation, but potentially reduce the constant of the error term. However, we will not pursue this particular direction further.
 
 \section{Transverse field Ising model}\label{sec:TFIM}
@@ -292,7 +292,7 @@ After each cooling step, the auxiliary qubit is measured and prepared in the sam
 \begin{itemize}
     \item we choose the initial state of the auxiliary qubit probabilistically according to the statistics of the Gibbs state, i.e. 
     \begin{align}
-        p_0=p(\ket{0}) = \frac{e^{-\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}} \quad\mbox{resp.}\quad p_1=p(\ket{1}) = \frac{e^{\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}}.
+        p_0=p(\ket{0}) = \frac{e^{\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}} \quad\mbox{resp.}\quad p_1=p(\ket{1}) = \frac{e^{-\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}}.
     \end{align}
     \item we run the simulation in mixed mode, meaning states are not assumed to be pure but mixed instead. In this case we can implement the constant 2-dimensional quantum channel 
     \begin{align}\label{eq:constant_channel}
