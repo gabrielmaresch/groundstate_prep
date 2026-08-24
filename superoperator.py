@@ -70,7 +70,7 @@ def get_choi_element(i,j, num_system_qubits, U, omega, beta):
    
     rho_reshaped = rho_total.reshape(d_sys, 2, d_sys, 2)
     rho_sys_out = np.trace(rho_reshaped, axis1=1, axis2=3)
-    
+
     return rho_sys_out
 
 def get_kraus_blocks(num_system_qubits, U):
@@ -127,7 +127,23 @@ def superoperator_as_linop(num_system_qubits, U, omega, beta):
         
         return out.reshape(-1)
 
-    return LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+    def rmatvec(vec):
+        observable = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+
+        for b in range(2):
+            for a in range(2):
+                A = U_blocks[a][b]
+                out += p[b] * (A.conj().T @ observable @ A)
+
+        return out.reshape(-1)
+
+    return LinearOperator(
+        (d_so, d_so),
+        matvec=matvec,
+        rmatvec=rmatvec,
+        dtype=np.complex64,
+    )
 
 
 
@@ -197,11 +213,23 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
     def matvec(vec):
         out = np.zeros(d_so, dtype=np.complex64)
         for linop in linops:
-                out += linop @ vec
+            out += linop @ vec
                
         return (out / averages)
 
-    S = LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+    def rmatvec(vec):
+        out = np.zeros(d_so, dtype=np.complex64)
+        for linop in linops:
+            out += linop.H @ vec
+
+        return (out / averages)
+
+    S = LinearOperator(
+        (d_so, d_so),
+        matvec=matvec,
+        rmatvec=rmatvec,
+        dtype=np.complex64,
+    )
     S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
     return S, S_params
 
@@ -364,6 +392,32 @@ def apply_channel(S, rho, output='matrix'):
         rho_out = (S@rho_vec)
 
     return rho_out
+
+def get_normality_residual(S, *, n_vectors=16, seed=0, eps=1e-12):
+    """Estimate the largest normalized ||S†Sx - SS†x|| over random probes."""
+    if S.shape[0] != S.shape[1]:
+        raise ValueError("Normality is defined only for square operators.")
+    if n_vectors < 1:
+        raise ValueError("n_vectors must be at least one.")
+
+    rng = np.random.default_rng(seed)
+
+    max_residual = 0.0
+    for _ in range(n_vectors):
+        vec = rng.standard_normal(S.shape[1]) + 1j * rng.standard_normal(S.shape[1])
+        vec /= np.linalg.norm(vec)
+
+        adjoint_then_forward = S.H @ (S @ vec)
+        forward_then_adjoint = S @ (S.H @ vec)
+        residual = np.linalg.norm(adjoint_then_forward - forward_then_adjoint)
+        scale = max(
+            np.linalg.norm(adjoint_then_forward),
+            np.linalg.norm(forward_then_adjoint),
+            eps,
+        )
+        max_residual = max(max_residual, residual / scale)
+
+    return max_residual
 
 def get_mixing_time(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
