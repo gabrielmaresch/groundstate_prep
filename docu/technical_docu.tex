@@ -168,16 +168,30 @@ H_{\rm bath}\right) \right).
 \end{align}
 
 
-While an analog simulation would produce the correct time evolution intrinsically, on a digital quantum simulator we have to program the time evolution explicitly and do so with second order Trotterization for some time $\Delta t$
+While an analog simulation would produce the correct time evolution intrinsically, on a digital quantum simulator we have to program the time evolution explicitly and do so with a time-dependent second order Trotterization for some time $\Delta t$
 \begin{align}\label{eq:trotterization}\notag
 U(t\rightarrow t+\Delta t)&\approx \exp\left(-i\int_{t+\tfrac{\Delta t}{2}}^{t+\Delta t}d\tau H_{\rm int}(\tau)\right)e^{-i(H_0+H_{\rm bath})\Delta t} \exp\left(-i\int_{t}^{t+\tfrac{\Delta t}{2}}d\tau H_{\rm int}(\tau)\right)\\
 \end{align}
-and then approximate the integrals by using the value at the midpoint as constant approximation in order to preserve symmetry: \SA{maybe explain importance}
+and then approximate the integrals by using the value at the midpoint as constant approximation in order to preserve symmetry which allows for a second order schema.
 \begin{align}\label{eq:trotterization_with_freezing}
 U(t\rightarrow t+\Delta t)&\approx e^{-i H_{\rm int}(t+\tfrac{\Delta t}{2})\tfrac{\Delta t}{2}}e^{-i(H_0+H_{\rm bath})\Delta t} e^{-i H_{\rm int}(t+\tfrac{\Delta t}{2})\tfrac{\Delta t}{2}}.
 \end{align}
 %\SA{($\frac{1}{2}\Delta t \to \Delta t /2 $?)}
-In the cooling algorithm itself, the interval $[-T,T]$ is divided into $M$ subintervals of length $\tau$ and each subinterval is evolved according to \cref{eq:trotterization_with_freezing}. Note, that freezing $H_{\rm int}$ at the subinterval-midpoint is just a convenient numerical choice, but not necessarily optimal. Using different evaluation points for the quadrature of $f$, or even exact evaluation of the $f$-integration, would not necessarily improve the order of the approximation, but potentially reduce the constant of the error term. However, we will not pursue this particular direction further.
+In the cooling algorithm itself, the interval $[-T,T]$ is divided into $M$ subintervals of length $\tau$ and each subinterval is evolved according to \cref{eq:trotterization_with_freezing}. Note, that freezing $H_{\rm int}$ at the subinterval-midpoint is a convenient numerical choice as it is a second order approximation:
+\begin{align}\label{eq:midpoint_error_right}
+    \int_{t+\tfrac{\Delta t}{2}}^{t+\Delta t}d\tau H_{\rm int}(\tau) & = \tfrac{\Delta t}{2} H_{\rm int}(t+\tfrac{\Delta t}{2})+ A \Delta t^2 + O( \Delta t^3)\\ \label{eq:midpoint_error_left}
+    \int_t^{t+\tfrac{\Delta t}{2}}d\tau H_{\rm int}(\tau) & = \tfrac{\Delta t}{2} H_{\rm int}(t+\tfrac{\Delta t}{2})- A \Delta t^2 + O( \Delta t^3).
+\end{align} It is not hard to show that all operators on the righthand side of \cref{eq:midpoint_error_left,eq:midpoint_error_right} commute. Therefore, to argue why \cref{eq:trotterization_with_freezing} is actually of second order, it suffices to focus on the term 
+
+\begin{align}
+e^{-iA\Delta t^2}    e^{-i(H_0+H_{\rm bath})\Delta t} e^{iA\Delta t^2} &=   e^{-i(H_0+H_{\rm bath})\Delta t} + i [e^{-i(H_0+H_{\rm bath})\Delta t},A] \Delta t^2 + O(\Delta t^4).
+\end{align} Finally, expanding $
+ [e^{-i(H_0+H_{\rm bath})\Delta t} + O(\Delta^2),A] = [I-i(H_0+H_{\rm bath})\Delta t, A]  =O(\Delta t)$ we see that the error in \cref{eq:trotterization_with_freezing} is $O(\Delta t^3)$ for one substep of the time-evolution. Since there are $O(\tfrac{1}{\Delta t})$ substeps the global error is $O(\Delta t^2)$.
+
+
+Using a more sophisticated quadrature of $f$, or even exact integration, would not necessarily improve the order of the overall approximation, but potentially reduce the constant of the error term. However, we will not pursue this particular direction further.
+
+
 
 \section{Transverse field Ising model}\label{sec:TFIM}
 The benchmark system which is used for validation is given by the Hamiltonian
@@ -205,7 +219,7 @@ The spectrum of $H(J,h)$ can be computed exactly by mapping the TFIM to a free f
 This transforms \cref{eq:TFIM_Hamiltonian} to a quadratic fermionic Hamiltonian which then can be diagonalized via momentum basis and a suitable Bogoliubov transformation. The end result is a free fermionic Hamiltonian which is diagonal in the number basis $\hat{n}_k= \hat{\gamma}_k^{\dagger} \hat{\gamma}_k$ of the corresponding Bogoliubov quasiparticles:
 \begin{align}\label{eq:TFIM_ff}
     H = \sum_k \varepsilon_k (J,h)\left( \hat{n}_k - \frac12\right)
-\end{align}   
+\end{align}
 with dispersion relation
 \begin{align}\label{eq:TFIM_dispersion}
    \varepsilon_k(J,h) = 2\sqrt{(h-J\cos k)^2 + J^2\sin^2 k} \quad {\rm for} \quad k = \pm \frac{\pi}{N}, \pm \frac{2\pi}{N}, \ldots
@@ -237,14 +251,14 @@ Let us quickly review the parameters we encountered so far:
 
     \begin{subfigure}[t]{0.49\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/bohr_density_plot.png}
+        \includegraphics[width=\linewidth]{docu/plots/bohr_density_plot.png}
         \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J=1.2$.}
         \label{fig:bohr_bandwiths}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/bohr_quantiles_plot.png}
+        \includegraphics[width=\linewidth]{docu/plots/bohr_quantiles_plot.png}
         \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J$ between $0$ and $2$.}
         \label{fig:bohr_quantiles}
     \end{subfigure}
@@ -302,7 +316,7 @@ After each cooling step, the auxiliary qubit is measured and prepared in the sam
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{docu/circuit_2_steps.png}
+    \includegraphics[width=\textwidth]{docu/plots/circuit_2_steps.png}
      \caption{Quantum Circuit constructed using  the \textsc{pennylane} framework}
      \label{fig:qc}
 \end{figure}
@@ -311,12 +325,9 @@ Nota bene: Simulation of the quantum circuit makes it necessary to decide in adv
 
 Furthermore, since for simulation all iteration steps have to be pre-determined, meaning a specific sequence $(A_n,\omega_n)\in \mathcal{A}\times [0, \omega_{\rm max}]$ has to be chosen in advance. In the present implementation this is done with a random seed, in order to allow for reproducibility.
 
-Trotterization order analysis: second order is possible.
-
-
 
 \section{Simulation using superoperator representation}
-A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called ,,vectorization''.
+A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called ,,vectorization'', cf. \cite{watrous2018}.
 
 \subsection{Choi representation}
 
@@ -338,6 +349,7 @@ where $U_{ij} = \bra{i}_{b} U  \ket{j}_{b}$ is an operator $\mathcal{H}_0 \to \m
 \begin{align*}
      \Tr_{\mathcal H_{\rm bath}} U\rho U^{\dagger} = \sum_{ij} p_j  U_{ij}\rho_0 U_{ij}^{\dagger}.
 \end{align*} This involves only matrix-products of $2^N \times 2^N$ matrices, which is advantageous to multiplying $2^{N+1} \times 2^{N+1}$ matrices.
+
 \subsection{Time Evolution}
 Matrix exponentials are computed exactly up to complex64 precision.
 
@@ -385,14 +397,14 @@ Convergence is measured in number of iterations starting from the pure state $\r
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/iterations_normalized.png}
+        \includegraphics[width=\linewidth]{docu/plots/iterations_normalized.png}
         \caption{First subplot.}
         \label{fig:iterations}
     \end{subfigure}%
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/iterations_log_normalized.png}
+        \includegraphics[width=\linewidth]{docu/plots/iterations_log_normalized.png}
         \caption{Second subplot.}
         \label{fig:iterations_logplot}
     \end{subfigure}
@@ -408,7 +420,7 @@ The number of iterations till fixed-point closeness does not decrease uniformly 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.65\textwidth]{docu/iterations_fit_normalized.png}
+    \includegraphics[width=0.65\textwidth]{docu/plots/iterations_fit_normalized.png}
     \caption{Description of the image.}
     \label{fig:iterations_fitted}
 \end{figure}
@@ -416,7 +428,7 @@ The number of iterations till fixed-point closeness does not decrease uniformly 
 It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \cref{fig:distance_to_gibbs} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\epsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alpha$ need more iterations.  
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{docu/distance_to_gibbs_normalized.png}
+    \includegraphics[width=0.8\textwidth]{docu/plots/distance_to_gibbs_normalized.png}
     \caption{Description of the image.}
     \label{fig:distance_to_gibbs}
 \end{figure}
@@ -440,7 +452,7 @@ only for real nonnegative subleading eigenvalue the two notion coincide. Since, 
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/superoperator_N4_ex1.png}
+        \includegraphics[width=\linewidth]{docu/plots/superoperator_N4_ex1.png}
         \caption{Spectrum for concrete instance of averaged cooling superoperator.}
         \label{fig:spectrum_example}
     \end{subfigure}
@@ -476,6 +488,12 @@ arXiv:2512.03457 [quant-ph] (2025).
 M.~Oshikawa,
 \textit{Universal Finite-Size Gap Scaling of the Quantum Ising Chain},
 arXiv:1910.06353 [cond-mat.stat-mech] (2019).
+
+\bibitem[Watrous(2018)]{watrous2018}
+J.~Watrous,
+\textit{The Theory of Quantum Information},
+Cambridge University Press, Cambridge, 2018.
+
 
 \end{thebibliography}
 
