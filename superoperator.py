@@ -252,7 +252,7 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
         n_eigvals = min(4, d_so - 1)
         eigvals = np.full(n_eigvals, np.nan, dtype=np.complex64)
         fixedpoint = np.full(d_so, np.nan, dtype=np.complex64)
-        return eigvals, fixedpoint, np.nan, np.nan, np.nan
+        return eigvals, fixedpoint, np.nan, np.nan, np.nan, np.nan
     
 
     eigvals = eigvals.astype(np.complex64)
@@ -275,9 +275,10 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
     thermal_dist = abs(thermal_ev - target_ev)
     num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
 
-    # compute distance between the two non-leading eigenvalues closest to 1
-    Delta2 = abs(sorted_eigvals[0] - sorted_eigvals[1])
-    return eigvals, fixedpoint, num_closer, Delta2, thermal_dist
+    # Separation from the fixed-point eigenvalue and conventional modulus gap.
+    Delta_sep = abs(sorted_eigvals[0] - sorted_eigvals[1])
+    Delta_gap = 1 - np.max(np.abs(sorted_eigvals[1:]))
+    return eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, thermal_dist
 
 def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
         target = 1. + 0.j
@@ -310,7 +311,7 @@ def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
 def plot_superoperator_spectrum(S, S_params, J, h, output = True):
     
     N, tau, T, sigma, _, omega_max, _, alpha, beta, averages = S_params
-    eigvals, _, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
+    eigvals, _, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
 
     
     #### PLOT ###########
@@ -323,7 +324,8 @@ def plot_superoperator_spectrum(S, S_params, J, h, output = True):
 
     info_so = (
         f"num_closer to FP = {num_closer}\n"
-        f"$\\Delta_2$ = {np.real(Delta2):.4f}\n"
+        f"$\\Delta_{{\\mathrm{{sep}}}}$ = {np.real(Delta_sep):.4f}\n"
+        f"$\\Delta_{{\\mathrm{{gap}}}}$ = {np.real(Delta_gap):.4f}\n"
         f"$\\Delta_{{\\mathrm{{th}}}}$ = {Delta_th:.4f}"
     )
     info_H = f"N = {N}\nJ = {J}\nh = {h}"
@@ -401,14 +403,15 @@ def get_normality_residual(S, *, n_vectors=16, seed=0, eps=1e-12):
         raise ValueError("n_vectors must be at least one.")
 
     rng = np.random.default_rng(seed)
+    adjoint = S.H if hasattr(S, "H") else np.asarray(S).conj().T
 
     max_residual = 0.0
     for _ in range(n_vectors):
         vec = rng.standard_normal(S.shape[1]) + 1j * rng.standard_normal(S.shape[1])
         vec /= np.linalg.norm(vec)
 
-        adjoint_then_forward = S.H @ (S @ vec)
-        forward_then_adjoint = S @ (S.H @ vec)
+        adjoint_then_forward = adjoint @ (S @ vec)
+        forward_then_adjoint = S @ (adjoint @ vec)
         residual = np.linalg.norm(adjoint_then_forward - forward_then_adjoint)
         scale = max(
             np.linalg.norm(adjoint_then_forward),
@@ -419,7 +422,7 @@ def get_normality_residual(S, *, n_vectors=16, seed=0, eps=1e-12):
 
     return max_residual
 
-def get_mixing_time(S, fixedpoint, *, eps=0.01, max_iter = 5000):
+def num_iterations(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
@@ -471,7 +474,7 @@ if __name__ == "__main__":
 
 
     S, S_params = get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, method = 'kraus')
-    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
+    eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(S, beta, [N, J, h])
     
     correct_fp, test_state, dist_fp  = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
     if correct_fp:
@@ -482,7 +485,7 @@ if __name__ == "__main__":
 
     plot_superoperator_spectrum(S, S_params, J, h)
 
-    print('number of iterations from fit:', get_mixing_time(S, fixedpoint))
+    print('number of iterations from fit:', num_iterations(S, fixedpoint))
 
     # initialize rho
     rho = np.zeros((2**N, 2**N), dtype = np.complex64)

@@ -13,7 +13,8 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
-    get_mixing_time,
+    get_normality_residual,
+    num_iterations,
     get_superoperator_spectral_data,
     next_running_number,
 )
@@ -112,13 +113,14 @@ def compute_single_point(
         beta,
         method=method,
     )
-    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+    eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
         channel,
         beta,
         [N, J_hot, h_hot],
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
-    mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
+    normality_residual = get_normality_residual(channel)
+    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
 
     result = {
         "N": N,
@@ -137,11 +139,13 @@ def compute_single_point(
         "channel_params": channel_params,
         "spectrum_data": {
             "eigvals": np.asarray(eigvals),
-            "Delta2": float(Delta2),
+            "Delta_sep": float(Delta_sep),
+            "Delta_gap": float(Delta_gap),
             "Delta_th": float(Delta_th),
             "num_closer": int(num_closer),
             "trace_distance": float(trace_distance),
-            "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
+            "normality_residual": float(normality_residual),
+            "num_iterations": np.nan if iteration_count is None else float(iteration_count),
         },
     }
     if save_channel:
@@ -204,11 +208,13 @@ def save_grid(rows, snapshot_path, save_channel):
         beta=np.array([row["beta"] for row in rows]),
         h_over_J=np.array([row["h_over_J"] for row in rows]),
         eigvals=np.stack([row["spectrum_data"]["eigvals"] for row in rows]),
-        Delta2=np.array([row["spectrum_data"]["Delta2"] for row in rows]),
+        Delta_sep=np.array([row["spectrum_data"]["Delta_sep"] for row in rows]),
+        Delta_gap=np.array([row["spectrum_data"]["Delta_gap"] for row in rows]),
         Delta_th=np.array([row["spectrum_data"]["Delta_th"] for row in rows]),
         num_closer=np.array([row["spectrum_data"]["num_closer"] for row in rows]),
         trace_distance=np.array([row["spectrum_data"]["trace_distance"] for row in rows]),
-        get_mixingtime=np.array([row["spectrum_data"]["get_mixingtime"] for row in rows]),
+        normality_residual=np.array([row["spectrum_data"]["normality_residual"] for row in rows]),
+        num_iterations=np.array([row["spectrum_data"]["num_iterations"] for row in rows]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
     )
 

@@ -80,8 +80,8 @@ python grid.py --N 4 --h-points 10 --alpha-points 6 --sigma-points 5 --omega-poi
 
 Results are saved as `.npz` files under `data/` by default. Use `--data-dir`
 to choose another output directory. The notebooks `sweep_analysis.ipynb` and
-`grid_analysis.ipynb` inspect the resulting spectral gaps, trace distances,
-mixing-time estimates, and parameter dependence.
+`grid_analysis.ipynb` inspect the resulting spectral separations, spectral gaps, trace distances,
+normality residuals, iteration counts, and parameter dependence.
 
 > **Scaling note:** a dense channel matrix has dimension
 > \(4^N \times 4^N\). Dense workflows are therefore practical only for small

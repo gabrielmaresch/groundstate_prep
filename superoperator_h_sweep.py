@@ -5,7 +5,7 @@ import sys
 import numpy as np
 import matplotlib
 
-if "--load" not in sys.argv:
+if __name__ == "__main__" and "--load" not in sys.argv:
     matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
@@ -14,7 +14,8 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
-    get_mixing_time,
+    get_normality_residual,
+    num_iterations,
     get_superoperator_spectral_data,
     next_running_number,
 )
@@ -60,11 +61,13 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
-        Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
+        Delta_sep=np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data]),
+        Delta_gap=np.array([entry["spectrum_data"]["Delta_gap"] for entry in sweep_data]),
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
         num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
-        get_mixingtime=np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data]),
+        normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
+        num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
     )
     temp_path.replace(snapshot_path)
 
@@ -110,10 +113,11 @@ def compute_sweep(
             beta,
             method="choi",
         )
-        eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J_hot, h_hot])
+        eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J_hot, h_hot])
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
-        mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
-        print(f"iterations for eps={eps_fit:.4g}: {mixing_time}")
+        normality_residual = get_normality_residual(channel)
+        iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+        print(f"iterations for eps={eps_fit:.4g}: {iteration_count}")
         
         
         sweep_data.append(
@@ -125,11 +129,13 @@ def compute_sweep(
                 "channel_params": channel_params,
                 "spectrum_data": {
                     "eigvals": eigvals,
-                    "Delta2": float(Delta2),
+                    "Delta_sep": float(Delta_sep),
+                    "Delta_gap": float(Delta_gap),
                     "Delta_th": float(Delta_th),
                     "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
-                    "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
+                    "normality_residual": float(normality_residual),
+                    "num_iterations": np.nan if iteration_count is None else float(iteration_count),
                 },
             }
         )
@@ -148,24 +154,24 @@ def show_plots(
     omega_max,
     J,
     h_grid,
-    Delta2,
+    Delta_sep,
     trace_distance,
-    mixing_time,
+    iteration_counts,
     plot_dir,
     show_window=False,
 ):
-    gap = np.maximum(Delta2, 1e-16)
+    separation = np.maximum(Delta_sep, 1e-16)
     fig, axes = plt.subplots(2, 2, figsize=(10, 7))
-    ax_gap = axes[0, 0]
+    ax_sep = axes[0, 0]
     ax_dist = axes[0, 1]
-    ax_mix = axes[1, 0]
+    ax_iterations = axes[1, 0]
     ax_info = axes[1, 1]
 
-    ax_gap.semilogy(h_grid, gap, marker="o")
-    ax_gap.set_xlabel(r"$h/J$")
-    ax_gap.set_ylabel(r"$\Delta_2$")
-    ax_gap.set_title(r"$\Delta_2$ vs $h/J$")
-    ax_gap.grid(True, which="both", linestyle=":")
+    ax_sep.semilogy(h_grid, separation, marker="o")
+    ax_sep.set_xlabel(r"$h/J$")
+    ax_sep.set_ylabel(r"$\Delta_{\mathrm{sep}}$")
+    ax_sep.set_title(r"$\Delta_{\mathrm{sep}}$ vs $h/J$")
+    ax_sep.grid(True, which="both", linestyle=":")
 
     ax_dist.plot(h_grid, trace_distance, marker="o")
     ax_dist.set_xlabel(r"$h/J$")
@@ -173,14 +179,14 @@ def show_plots(
     ax_dist.set_title("fixed point distance")
     ax_dist.grid(True, linestyle=":")
 
-    if mixing_time is not None:
-        ax_mix.plot(h_grid, mixing_time, marker="o")
-        ax_mix.set_xlabel(r"$h/J$")
-        ax_mix.set_ylabel(r"$t_{\rm mix}/T$")
-        ax_mix.set_title("mixing time (iterations)")
-        ax_mix.grid(True, linestyle=":")
+    if iteration_counts is not None:
+        ax_iterations.plot(h_grid, iteration_counts, marker="o")
+        ax_iterations.set_xlabel(r"$h/J$")
+        ax_iterations.set_ylabel("number of iterations")
+        ax_iterations.set_title("iterations to fixed point")
+        ax_iterations.grid(True, linestyle=":")
     else:
-        ax_mix.axis("off")
+        ax_iterations.axis("off")
 
     info = (
         f"N = {N}\n"
@@ -247,9 +253,9 @@ def main():
         saved = np.load(matches[0])
         h_grid = saved["h_over_J"] if "h_over_J" in saved.files else saved["h"]
         # channels = saved["channels"] if "channels" in saved.files else np.array([])
-        Delta2 = saved["Delta2"]
+        Delta_sep = saved["Delta_sep"]
         trace_distance = saved["trace_distance"]
-        mixing_time = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
+        iteration_counts = saved["num_iterations"] if "num_iterations" in saved.files else None
     else:
         sweep_data = compute_sweep(
             op_set,
@@ -268,9 +274,9 @@ def main():
             snapshot_path=snapshot_path,
         )
         h_grid = np.array([entry["h_over_J"] for entry in sweep_data])
-        Delta2 = np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data])
+        Delta_sep = np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data])
         trace_distance = np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data])
-        mixing_time = np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data])
+        iteration_counts = np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data])
     
     show_plots(
         N=N,
@@ -282,9 +288,9 @@ def main():
         omega_max=omega_max,
         J=J,
         h_grid=h_grid,
-        Delta2=Delta2,
+        Delta_sep=Delta_sep,
         trace_distance=trace_distance,
-        mixing_time=mixing_time,
+        iteration_counts=iteration_counts,
         plot_dir=plot_dir,
         show_window=args.load,
     )

@@ -9,7 +9,8 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel,
-    get_mixing_time,
+    get_normality_residual,
+    num_iterations,
     get_superoperator_spectral_data,
     next_running_number,
 )
@@ -62,11 +63,13 @@ def save_sweep(sweep_data, snapshot_path, save_channel):
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
-        Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
+        Delta_sep=np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data]),
+        Delta_gap=np.array([entry["spectrum_data"]["Delta_gap"] for entry in sweep_data]),
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
         num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
-        get_mixingtime=np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data]),
+        normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
+        num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
     )
 
 
@@ -107,14 +110,15 @@ def compute_single_hJ(
         alpha,
         beta,
     )
-    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+    eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
         channel,
         beta,
         [N, J_hot, h_hot],
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
-    mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
-    print(f"iterations for eps={eps_fit:.4g}: {mixing_time}", flush=True)
+    normality_residual = get_normality_residual(channel)
+    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+    print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
 
     result = {
         "h": h,
@@ -123,11 +127,13 @@ def compute_single_hJ(
         "channel_params": channel_params,
         "spectrum_data": {
             "eigvals": eigvals,
-            "Delta2": float(Delta2),
+            "Delta_sep": float(Delta_sep),
+            "Delta_gap": float(Delta_gap),
             "Delta_th": float(Delta_th),
             "num_closer": int(num_closer),
             "trace_distance": float(trace_distance),
-            "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
+            "normality_residual": float(normality_residual),
+            "num_iterations": np.nan if iteration_count is None else float(iteration_count),
         },
     }
     if save_channel:
