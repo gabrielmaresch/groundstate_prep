@@ -44,7 +44,8 @@ def thermal_state(H: np.ndarray, beta: float):
         raise ValueError("H must be square")
 
     evals, evecs = np.linalg.eigh(H)
-    beta_exps = np.exp(-beta * evals)
+    shifted_evals = evals - np.min(evals)
+    beta_exps = np.exp(-beta * shifted_evals)
     Z = np.sum(beta_exps)
     weights = np.asarray(beta_exps / Z, dtype=np.complex64)
     gibbs = ((evecs.astype(np.complex64) * weights) @ evecs.conj().T).astype(np.complex64)
@@ -60,7 +61,8 @@ def thermal_expectation_value(H: np.ndarray, A: np.ndarray, beta: float):
         raise ValueError("H must be square")
 
     evals, evecs = np.linalg.eigh(H)
-    beta_exps = np.exp(-beta * evals)
+    shifted_evals = evals - np.min(evals)
+    beta_exps = np.exp(-beta * shifted_evals)
     Z = np.sum(beta_exps)
 
     expectation = np.complex64(0.0)

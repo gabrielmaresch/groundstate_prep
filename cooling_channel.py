@@ -134,8 +134,10 @@ def construct_U_layers(num_qubits:int, tau:float, T:float, sigma:float, op:"qml.
 
 def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:bool = True):
 
-    Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
-    p0, p1 = np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z
+    # Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
+    # p0, p1 = np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z
+    p0 = 1 / (1 + np.exp(-omega * beta))
+    p1 = 1 - p0
     assert np.isclose(p0+p1, 1)
 
     if mixed:
