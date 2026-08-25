@@ -86,12 +86,17 @@ def averaged_blocks_as_linop(num_system_qubits, computed_instances, beta):
     d_so = d_sys * d_sys
     weights = []
     for _, omega in computed_instances:
-        Z = np.exp(omega * beta / 2) + np.exp(-omega * beta / 2)
+        # Z = np.exp(omega * beta / 2) + np.exp(-omega * beta / 2)
+        # weights.append(
+        #     np.array(
+        #         [np.exp(omega * beta / 2) / Z, np.exp(-omega * beta / 2) / Z],
+        #         dtype=np.complex64,
+        #     )
+        # )
+        p0 = 1 / (1 + np.exp(-omega * beta))
+        p1 = 1 - p0
         weights.append(
-            np.array(
-                [np.exp(omega * beta / 2) / Z, np.exp(-omega * beta / 2) / Z],
-                dtype=np.complex64,
-            )
+            np.array([p0, p1], dtype=np.complex64)
         )
     averages = len(computed_instances)
 
