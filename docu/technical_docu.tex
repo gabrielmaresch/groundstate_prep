@@ -422,18 +422,18 @@ It is important to keep in mind, that the fixed point of a given channel is not 
 \end{figure}
 To study the spectral properties of the channel with respect to its fixed point behavior we introduce the quantity
 \begin{align}\label{eq:spectral_separation}
-    \Delta_2 = \min_{\lambda\neq 1}|1-\lambda|.
+    \Delta_{\mathrm{sep}} = \min_{\lambda\neq 1}|1-\lambda|.
 \end{align} Note that \cref{eq:spectral_separation} is in general different from the spectral \emph{gap}
 \begin{align}\label{eq:spectral_gap}
-    \Delta_{\rm gap} = 1- \max_{\lambda\neq 1}|\lambda|\le \Delta_2,
+    \Delta_{\mathrm{gap}} = 1- \max_{\lambda\neq 1}|\lambda|\le \Delta_{\mathrm{sep}},
 \end{align}
-only for real nonnegative subleading eigenvalue the two notion coincide. Since, by perturbative arguments we know that - at least in the weak coupling regime - the channel is guaranteed to have am almost thermal fixed point, we are mostly interested in the local behavior around this fixed point rather than in the global gap. However, numerical inspection of explicit spectra indicate $\lambda_2$ being positive and real, so that $\Delta_2 \approx \Delta_{\rm gap}$ is a sensible working hypothesis for our experimental runs, cf. \cref{fig:spectrum_example}.
+only for real nonnegative subleading eigenvalue the two notion coincide. Since, by perturbative arguments we know that - at least in the weak coupling regime - the channel is guaranteed to have am almost thermal fixed point, we are mostly interested in the local behavior around this fixed point rather than in the global gap. However, numerical inspection of explicit spectra indicate $\lambda_2$ being positive and real, so that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ is a sensible working hypothesis for our experimental runs, cf. \cref{fig:spectrum_example}.
 
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/gap_normalized.png}
+        \includegraphics[width=\linewidth]{docu/plots/separation_normalized.png}
         \caption{Spectral separation from channel fixed point}
         \label{fig:sep_vs_iterations}
     \end{subfigure}%

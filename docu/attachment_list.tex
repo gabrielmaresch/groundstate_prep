@@ -35,7 +35,7 @@
       \item State problem: preparing low-temperature/thermal quantum states.
       \item State method: averaged cooling channel with auxiliary qubit.
       \item State benchmark: transverse-field Ising model, exact Gibbs states.
-      \item State main findings: convergence behavior, fixed-point quality, spectral gap/mixing-time dependence on parameters.
+      \item State main findings: convergence behavior, fixed-point quality, and spectral-gap/iteration-count dependence on parameters.
     \end{itemize}
 
     \item \textbf{Introduction}
@@ -112,10 +112,10 @@
       \item Experiment 2: Superoperator spectrumBuild averaged channel S.
       \item Plot eigenvalues in the complex plane.
       \item Identify eigenvalue near 1 and associated fixed point.
-      \item Use $\Delta_2$ as convergence proxy.
+      \item Use $\Delta_{\mathrm{sep}}$ as convergence proxy.
       \item Experiment 3: $\beta$ sweepStudy lower-temperature behavior.
       \item Plot trace distance of fixed point to Gibbs state versus $\beta$.
-      \item Plot spectral gap/mixing time versus $\beta$.
+      \item Plot spectral gap/number of iterations versus $\beta$.
       \item Use existing \texttt{data/superoperator\_N4\_beta\_sweep\_*.npz}.
       \item Experiment 4: h/J sweepSweep transverse field.
       \item Look for harder convergence near the TFIM critical region.
@@ -127,13 +127,13 @@
     \item \textbf{Results}
     \begin{itemize}
       \item Organize by metrics, not by scripts:Fixed-point accuracy: D($\rho_\text{fix}$, $\rho_\beta$).
-      \item Mixing time: iterations to reach chosen $\epsilon$.
-      \item Spectral gap proxy: distance between leading and subleading eigenvalues.
+      \item Number of iterations needed to reach the chosen $\epsilon$.
+      \item Spectral-separation proxy: distance between leading and subleading eigenvalues.
       \item Parameter sensitivity: $\beta$, h/J, $\alpha$, $\sigma$, T, $\tau$.
       \item Good core figures:Trace distance to Gibbs vs iterations.
       \item Spectrum of averaged superoperator.
       \item Fixed-point trace distance vs $\beta$.
-      \item Mixing time vs h/J.
+      \item Number of iterations vs h/J.
       \item Gap proxy vs h/J or $\beta$.
     \end{itemize}
 

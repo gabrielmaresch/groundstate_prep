@@ -11,7 +11,8 @@ from superoperator import (
     check_if_TFIM_gibbs,
     get_U_matrix,
     get_kraus_blocks,
-    get_mixing_time,
+    get_normality_residual,
+    num_iterations,
     get_superoperator_spectral_data,
     next_running_number,
 )
@@ -64,11 +65,13 @@ def save_instance(result, snapshot_path, save_channel):
         beta=result["beta"],
         channel=result["channel"] if save_channel else np.array([]),
         eigvals=result["spectrum_data"]["eigvals"],
-        Delta2=result["spectrum_data"]["Delta2"],
+        Delta_sep=result["spectrum_data"]["Delta_sep"],
+        Delta_gap=result["spectrum_data"]["Delta_gap"],
         Delta_th=result["spectrum_data"]["Delta_th"],
         num_closer=result["spectrum_data"]["num_closer"],
         trace_distance=result["spectrum_data"]["trace_distance"],
-        get_mixingtime=result["spectrum_data"]["get_mixingtime"],
+        normality_residual=result["spectrum_data"]["normality_residual"],
+        num_iterations=result["spectrum_data"]["num_iterations"],
     )
 
 
@@ -216,13 +219,14 @@ def main():
         workers=workers,
         H_sys=H_sys,
     )
-    eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+    eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
         channel,
         beta,
         [N, J, h],
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
-    mixing_time = get_mixing_time(channel, fixedpoint, eps=eps_fit)
+    normality_residual = get_normality_residual(channel)
+    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
 
     result = {
         "h": h,
@@ -231,11 +235,13 @@ def main():
         "channel_params": channel_params,
         "spectrum_data": {
             "eigvals": eigvals,
-            "Delta2": float(Delta2),
+            "Delta_sep": float(Delta_sep),
+            "Delta_gap": float(Delta_gap),
             "Delta_th": float(Delta_th),
             "num_closer": int(num_closer),
             "trace_distance": float(trace_distance),
-            "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
+            "normality_residual": float(normality_residual),
+            "num_iterations": np.nan if iteration_count is None else float(iteration_count),
         },
     }
     if save_channel:

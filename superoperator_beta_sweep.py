@@ -4,19 +4,22 @@ import sys
 
 import matplotlib
 import numpy as np
+
+if __name__ == "__main__" and "--load" not in sys.argv:
+    matplotlib.use("Agg")
+
 from matplotlib.widgets import Slider
 
 from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
-    get_mixing_time,
+    get_normality_residual,
+    num_iterations,
     get_superoperator_spectral_data,
     next_running_number,
 )
 
-if "--load" not in sys.argv:
-    matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
@@ -58,11 +61,13 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
-        Delta2=np.array([entry["spectrum_data"]["Delta2"] for entry in sweep_data]),
+        Delta_sep=np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data]),
+        Delta_gap=np.array([entry["spectrum_data"]["Delta_gap"] for entry in sweep_data]),
         Delta_th=np.array([entry["spectrum_data"]["Delta_th"] for entry in sweep_data]),
         num_closer=np.array([entry["spectrum_data"]["num_closer"] for entry in sweep_data]),
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
-        get_mixingtime=np.array([entry["spectrum_data"]["get_mixingtime"] for entry in sweep_data]),
+        normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
+        num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
     )
     temp_path.replace(snapshot_path)
 
@@ -106,11 +111,12 @@ def precompute_sweep(
             beta,
             method="choi",
         )
-        eigvals, fixedpoint, num_closer, Delta2, Delta_th = get_superoperator_spectral_data(
+        eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
             channel, beta, [N, J_hot, h_hot]
         )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
-        mixing_time = get_mixing_time(channel, fixedpoint)
+        normality_residual = get_normality_residual(channel)
+        iteration_count = num_iterations(channel, fixedpoint)
 
         sweep_data.append(
             {
@@ -119,11 +125,13 @@ def precompute_sweep(
                 "channel_params": channel_params,
                 "spectrum_data": {
                     "eigvals": eigvals,
-                    "Delta2": float(Delta2),
+                    "Delta_sep": float(Delta_sep),
+                    "Delta_gap": float(Delta_gap),
                     "Delta_th": float(Delta_th),
                     "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
-                    "get_mixingtime": np.nan if mixing_time is None else float(mixing_time),
+                    "normality_residual": float(normality_residual),
+                    "num_iterations": np.nan if iteration_count is None else float(iteration_count),
                 },
             }
         )
@@ -134,10 +142,12 @@ def precompute_sweep(
 
 def draw_entry(ax, bar_ax, entry, extent, *, N, T, alpha, sigma, omega_max, tau, J, h):
     eigvals = entry["spectrum_data"]["eigvals"]
-    Delta2 = entry["spectrum_data"]["Delta2"]
+    Delta_sep = entry["spectrum_data"]["Delta_sep"]
+    Delta_gap = entry["spectrum_data"]["Delta_gap"]
     Delta_th = entry["spectrum_data"]["Delta_th"]
     num_closer = entry["spectrum_data"]["num_closer"]
     trace_distance = entry["spectrum_data"]["trace_distance"]
+    normality_residual = entry["spectrum_data"]["normality_residual"]
 
     ax.clear()
     ax.scatter(eigvals.real, eigvals.imag, s=12)
@@ -163,8 +173,10 @@ def draw_entry(ax, bar_ax, entry, extent, *, N, T, alpha, sigma, omega_max, tau,
     )
     info_so = (
         f"num_closer = {num_closer}\n"
-        f"$\\Delta_2$ = {Delta2:.4f}\n"
+        f"$\\Delta_{{\\mathrm{{sep}}}}$ = {Delta_sep:.4f}\n"
+        f"$\\Delta_{{\\mathrm{{gap}}}}$ = {Delta_gap:.4f}\n"
         f"$\\Delta_{{\\mathrm{{th}}}}$ = {Delta_th:.4f}\n"
+        f"normality residual = {normality_residual:.4e}\n"
     )
 
     ax.text(
@@ -299,29 +311,46 @@ def main():
         saved = np.load(matches[0])
         beta_grid = saved["beta"]
         channels = saved["channels"] if "channels" in saved.files else np.array([])
-        mixing_times = saved["get_mixingtime"] if "get_mixingtime" in saved.files else None
+        iteration_counts = saved["num_iterations"] if "num_iterations" in saved.files else None
+        normality_residuals = (
+            saved["normality_residual"]
+            if "normality_residual" in saved.files
+            else np.full_like(saved["beta"], np.nan, dtype=float)
+        )
+        Delta_gaps = (
+            saved["Delta_gap"]
+            if "Delta_gap" in saved.files
+            else np.array([
+                1 - np.max(np.abs(np.delete(values, np.argmin(np.abs(values - 1)))))
+                for values in saved["eigvals"]
+            ])
+        )
         sweep_data = [
             {
                 "beta": beta,
                 "channel": channel if channels.size else None,
                 "spectrum_data": {
                     "eigvals": eigvals,
-                    "Delta2": float(Delta2),
+                    "Delta_sep": float(Delta_sep),
+                    "Delta_gap": float(Delta_gap),
                     "Delta_th": float(Delta_th),
                     "num_closer": int(num_closer),
                     "trace_distance": float(trace_distance),
-                    "get_mixingtime": np.nan if mix_time is None else float(mix_time),
+                    "normality_residual": float(normality_residual),
+                    "num_iterations": np.nan if iteration_count is None else float(iteration_count),
                 },
             }
-            for beta, channel, eigvals, Delta2, Delta_th, num_closer, trace_distance, mix_time in zip(
+            for beta, channel, eigvals, Delta_sep, Delta_gap, Delta_th, num_closer, trace_distance, normality_residual, iteration_count in zip(
                 saved["beta"],
                 channels if channels.size else [None] * len(saved["beta"]),
                 saved["eigvals"],
-                saved["Delta2"],
+                saved["Delta_sep"],
+                Delta_gaps,
                 saved["Delta_th"],
                 saved["num_closer"],
                 saved["trace_distance"],
-                mixing_times if mixing_times is not None else [np.nan] * len(saved["beta"]),
+                normality_residuals,
+                iteration_counts if iteration_counts is not None else [np.nan] * len(saved["beta"]),
             )
         ]
     else:
