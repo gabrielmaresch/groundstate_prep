@@ -114,9 +114,18 @@ def compute_single_beta(
         beta,
         [N, J_hot, h_hot],
     )
-    _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
+    spectral_success = np.all(np.isfinite(eigvals)) and np.all(np.isfinite(fixedpoint))
+    if spectral_success:
+        _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
+        iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+        num_closer_value = int(num_closer)
+    else:
+        print(f"Spectral computation failed for beta={beta:.4g}; storing NaN diagnostics", flush=True)
+        trace_distance = np.nan
+        iteration_count = None
+        num_closer_value = np.nan
+
     normality_residual = get_normality_residual(channel)
-    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
     print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
 
     result = {
@@ -128,7 +137,7 @@ def compute_single_beta(
             "Delta_sep": float(Delta_sep),
             "Delta_gap": float(Delta_gap),
             "Delta_th": float(Delta_th),
-            "num_closer": int(num_closer),
+            "num_closer": num_closer_value,
             "trace_distance": float(trace_distance),
             "normality_residual": float(normality_residual),
             "num_iterations": np.nan if iteration_count is None else float(iteration_count),

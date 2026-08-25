@@ -66,7 +66,7 @@ def get_choi_element(i,j, num_system_qubits, U, omega, beta):
     # rho_env = np.diag([np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z])
     p0 = 1 / (1 + np.exp(-omega * beta))
     p1 = 1 - p0
-    rho_env = np.diag([p0, p1])
+    rho_env = np.diag(np.array([p0, p1], dtype=np.float32))
     rho = np.kron(rho_sys, rho_env)
 
     rho_total = U@rho@U.conj().T
