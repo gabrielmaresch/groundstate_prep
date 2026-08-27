@@ -302,9 +302,12 @@ def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
                     current_idx = i
         return current_idx
 
-def normalize_to_densitymatrix(A):
+def normalize_to_densitymatrix(A, tol=1e-12):
+    trace =  np.trace(A)
+    if not np.isfinite(trace) or abs(trace) < tol:
+        return np.full_like(A, np.nan, dtype=np.complex64)
+    A = A / trace
     A_dens = 0.5 * (A + A.conj().T)
-    A_dens = A_dens / np.trace(A_dens)
     return A_dens
 
 def check_if_TFIM_gibbs(test_vector, beta, TFIM_params, tol = 0.025):
