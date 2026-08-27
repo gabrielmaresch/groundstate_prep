@@ -50,10 +50,15 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--dense-spectrum",
+        help="Diagonalize the full dense channel spectrum instead of using ARPACK.",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
-def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
+def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum):
     temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
     np.savez_compressed(
@@ -68,6 +73,7 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
         normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
         num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
+        dense_spectrum=dense_spectrum,
     )
     temp_path.replace(snapshot_path)
 
@@ -87,6 +93,7 @@ def precompute_sweep(
     beta_values,
     snapshot_path,
     save_channel,
+    dense_spectrum,
 ):
     sweep_data = []
     J_hot, h_hot = J, h
@@ -112,7 +119,7 @@ def precompute_sweep(
             method="superoperator",
         )
         eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
-            channel, beta, [N, J_hot, h_hot]
+            channel, beta, [N, J_hot, h_hot], full_spectrum=dense_spectrum
         )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
         normality_residual = get_normality_residual(channel)
@@ -135,7 +142,7 @@ def precompute_sweep(
                 },
             }
         )
-        save_sweep_snapshot(sweep_data, snapshot_path, save_channel)
+        save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum)
 
     return sweep_data
 
@@ -295,6 +302,7 @@ def main():
     data_dir = args.data_dir
     plot_dir = args.plot_dir
     save_channel = args.save_channel
+    dense_spectrum = args.dense_spectrum
 
     data_dir.mkdir(parents=True, exist_ok=True)
     plot_dir.mkdir(parents=True, exist_ok=True)
@@ -369,6 +377,7 @@ def main():
             beta_values=beta_values,
             snapshot_path=snapshot_path,
             save_channel=save_channel,
+            dense_spectrum=dense_spectrum,
         )
         beta_grid = beta_values
 

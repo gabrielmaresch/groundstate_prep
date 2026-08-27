@@ -14,6 +14,7 @@ from superoperator import (
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
+    linear_operator_to_dense,
     next_running_number,
 )
 
@@ -52,22 +53,27 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--dense-spectrum",
+        help="Whether dense superoprator matrix instead of linear operator/ARPACK.",
+        action="store_true",
+    )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--save-as-nr", type=int, default=-1)
     return parser.parse_args()
 
 
-def validate_save_channel_size(N, save_channel, *, max_dense_dim=4096):
+def validate_dense_size(N, dense_requested, *, max_dense_dim=4096):
     d_so = 2 ** (2 * N)
-    if save_channel and d_so > max_dense_dim:
+    if dense_requested and d_so > max_dense_dim:
         raise ValueError(
-            f"--save-channel would require a dense {d_so}x{d_so} channel. "
+            f"Dense channel use would require a {d_so}x{d_so} matrix. "
             f"Refusing because max_dense_dim={max_dense_dim}."
         )
 
 
-def save_instance(result, snapshot_path, save_channel):
+def save_instance(result, snapshot_path, save_channel, dense_spectrum):
     np.savez_compressed(
         snapshot_path,
         h=result["h"],
@@ -82,13 +88,8 @@ def save_instance(result, snapshot_path, save_channel):
         trace_distance=result["spectrum_data"]["trace_distance"],
         normality_residual=result["spectrum_data"]["normality_residual"],
         num_iterations=result["spectrum_data"]["num_iterations"],
+        dense_spectrum=dense_spectrum,
     )
-
-
-def linear_operator_to_dense(channel):
-    d_so = channel.shape[0]
-    basis = np.eye(d_so, dtype=np.complex64)
-    return np.column_stack([channel @ basis[:, j] for j in range(d_so)])
 
 
 def averaged_blocks_as_linop(num_system_qubits, computed_instances, beta):
@@ -100,19 +101,19 @@ def averaged_blocks_as_linop(num_system_qubits, computed_instances, beta):
         # weights.append(
         #     np.array(
         #         [np.exp(omega * beta / 2) / Z, np.exp(-omega * beta / 2) / Z],
-        #         dtype=np.complex64,
+        #         dtype=np.complex128,
         #     )
         # )
         p0 = 1 / (1 + np.exp(-omega * beta))
         p1 = 1 - p0
         weights.append(
-            np.array([p0, p1], dtype=np.complex64)
+            np.array([p0, p1], dtype=np.complex128)
         )
     averages = len(computed_instances)
 
     def matvec(vec):
-        rho = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
-        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+        rho = np.asarray(vec, dtype=np.complex128).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex128)
 
         for (U_blocks, _), p in zip(computed_instances, weights):
             for b in range(2):
@@ -123,8 +124,8 @@ def averaged_blocks_as_linop(num_system_qubits, computed_instances, beta):
         return (out / averages).reshape(-1)
 
     def rmatvec(vec):
-        observable = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
-        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+        observable = np.asarray(vec, dtype=np.complex128).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex128)
 
         for (U_blocks, _), p in zip(computed_instances, weights):
             for b in range(2):
@@ -138,7 +139,7 @@ def averaged_blocks_as_linop(num_system_qubits, computed_instances, beta):
         (d_so, d_so),
         matvec=matvec,
         rmatvec=rmatvec,
-        dtype=np.complex64,
+        dtype=np.complex128,
     )
 
 
@@ -211,7 +212,7 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
-    validate_save_channel_size(N, save_channel)
+    validate_dense_size(N, save_channel or args.dense_spectrum)
     workers = args.workers
     save_as_nr = args.save_as_nr
     op_set_type = args.op_set
@@ -254,14 +255,16 @@ def main():
         workers=workers,
         H_sys=H_sys,
     )
+    analysis_channel = linear_operator_to_dense(channel) if args.dense_spectrum else channel
     eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
-        channel,
+        analysis_channel,
         beta,
         [N, J, h],
+        full_spectrum=args.dense_spectrum,
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
-    normality_residual = np.nan if args.skip_normality_residual else get_normality_residual(channel)
-    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+    normality_residual = np.nan if args.skip_normality_residual else get_normality_residual(analysis_channel)
+    iteration_count = num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
 
     result = {
         "h": h,
@@ -280,9 +283,9 @@ def main():
         },
     }
     if save_channel:
-        result["channel"] = linear_operator_to_dense(channel)
+        result["channel"] = analysis_channel if args.dense_spectrum else linear_operator_to_dense(channel)
 
-    save_instance(result, snapshot_path, save_channel)
+    save_instance(result, snapshot_path, save_channel, args.dense_spectrum)
 
 
 if __name__ == "__main__":

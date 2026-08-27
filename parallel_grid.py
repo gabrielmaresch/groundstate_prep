@@ -45,6 +45,11 @@ def parse_args():
         help="Whether to store the full channel matrices in the output file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--dense-spectrum",
+        help="Diagonalize the full dense channel spectrum instead of using ARPACK.",
+        action="store_true",
+    )
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--data-dir", type=Path, default=Path("data/grid"))
     parser.add_argument("--save-as-nr", type=int, default=-1)
@@ -64,11 +69,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def validate_save_channel_size(N, save_channel, *, max_dense_dim=4096):
+def validate_dense_size(N, dense_requested, *, max_dense_dim=4096):
     d_so = 2 ** (2 * N)
-    if save_channel and d_so > max_dense_dim:
+    if dense_requested and d_so > max_dense_dim:
         raise ValueError(
-            f"--save-channel would require a dense {d_so}x{d_so} channel. "
+            f"Dense channel use would require a {d_so}x{d_so} matrix. "
             f"Refusing because max_dense_dim={max_dense_dim}."
         )
 
@@ -88,6 +93,7 @@ def compute_single_point(
     method,
     normalize_Jh,
     save_channel,
+    dense_spectrum,
     verbose=False,
 ):
     if verbose:
@@ -117,6 +123,7 @@ def compute_single_point(
         channel,
         beta,
         [N, J_hot, h_hot],
+        full_spectrum=dense_spectrum,
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     normality_residual = get_normality_residual(channel)
@@ -178,6 +185,7 @@ def worker(point, *, fixed):
         method=fixed["method"],
         normalize_Jh=fixed["normalize_Jh"],
         save_channel=fixed["save_channel"],
+        dense_spectrum=fixed["dense_spectrum"],
         verbose=False,
     )
 
@@ -197,7 +205,7 @@ def render_status(completed, total, active_points, elapsed):
     return lines
 
 
-def save_grid(rows, snapshot_path, save_channel):
+def save_grid(rows, snapshot_path, save_channel, dense_spectrum):
     channel_entries = [row["channel"] for row in rows] if save_channel else []
     np.savez(
         snapshot_path,
@@ -216,12 +224,13 @@ def save_grid(rows, snapshot_path, save_channel):
         normality_residual=np.array([row["spectrum_data"]["normality_residual"] for row in rows]),
         num_iterations=np.array([row["spectrum_data"]["num_iterations"] for row in rows]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
+        dense_spectrum=dense_spectrum,
     )
 
 
 def main():
     args = parse_args()
-    validate_save_channel_size(args.N, args.save_channel)
+    validate_dense_size(args.N, args.save_channel or args.dense_spectrum)
 
     h_values, alpha_values, sigma_values, omega_values = flatten_grid(args)
     points = list(product(h_values, alpha_values, sigma_values, omega_values))
@@ -248,6 +257,7 @@ def main():
         "method": args.method,
         "normalize_Jh": args.normalize_Jh,
         "save_channel": args.save_channel,
+        "dense_spectrum": args.dense_spectrum,
     }
 
     rows = []
@@ -282,7 +292,7 @@ def main():
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-    save_grid(rows, snapshot_path, args.save_channel)
+    save_grid(rows, snapshot_path, args.save_channel, args.dense_spectrum)
     print(f"Saved grid to {snapshot_path}")
 
 

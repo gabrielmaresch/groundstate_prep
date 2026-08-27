@@ -12,6 +12,7 @@ from superoperator import (
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
+    linear_operator_to_dense,
     next_running_number,
 )
 
@@ -40,22 +41,27 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--dense-spectrum",
+        help="Diagonalize the materialized channel matrix instead of using ARPACK.",
+        action="store_true",
+    )
     parser.add_argument("--workers", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--save-as-nr", type=int, default=-1)
     return parser.parse_args()
 
 
-def validate_save_channel_size(N, save_channel, *, max_dense_dim=4096):
+def validate_dense_size(N, dense_requested, *, max_dense_dim=4096):
     d_so = 2 ** (2 * N)
-    if save_channel and d_so > max_dense_dim:
+    if dense_requested and d_so > max_dense_dim:
         raise ValueError(
-            f"--save-channel would require a dense {d_so}x{d_so} channel. "
+            f"Dense channel use would require a {d_so}x{d_so} matrix. "
             f"Refusing because max_dense_dim={max_dense_dim}."
         )
 
 
-def save_sweep(sweep_data, snapshot_path, save_channel):
+def save_sweep(sweep_data, snapshot_path, save_channel, dense_spectrum):
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
     np.savez_compressed(
         snapshot_path,
@@ -70,6 +76,7 @@ def save_sweep(sweep_data, snapshot_path, save_channel):
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
         normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
         num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
+        dense_spectrum=dense_spectrum,
     )
 
 
@@ -87,6 +94,7 @@ def compute_single_beta(
     eps_fit,
     normalize_Jh,
     save_channel,
+    dense_spectrum,
 ):
     print(f"Computing beta={beta:.4g}", flush=True)
 
@@ -109,15 +117,17 @@ def compute_single_beta(
         alpha,
         beta,
     )
+    analysis_channel = linear_operator_to_dense(channel) if dense_spectrum else channel
     eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
-        channel,
+        analysis_channel,
         beta,
         [N, J_hot, h_hot],
+        full_spectrum=dense_spectrum,
     )
     spectral_success = np.all(np.isfinite(eigvals)) and np.all(np.isfinite(fixedpoint))
     if spectral_success:
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
-        iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+        iteration_count = num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
         num_closer_value = int(num_closer)
     else:
         print(f"Spectral computation failed for beta={beta:.4g}; storing NaN diagnostics", flush=True)
@@ -125,7 +135,7 @@ def compute_single_beta(
         iteration_count = None
         num_closer_value = np.nan
 
-    normality_residual = get_normality_residual(channel)
+    normality_residual = get_normality_residual(analysis_channel)
     print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
 
     result = {
@@ -144,7 +154,7 @@ def compute_single_beta(
         },
     }
     if save_channel:
-        result["channel"] = channel
+        result["channel"] = analysis_channel if dense_spectrum else linear_operator_to_dense(channel)
 
     return result
 
@@ -163,6 +173,7 @@ def compute_sweep(
     normalize_Jh,
     beta_values,
     save_channel,
+    dense_spectrum,
     workers,
 ):
     worker = partial(
@@ -178,6 +189,7 @@ def compute_sweep(
         eps_fit=eps_fit,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
+        dense_spectrum=dense_spectrum,
     )
     with ProcessPoolExecutor(max_workers=workers) as executor:
         return list(executor.map(worker, beta_values))
@@ -197,7 +209,8 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
-    validate_save_channel_size(N, save_channel)
+    dense_spectrum = args.dense_spectrum
+    validate_dense_size(N, save_channel or dense_spectrum)
     workers = args.workers
     save_as_nr = args.save_as_nr
 
@@ -230,9 +243,10 @@ def main():
         normalize_Jh=normalize_Jh,
         beta_values=beta_values,
         save_channel=save_channel,
+        dense_spectrum=dense_spectrum,
         workers=workers,
     )
-    save_sweep(sweep_data, snapshot_path, save_channel)
+    save_sweep(sweep_data, snapshot_path, save_channel, dense_spectrum)
 
 
 if __name__ == "__main__":

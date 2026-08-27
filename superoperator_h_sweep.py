@@ -45,6 +45,11 @@ def parse_args():
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
     )
+    parser.add_argument(
+        "--dense-spectrum",
+        help="Diagonalize the full dense channel spectrum instead of using ARPACK.",
+        action="store_true",
+    )
     parser.add_argument("--load", action="store_true")
     parser.add_argument("--npz-number", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
@@ -52,7 +57,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
+def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum):
     temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
     np.savez_compressed(
@@ -68,6 +73,7 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel):
         trace_distance=np.array([entry["spectrum_data"]["trace_distance"] for entry in sweep_data]),
         normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
         num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
+        dense_spectrum=dense_spectrum,
     )
     temp_path.replace(snapshot_path)
 
@@ -87,6 +93,7 @@ def compute_sweep(
     h_values,
     normalize_Jh,
     save_channel,
+    dense_spectrum,
     snapshot_path,
 ):
     sweep_data = []
@@ -113,7 +120,9 @@ def compute_sweep(
             beta,
             method="superoperator",
         )
-        eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J_hot, h_hot])
+        eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(
+            channel, beta, [N, J_hot, h_hot], full_spectrum=dense_spectrum
+        )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
         normality_residual = get_normality_residual(channel)
         iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
@@ -139,7 +148,7 @@ def compute_sweep(
                 },
             }
         )
-        save_sweep_snapshot(sweep_data, snapshot_path, save_channel)
+        save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum)
 
     return sweep_data
 
@@ -231,6 +240,7 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
+    dense_spectrum = args.dense_spectrum
 
     h_values = np.linspace(args.h_min, args.h_max, args.h_points)
 
@@ -271,6 +281,7 @@ def main():
             h_values=h_values,
             normalize_Jh=normalize_Jh,
             save_channel=save_channel,
+            dense_spectrum=dense_spectrum,
             snapshot_path=snapshot_path,
         )
         h_grid = np.array([entry["h_over_J"] for entry in sweep_data])
