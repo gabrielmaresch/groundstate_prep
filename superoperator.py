@@ -57,7 +57,7 @@ def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
     qscript = qml.tape.make_qscript(circuit)()
     return qml.matrix(qscript, wire_order=range(num_system_qubits + 1)).astype(np.complex64)
 
-def get_choi_element(i,j, num_system_qubits, U, omega, beta):
+def get_superoperator_basis_output(i,j, num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
     rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex64)
     rho_sys[i,j]  = 1 
@@ -156,15 +156,15 @@ def superoperator_as_linop(num_system_qubits, U, omega, beta):
 
 
 
-def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
+def get_superoperator_matrix(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
-    d_choi = d_sys*d_sys
+    d_so = d_sys*d_sys
 
-    S = np.zeros((d_choi, d_choi), dtype=np.complex64)
+    S = np.zeros((d_so, d_so), dtype=np.complex64)
 
     for i in range(d_sys):
         for j in range(d_sys):
-            sigma_ij = get_choi_element(i, j, num_system_qubits, U, omega, beta)
+            sigma_ij = get_superoperator_basis_output(i, j, num_system_qubits, U, omega, beta)
             for a in range(d_sys):
                 for b in range(d_sys):
                     row = a * d_sys + b
@@ -175,7 +175,7 @@ def get_superoperator_matrix_choi(num_system_qubits, U, omega, beta):
 
 
 
-def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'choi'):
+def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, *, omega_quadrature= ('midpoint', 10), method = 'superoperator'):
     
     rule, n_omega =  omega_quadrature
     if rule == 'midpoint':
@@ -187,8 +187,8 @@ def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alph
     for op in op_set:
         for omega in omegas:
             U = get_U_matrix(N, tau, T, sigma, op, omega, H_sys, alpha)
-            if method == 'choi':
-                S += get_superoperator_matrix_choi(N, U, omega, beta)
+            if method == 'superoperator':
+                S += get_superoperator_matrix(N, U, omega, beta)
             elif method == 'kraus':
                 U_blocks = get_kraus_blocks(N, U)
                 S += get_superoperator_matrix_kraus(N, U_blocks, beta, omega)
@@ -454,7 +454,7 @@ def num_iterations(S, fixedpoint, *, eps=0.01, max_iter = 5000):
         try:
             # fit tail 
             _, p_fit, _ = extract_asymptotics(iterations[1000:], dist[1000:])
-        except RuntimeError:
+        except (RuntimeError, ValueError):
             return None
     
         a, b, c = p_fit

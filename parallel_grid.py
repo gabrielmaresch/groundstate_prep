@@ -31,8 +31,8 @@ def parse_args():
     parser.add_argument(
         "--method",
         type=str,
-        default="choi",
-        choices=("choi", "kraus"),
+        default="superoperator",
+        choices=("superoperator", "kraus"),
         help="Channel construction method.",
     )
     parser.add_argument(

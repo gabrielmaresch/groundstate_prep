@@ -62,20 +62,20 @@ The circuit construction itself lives in `cooling_channel.py`:
 ### Averaged-channel analysis
 
 `superoperator.py` constructs the averaged channel and provides spectral and
-fixed-point diagnostics. The channel can be built either from Choi elements or
-Kraus blocks; sweep scripts select the appropriate implementation for their
+fixed-point diagnostics. The channel can be built either directly as a superoperator or
+from Kraus blocks; sweep scripts select the appropriate implementation for their
 use case.
 
 For a sweep over the transverse field, run for example:
 
 ```bash
-python parallel_h_sweep.py --N 4 --h-min 0.1 --h-max 2.0 --h-points 20
+python parallel_h_sweep.py --N 4 --h_min 0.1 --h_max 2.0 --h_points 20
 ```
 
 For a grid over `h`, `alpha`, `sigma`, and `omega_max`:
 
 ```bash
-python grid.py --N 4 --h-points 10 --alpha-points 6 --sigma-points 5 --omega-points 2
+python parallel_grid.py --N 4 --h_points 10 --alpha_points 6 --sigma_points 5 --omega_points 2
 ```
 
 Results are saved as `.npz` files under `data/` by default. Use `--data-dir`
@@ -112,7 +112,7 @@ establish performance for larger systems or the planned impurity model.
 - `superoperator.py` — averaged quantum channels and spectral analysis.
 - `ed.py`, `ed.jl` — exact diagonalization and Gibbs-state reference methods.
 - `path_analysis.py` — cooling trajectories and convergence metrics.
-- `parallel_h_sweep.py`, `parallel_beta_sweep.py`, `grid.py` — parameter-sweep
+- `parallel_h_sweep.py`, `parallel_beta_sweep.py`, `parallel_grid.py` — parameter-sweep
   entry points.
 - `*_analysis.ipynb` — notebook-based data analysis.
 - `data/` — generated numerical results.
