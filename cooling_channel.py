@@ -141,10 +141,10 @@ def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:boo
     assert np.isclose(p0+p1, 1)
 
     if mixed:
-        K0 = np.sqrt(p0) * np.array([[1, 0], [0, 0]], dtype = np.complex64)
-        K1 = np.sqrt(p0) * np.array([[0, 1], [0, 0]], dtype = np.complex64)
-        K2 = np.sqrt(p1) * np.array([[0, 0], [1, 0]], dtype = np.complex64)
-        K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype = np.complex64)
+        K0 = np.sqrt(p0) * np.array([[1, 0], [0, 0]], dtype = np.complex128)
+        K1 = np.sqrt(p0) * np.array([[0, 1], [0, 0]], dtype = np.complex128)
+        K2 = np.sqrt(p1) * np.array([[0, 0], [1, 0]], dtype = np.complex128)
+        K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype = np.complex128)
         qml.QubitChannel([K0, K1, K2, K3], wires=wire)
     else:
         raise NotImplementedError('pure state simulation not supported')

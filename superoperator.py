@@ -55,18 +55,18 @@ def U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, a
 def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
     circuit = U_parametrized_circuit(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha)
     qscript = qml.tape.make_qscript(circuit)()
-    return qml.matrix(qscript, wire_order=range(num_system_qubits + 1)).astype(np.complex64)
+    return qml.matrix(qscript, wire_order=range(num_system_qubits + 1)).astype(np.complex128)
 
 def get_superoperator_basis_output(i,j, num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
-    rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex64)
+    rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex128)
     rho_sys[i,j]  = 1 
 
     # Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
     # rho_env = np.diag([np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z])
     p0 = 1 / (1 + np.exp(-omega * beta))
     p1 = 1 - p0
-    rho_env = np.diag(np.array([p0, p1], dtype=np.float32))
+    rho_env = np.diag(np.array([p0, p1], dtype=np.float64))
     rho = np.kron(rho_sys, rho_env)
 
     rho_total = U@rho@U.conj().T
@@ -94,7 +94,7 @@ def get_superoperator_matrix_kraus(num_system_qubits, U_blocks, beta, omega):
     p1 = 1 - p0
     p = [p0, p1]
 
-    S = np.zeros((d_sys**2, d_sys**2), dtype=np.complex64)
+    S = np.zeros((d_sys**2, d_sys**2), dtype=np.complex128)
 
     # for a in range(2):
     #     for b in range(2):
@@ -118,16 +118,16 @@ def superoperator_as_linop(num_system_qubits, U, omega, beta):
     d_so = d_sys * d_sys
 
     # Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
-    # p = np.array([np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z], dtype=np.complex64)
+    # p = np.array([np.exp(omega*beta/2)/Z, np.exp(-omega*beta/2)/Z], dtype=np.complex128)
     p0 = 1 / (1 + np.exp(-omega * beta))
     p1 = 1 - p0
-    p = np.array([p0, p1], dtype=np.complex64)
+    p = np.array([p0, p1], dtype=np.complex128)
 
     U_blocks = get_kraus_blocks(num_system_qubits, U)
 
     def matvec(vec):
-        rho = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
-        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+        rho = np.asarray(vec, dtype=np.complex128).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex128)
 
         for b in range(2):
             for a in range(2):
@@ -137,8 +137,8 @@ def superoperator_as_linop(num_system_qubits, U, omega, beta):
         return out.reshape(-1)
 
     def rmatvec(vec):
-        observable = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
-        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+        observable = np.asarray(vec, dtype=np.complex128).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex128)
 
         for b in range(2):
             for a in range(2):
@@ -151,7 +151,7 @@ def superoperator_as_linop(num_system_qubits, U, omega, beta):
         (d_so, d_so),
         matvec=matvec,
         rmatvec=rmatvec,
-        dtype=np.complex64,
+        dtype=np.complex128,
     )
 
 
@@ -160,7 +160,7 @@ def get_superoperator_matrix(num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
     d_so = d_sys*d_sys
 
-    S = np.zeros((d_so, d_so), dtype=np.complex64)
+    S = np.zeros((d_so, d_so), dtype=np.complex128)
 
     for i in range(d_sys):
         for j in range(d_sys):
@@ -182,7 +182,7 @@ def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alph
         delta_omega = omega_max / n_omega
         omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
     
-    S = np.zeros((2**(2*N),2**(2*N)), dtype = np.complex64)
+    S = np.zeros((2**(2*N),2**(2*N)), dtype = np.complex128)
 
     for op in op_set:
         for omega in omegas:
@@ -220,14 +220,14 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
     d_so = d_sys * d_sys
     
     def matvec(vec):
-        out = np.zeros(d_so, dtype=np.complex64)
+        out = np.zeros(d_so, dtype=np.complex128)
         for linop in linops:
             out += linop @ vec
                
         return (out / averages)
 
     def rmatvec(vec):
-        out = np.zeros(d_so, dtype=np.complex64)
+        out = np.zeros(d_so, dtype=np.complex128)
         for linop in linops:
             out += linop.H @ vec
 
@@ -237,16 +237,22 @@ def get_averaged_channel(N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta
         (d_so, d_so),
         matvec=matvec,
         rmatvec=rmatvec,
-        dtype=np.complex64,
+        dtype=np.complex128,
     )
     S_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
     return S, S_params
 
 
+def linear_operator_to_dense(channel):
+    dimension = channel.shape[0]
+    basis = np.eye(dimension, dtype=np.complex128)
+    return np.column_stack([channel @ basis[:, index] for index in range(dimension)])
+
+
 def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False):
 
-    #doublecheck
-    full_spectrum = full_spectrum and not isinstance(S, LinearOperator)
+    if full_spectrum and isinstance(S, LinearOperator):
+        raise ValueError("full_spectrum requires a dense channel matrix.")
 
     # to hande nan exceptions when using parallel workers ##
     try:
@@ -259,24 +265,23 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
         # Return dummy values instead of crashing worker process
         d_so = S.shape[0]
         n_eigvals = min(4, d_so - 1)
-        eigvals = np.full(n_eigvals, np.nan, dtype=np.complex64)
-        fixedpoint = np.full(d_so, np.nan, dtype=np.complex64)
+        eigvals = np.full(n_eigvals, np.nan, dtype=np.complex128)
+        fixedpoint = np.full(d_so, np.nan, dtype=np.complex128)
         return eigvals, fixedpoint, np.nan, np.nan, np.nan, np.nan
     
 
-    eigvals = eigvals.astype(np.complex64)
-    eigvecs = eigvecs.astype(np.complex64)
+    eigvals = eigvals.astype(np.complex128)
+    eigvecs = eigvecs.astype(np.complex128)
     
     N, J, h = TFIM_params
     thermal, _ = get_gibbs(N, J, h, beta)
     thermal = np.array(thermal)
     closest_eval_to_thermal = identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal)
 
-    idx = np.argsort(np.abs(eigvals - 1))
-    sorted_eigvals = eigvals[idx]
-    
-    fixedpoint = eigvecs[:, idx[0]]
-    target_ev = sorted_eigvals[0]
+    fixedpoint_index = np.argmin(np.abs(eigvals - 1))
+    fixedpoint = eigvecs[:, fixedpoint_index]
+    target_ev = eigvals[fixedpoint_index]
+    other_eigvals = np.delete(eigvals, fixedpoint_index)
 
     # how many eigenvals are closer to the fixed-point eigenvalue than the
     # eigenvalue whose eigenvector has maximal overlap with the thermal state
@@ -285,8 +290,8 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
     num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
 
     # Separation from the fixed-point eigenvalue and conventional modulus gap.
-    Delta_sep = abs(sorted_eigvals[0] - sorted_eigvals[1])
-    Delta_gap = 1 - np.max(np.abs(sorted_eigvals[1:]))
+    Delta_sep = np.min(np.abs(other_eigvals - target_ev))
+    Delta_gap = 1 - np.max(np.abs(other_eigvals))
     return eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, thermal_dist
 
 def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
@@ -305,7 +310,7 @@ def identify_closest_eigenval_for_thermal_state(S, eigvals, eigvecs, thermal):
 def normalize_to_densitymatrix(A, tol=1e-12):
     trace =  np.trace(A)
     if not np.isfinite(trace) or abs(trace) < tol:
-        return np.full_like(A, np.nan, dtype=np.complex64)
+        return np.full_like(A, np.nan, dtype=np.complex128)
     A = A / trace
     A_dens = 0.5 * (A + A.conj().T)
     return A_dens
@@ -438,7 +443,7 @@ def num_iterations(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
-    rho = np.zeros((d_sys, d_sys), dtype = np.complex64)
+    rho = np.zeros((d_sys, d_sys), dtype = np.complex128)
     rho[0,0] = 1
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((d_sys, d_sys)))
     dist = [trace_distance(rho, fixedpoint)]
@@ -500,7 +505,7 @@ if __name__ == "__main__":
     print('number of iterations from fit:', num_iterations(S, fixedpoint))
 
     # initialize rho
-    rho = np.zeros((2**N, 2**N), dtype = np.complex64)
+    rho = np.zeros((2**N, 2**N), dtype = np.complex128)
     rho[0,0] = 1
 
     eps = 1e-2
