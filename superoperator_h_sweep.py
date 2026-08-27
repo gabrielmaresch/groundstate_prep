@@ -111,7 +111,7 @@ def compute_sweep(
             h_sys,
             alpha,
             beta,
-            method="choi",
+            method="superoperator",
         )
         eigvals, fixedpoint, num_closer, Delta_sep, Delta_gap, Delta_th = get_superoperator_spectral_data(channel, beta, [N, J_hot, h_hot])
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
