@@ -38,6 +38,16 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--skip-normality-residual",
+        help="Skip the normality-residual calculation.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--skip-filename-info",
+        help="Do not print the output filename.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--save-channel",
         help="Whether to store the full channel matrices in the .npz file.",
         action="store_true",
@@ -112,7 +122,24 @@ def averaged_blocks_as_linop(num_system_qubits, computed_instances, beta):
 
         return (out / averages).reshape(-1)
 
-    return LinearOperator((d_so, d_so), matvec=matvec, dtype=np.complex64)
+    def rmatvec(vec):
+        observable = np.asarray(vec, dtype=np.complex64).reshape((d_sys, d_sys))
+        out = np.zeros((d_sys, d_sys), dtype=np.complex64)
+
+        for (U_blocks, _), p in zip(computed_instances, weights):
+            for b in range(2):
+                for a in range(2):
+                    A = U_blocks[a][b]
+                    out += p[b] * (A.conj().T @ observable @ A)
+
+        return (out / averages).reshape(-1)
+
+    return LinearOperator(
+        (d_so, d_so),
+        matvec=matvec,
+        rmatvec=rmatvec,
+        dtype=np.complex64,
+    )
 
 
 def compute_instance(
@@ -161,8 +188,10 @@ def compute_average(
     total = len(contributions)
     with ProcessPoolExecutor(max_workers=workers) as executor:
         for n, instance in enumerate(executor.map(worker, contributions), start=1):
-            print(f"finished {n} of {total}", flush=True)
+            print(f"\rfinished {n} of {total}", end="", flush=True)
             computed_instances.append(instance)
+
+    print()
 
     return averaged_blocks_as_linop(N, computed_instances, beta)
 
@@ -200,7 +229,7 @@ def main():
     channel_params = (N, tau, T, sigma, op_set, omega_max, H_sys, alpha, beta, averages)
     contributions = [(op, omega) for op in op_set for omega in omegas]
 
-    print(f"Computing one channel instance: N={N}, J={J:.4g}, h={h:.4g}")
+    print(f"Computing one channel instance: N={N}, h/J={h / J:.4g}")
 
     data_dir = args.data_dir
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -211,7 +240,8 @@ def main():
         snapshot_number = save_as_nr
 
     snapshot_path = data_dir / f"superoperator_N{N}_single_{snapshot_number}.npz"
-    print("File will be saved as", snapshot_path)
+    if not args.skip_filename_info:
+        print("File will be saved as", snapshot_path)
 
     channel = compute_average(
         N=N,
@@ -230,7 +260,7 @@ def main():
         [N, J, h],
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
-    normality_residual = get_normality_residual(channel)
+    normality_residual = np.nan if args.skip_normality_residual else get_normality_residual(channel)
     iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
 
     result = {
