@@ -88,14 +88,14 @@ Algorithms for Quantum State Preparation}
 \maketitle
 \begin{abstract}
 We numerically study a bath-assisted quantum cooling channel for finite transverse-field Ising models with $N=4$–$8$ spins. The channel is implemented by simulating the system–bath evolution with a two-level thermal ancilla, followed by ancilla reset, and is averaged over local Pauli coupling operators and bath frequencies as suggested in %following the work of 
-\cite{ding2025}. Using exact diagonalization, we compute the channel fixed point and compare it with the exact Gibbs state. %For the parameter regimes investigated, increasing the coupling strength generally reduces the number of channel iterations required for convergence but increases the fixed-point error relative to the Gibbs state. Intermediate coupling strengths provide a favorable empirical compromise between these effects.
-
+\citet{ding2025}. Using exact diagonalization, we compute the channel fixed point and compare it with the exact Gibbs state. %For the parameter regimes investigated, increasing the coupling strength generally reduces the number of channel iterations required for convergence but increases the fixed-point error relative to the Gibbs state. Intermediate coupling strengths provide a favorable empirical compromise between these effects.
+%
 %In this work we numerically investigate the cooling channel for finite transverse-field Ising models, including parameter regimes beyond the weak-coupling regime of the original analysis. We find evidence that stronger coupling can maintain a fixed point close to the thermal state while requiring far fewer iterations than in the weak-coupling regime. 
-
-While applicability of the cooling channel beyond weak-coupling is treated in \cite{wang2025} our observations for the chosen model also go along these lines and extend the weak-coupling analysis into a finite-size numerical regime, while remaining subject to discretization, frequency-quadrature, and finite-size effects. 
+%
+While applicability of the cooling channel beyond weak-coupling is treated in \citet{wang2025} our observations for the chosen model also go along these lines and extend the weak-coupling analysis into a finite-size numerical regime, while remaining subject to discretization, frequency-quadrature, and finite-size effects. 
 
 %\SA{reformulated (I would leave the details to the results and conclusion)}
-%Concerning the applicability of the cooling channel beyond weak-coupling, our numerical results for the transverse field Ising model are consistent with the predictions of \cite{wang2025}. 
+%Concerning the applicability of the cooling channel beyond weak-coupling, our numerical results for the transverse field Ising model are consistent with the predictions of \citet{wang2025}. 
 \end{abstract}
 
 \section*{Introduction}
@@ -141,7 +141,7 @@ Note, that the last step will in general produce a density matrix rather than a 
 
 The restricted action of \cref{eq:qu_channel} on the state-space $\mathcal{H}_0$ is usually called a quantum channel ($\Lambda[\,\cdot\,]$) and exhibits far richer dynamics than a purely unitary evolution. 
 
-In this project work we report on the implementation of the cooling scheme proposed in \cite{ding2025} which follows along the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state 
+In this project work we report on the implementation of the cooling scheme proposed in \citet{ding2025} which follows along the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state 
 \begin{align}\label{eq:gibbs_state}
 \rho_{\beta}= \frac{e^{-\beta H_0}}{{\rm Tr}\, e^{-\beta H_0}}
 \end{align}
@@ -181,12 +181,12 @@ In the cooling algorithm itself, the interval $[-T,T]$ is divided into $M$ subin
 \begin{align}\label{eq:midpoint_error_right}
     \int_{t+\tfrac{\Delta t}{2}}^{t+\Delta t}d\tau H_{\rm int}(\tau) & = \tfrac{\Delta t}{2} H_{\rm int}(t+\tfrac{\Delta t}{2})+ A \Delta t^2 + O( \Delta t^3)\\ \label{eq:midpoint_error_left}
     \int_t^{t+\tfrac{\Delta t}{2}}d\tau H_{\rm int}(\tau) & = \tfrac{\Delta t}{2} H_{\rm int}(t+\tfrac{\Delta t}{2})- A \Delta t^2 + O( \Delta t^3).
-\end{align} It is not hard to show that all operators on the righthand side of \cref{eq:midpoint_error_left,eq:midpoint_error_right} commute. Therefore, to argue why \cref{eq:trotterization_with_freezing} is actually of second order, it suffices to focus on the term 
+\end{align} It is not hard to show that all operators on the right-hand side of \cref{eq:midpoint_error_left,eq:midpoint_error_right} commute. Therefore, to argue why \cref{eq:trotterization_with_freezing} is actually of second order, it suffices to focus on the term 
 
 \begin{align}
 e^{-iA\Delta t^2}    e^{-i(H_0+H_{\rm bath})\Delta t} e^{iA\Delta t^2} &=   e^{-i(H_0+H_{\rm bath})\Delta t} + i [e^{-i(H_0+H_{\rm bath})\Delta t},A] \Delta t^2 + O(\Delta t^4).
 \end{align} Finally, expanding $
- [e^{-i(H_0+H_{\rm bath})\Delta t} + O(\Delta^2),A] = [I-i(H_0+H_{\rm bath})\Delta t, A]  =O(\Delta t)$ we see that the error in \cref{eq:trotterization_with_freezing} is $O(\Delta t^3)$ for one substep of the time-evolution. Since there are $O(\tfrac{1}{\Delta t})$ substeps the global error is $O(\Delta t^2)$.
+ [e^{-i(H_0+H_{\rm bath})\Delta t} + O(\Delta^2),A] = [I-i(H_0+H_{\rm bath})\Delta t, A]  =O(\Delta t)$ we see that the error in \cref{eq:trotterization_with_freezing} is $O(\Delta t^3)$ for one substep of the time-evolution. Since there are $O(1/\Delta t)$ substeps the global error is $O(\Delta t^2)$.
 
 
 Using a more sophisticated quadrature of $f$, or even exact integration, would not necessarily improve the order of the overall approximation, but potentially reduce the constant of the error term. However, we will not pursue this particular direction further.
@@ -208,15 +208,18 @@ The relevant parameter of this system is $J/h$, the ratio of the energy scale of
     h \to h/\sqrt{J^2+h^2}
 \end{align} which leaves the underlying physics unchanged and puts energies, gaps and dynamical timescales essentially on the same scale.  For positive $J,h$ with $J\ll h$ a configuration with all spins aligned in $\ket{\uparrow}_x$ is favored (paramagnetic phase) and the spectrum is gaped with $\Delta \approx 2|h|$. 
 
-For $J\gg h$ the ground state in the thermodynamical limit $N\to\infty$ is twofold degenerate: for $J>0$ all spins are either aligned in $\ket{\uparrow}_z$ direction or in $\ket{\downarrow}_z$ direction (ferromagnetic phase) resp. aligned alternately for $J<0$. The gap to the bulk is $\Delta_{\rm bulk}\approx 2 |J-h|$. In the finite case with non-vanishing field $h$, the degeneracy is lifted and the even parity combination of the above mentioned ferromagnetically aligned states is the ground state, whereas the odd parity combination is the first excited state. The splitting between these two state, i.e. the gap to the first excited stays exponentially small in $N$. The gap to the bulk remains finite even in the thermodynamical limit as long as the parameter $J/h$ stays away from the quantum critical region $J\approx h$. Here the gap closes asymptotically for $N\to \infty$ with $\Delta_{\rm bulk} \approx \frac1N$. 
-In our numerical analysis $(N=4-8)$ the gap $\Delta_N:= E_1-E_0$ is always finite except in the trivial case $h=0$. For a detailed finite-size analysis of this system we refer to \cite{oshikawa2019}.
+For $J\gg h$ the ground state in the thermodynamic limit $N\to\infty$ is twofold degenerate: for $J>0$ all spins are either aligned in $\ket{\uparrow}_z$ %direction 
+or in $\ket{\downarrow}_z$ direction (ferromagnetic phase) resp. aligned antiferromagnetically %alternately 
+for $J<0$. The gap to the bulk is $\Delta_{\rm bulk}\approx 2 |J-h|$. In presence of a non-vanishing field $h$, the degeneracy is lifted and the even parity combination of the above mentioned ferromagnetically aligned states is the ground state, whereas the odd parity combination is the first excited state. The splitting between these two state, i.e. the gap to the first excited state is exponentially small in $N$. The gap to the bulk remains finite even in the thermodynamic limit as long as the parameter $J/h$ is not in %stays away from 
+the quantum critical region $J\approx h$. Here the gap closes asymptotically for $N\to \infty$ with $\Delta_{\rm bulk} \approx \frac1N$. 
+In our numerical analysis $(N=4-8)$ the gap $\Delta_N:= E_1-E_0$ is always finite except in the trivial case of $h=0$. For a detailed finite-size analysis of this system we refer to \citet{oshikawa2019}.
 
 
 The spectrum of $H(J,h)$ can be computed exactly by mapping the TFIM to a free fermionic system. First one introduces the Jordan-Wigner transformation which relates spin-strings to fermionic operators:
 \begin{align}\label{eq:JW-trafo}
-\hat{c}_j = \left(\prod_{l<j} \sigma^{(x)}_{l} \right) \frac{\sigma^{(z)}_{j}-i\sigma^{(y)}_{j}}{2}, \quad \hat{c}_j^{\dagger} = \left(\prod_{l<j} \sigma^{(x)}_{l} \right) \frac{\sigma^{(z)}_{j}+i\sigma^{(y)}_{j}}{2}
+\hat{c}_j = \left(\prod_{l<j} \sigma^{(x)}_{l} \right) \frac{\sigma^{(z)}_{j}-i\sigma^{(y)}_{j}}{2}, \quad \hat{c}_j^{\dagger} = \left(\prod_{l<j} \sigma^{(x)}_{l} \right) \frac{\sigma^{(z)}_{j}+i\sigma^{(y)}_{j}}{2}.
 \end{align}
-This transforms \cref{eq:TFIM_Hamiltonian} to a quadratic fermionic Hamiltonian which then can be diagonalized via momentum basis and a suitable Bogoliubov transformation. The end result is a free fermionic Hamiltonian which is diagonal in the number basis $\hat{n}_k= \hat{\gamma}_k^{\dagger} \hat{\gamma}_k$ of the corresponding Bogoliubov quasiparticles:
+This transforms \cref{eq:TFIM_Hamiltonian} to a quadratic fermionic Hamiltonian which then can be diagonalized via a suitable Bogoliubov transformation in the momentum basis. The final result is a free fermionic Hamiltonian which is diagonal in the number operator basis $\hat{n}_k= \hat{\gamma}_k^{\dagger} \hat{\gamma}_k$ of the corresponding Bogoliubov quasiparticles:
 \begin{align}\label{eq:TFIM_ff}
     H = \sum_k \varepsilon_k (J,h)\left( \hat{n}_k - \frac12\right)
 \end{align}
@@ -229,22 +232,24 @@ In particular for $J=h$ one gets
     H = \sum_k 4J | \sin \tfrac{k}{2}| \left( \hat{n}_k - \tfrac12\right).
 \end{align}
 
-The equivalence of TFIM to a free fermionic Hamiltonian allows for a priori estimates on the integer mixing time of the cooling algorithm, that would be much harder to come by for other models, see Appendix F.2 in \cite{ding2025}. Therein an $\mathcal{O}(N^2\log \tfrac{N}{\varepsilon})$ dependence on system size and tolerated error is asserted. However this approach hinges on the choice $\mathcal{A}=\{\pm \gamma_k, \pm \gamma_k^{\dagger}\}$ of coupling operators, which are \emph{not} simply Pauli operators on individual sites but rather nonlocal combinations thereof. In our implementation we aim to have both operations $P$ and $Q$ available and thus are more interested in sets of coupling operators that contain $\sigma^{(x)}_{1}, \dots, \sigma^{(x)}_{N}$ \emph{and} $\sigma^{(z)}_{1}, \dots, \sigma^{(z)}_{N}$
+The equivalence of TFIM to a free fermionic Hamiltonian allows for a priori estimates of the integer mixing time of the cooling algorithm. This %that 
+would be much harder to obtain %come by 
+for other models, see Appendix F.2 in \citet{ding2025}. Therein an $\mathcal{O}(N^2\log \tfrac{N}{\varepsilon})$ dependence on system size and tolerated error is asserted. However this approach hinges on the choice $\mathcal{A}=\{\pm \gamma_k, \pm \gamma_k^{\dagger}\}$ of coupling operators, which are \emph{not} simply Pauli operators on individual sites but rather nonlocal combinations thereof. In our implementation we aim to have both operations $P$ and $Q$ available and thus are more interested in sets of coupling operators that contain $\sigma^{(x)}_{1}, \dots, \sigma^{(x)}_{N}$ \emph{and} $\sigma^{(z)}_{1}, \dots, \sigma^{(z)}_{N}$.
 
 \section{Parameter dependence}
 Let us quickly review the parameters we encountered so far:
 
 \begin{description}
-    \item[coupling strength $\alpha$] determines the magnitude of the interaction part in the cooling Hamiltonian, i.e. the maximal rate at which cooling processes mediated by the bath can take place. To allow for the description of the cooling process via perturbative Lindblad dynamics $\alpha$ is treated as small parameter in \cite{ding2025}. However, larger coupling allows for higher energy transfer from the system to the bath and therefore increases cooling. In \cite{wang2025} the validity of the cooling scheme is established also for $\alpha = O(1)$. The numerical experiments of this work underscore these findings.  
+    \item[coupling strength $\alpha$] determines the magnitude of the interaction part in the cooling Hamiltonian, i.e. the maximal rate at which cooling processes mediated by the bath can take place. To allow for the description of the cooling process via perturbative Lindblad dynamics, $\alpha$ is treated as small parameter in \citet{ding2025}. However, larger coupling allows for higher energy transfer from the system to the bath and therefore increases cooling. In \citet{wang2025} the validity of the cooling scheme is established also for $\alpha = O(1)$. The numerical experiments of this work underscore these findings.  
     
-    \item[temporal width $\sigma$] denotes standard deviation of a Gaussian filter function in time space. $\sigma$ tunes scale at which transitions from bath to system and vice versa with larger than $\frac{1}{\sigma}$ detuning are suppressed. A safe choice is 
-    $\frac{\hbar}{\sigma}\sim \|H_0\|$ resp. the energy bandwidth of the system that is to be cooled.
+    \item[temporal width $\sigma$] denotes the standard deviation of a Gaussian filter function in time space. $\sigma$ tunes the scale at which transitions from bath to system and vice versa with larger than $\frac{1}{\sigma}$ detuning are suppressed. A safe choice is 
+    $\hbar/\sigma\sim \|H_0\|$ resp. the energy bandwidth of the system that is to be cooled.
 
-    \item[frequency cutoff $\omega_{\max}$] determines the range of transition frequencies that are sampled. In \cite{ding2025} this cutoff is necessary since the transition frequencies are sampled uniformly
+    \item[frequency cutoff $\omega_{\max}$] determines the range of transition frequencies that are sampled. In \citet{ding2025} this cutoff is necessary since the transition frequencies are sampled uniformly
     \begin{align}\label{eq:omega_distribution}
         g(\omega)=\frac{1}{\omega_{\max}}\mathbb{1}_{[0,\omega_{\max}]}(\omega).
     \end{align}
-    The cutoff has to be large enough to include the relevant Bohr-frequencies of the system. A safe choice is the energy bandwidth $\omega_{\max}\geq  2 \|H\|\geq E_{\max}-E_{\min}$. In practice however it is not necessary to include \emph{all} but sufficiently many frequencies. Therefore a cutoff at the median transition frequency serves as a good starting point. It should be noted that a uniform distribution is merely convenient, but not necessarily the optimal choice.  In light of \cref{fig:bohr_bandwiths,fig:bohr_quantiles} $\sigma=8$ is safe for TFIM $N=4$, but $\sigma \approx 5$ is still sensible for $N=4-8$.
+    The cutoff has to be large enough to include the relevant Bohr frequencies of the system. A safe choice is the energy bandwidth $\omega_{\max}\geq  2 \|H\|\geq E_{\max}-E_{\min}$. In practice, however, it is not necessary to include \emph{all} but sufficiently many frequencies. Therefore a cutoff at the median transition frequency serves as a good starting point. It should be noted that a uniform distribution is merely convenient, but not necessarily the optimal choice.  In light of \cref{fig:bohr_bandwiths,fig:bohr_quantiles} $\sigma=8$ is safe for TFIM $N=4$, but $\sigma \approx 5$ is still sensible for $N=4-8$.
 
 \begin{figure}[htbp]
     \centering
@@ -252,56 +257,59 @@ Let us quickly review the parameters we encountered so far:
     \begin{subfigure}[t]{0.49\linewidth}
         \centering
         \includegraphics[width=\linewidth]{docu/plots/bohr_density_plot.png}
-        \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J=1.2$.}
+        \caption{%Heuristic for $\omega_{\rm max}$, 
+        TFIM for $h/J=1.2$.}
         \label{fig:bohr_bandwiths}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\linewidth}
         \centering
         \includegraphics[width=\linewidth]{docu/plots/bohr_quantiles_plot.png}
-        \caption{Heuristic for $\omega_{\rm max}$, TFIM with $h/J$ between $0$ and $2$.}
+        \caption{%Heuristic for $\omega_{\rm max}$, 
+        TFIM for $h/J$ between $0$ and $2$.}
         \label{fig:bohr_quantiles}
     \end{subfigure}
 
-    \caption{Heuristics for the choice of $\omega_{\rm max}$.}
+    \caption{Heuristics for the choice of $\omega_{\rm max}$. \SA{please explain; labels generally too small (or put in single larger column)}}
     \label{fig:bohr_heuristics}
 \end{figure}
     
-    \item[interaction time $T$] determines the finite time interval $[-T,T]$ during which system and bath interact. During the interaction the coupling constant is modulated with the Gaussian $f$. Increasing $T$ decreases the error due to ignoring $f$ outside $[-T,T]$ but increases the simulation time necessary to evolve the combined Hamiltonian $H_{\rm cooling}$ which itself is subject to discretization a Trotterization errors. In \cite{ding2025} it is assumed that $T\gg \sigma$ in order to give convergence guarantees.
+    \item[interaction time $T$] determines the finite time interval $[-T,T]$ during which system and bath interact. During the interaction, the coupling constant is modulated with the Gaussian $f$. Increasing $T$ decreases the error due to ignoring $f$ outside $[-T,T]$ but increases the simulation time necessary to evolve the combined Hamiltonian $H_{\rm cooling}$ which itself is subject to discretization a Trotterization  \SA{?} errors. In \citet{ding2025} it is assumed that $T\gg \sigma$ in order to guarantee convergence.
 
     \item[Trotter step size $\tau$ and order] determine the discretization scheme of the time evolution on the interval $[-T,T]$. There are
     \begin{align*}
-        M=\left\lceil\frac{2T}{\tau}\right\rceil.
+        M=\left\lceil\frac{2T}{\tau}\right\rceil
     \end{align*}
-    Trotter steps necessary. The chosen scheme is usually up to second order and thus avoids negative weights in the approximation
+    \SA{briefly explain meaning of brackets (also avoid eqs. without number)}
+    Trotter steps necessary. The chosen scheme is usually up to second order \SA{in ... (refer to relevant eqs. above)} and thus avoids negative weights in the approximation.
     Decreasing $\tau$ reduces the Trotter error but increases the circuit depth and number of numerical evaluations. Consequently, $\tau$ has to resolve both the system dynamics generated by $H_0$ and the system-bath interaction. As heuristic $\tau$ should be small compared to the times scale set by the free evolution of the system Hamiltonian and the interaction with the bath. 
 
-    \item[frequency spacing $\Delta\omega$] resp. quadrature rule for the integration of the bath frequency sampling density $g(\omega)$. In the numerical implementation of the algorithm $[0, \omega_{\rm max}]$ is replaced by a discrete frequency grid. The spacing has to be sufficiently small to resolve the relevant Bohr-frequencies. A too coarse frequency grid can miss relevant transitions and can therefore change both the cooling rate and the averaged channel.
+    \item[frequency spacing $\Delta\omega$] resp. quadrature rule for the integration of the bath frequency sampling density $g(\omega)$. In the numerical implementation of the algorithm $[0, \omega_{\rm max}]$ is replaced by a discrete frequency grid. The spacing has to be sufficiently small to resolve the relevant Bohr frequencies. On the other hand, a too coarse frequency grid can miss relevant transitions and therefore change both the cooling rate and the averaged channel.
 
     \item[coupling operators $\mathcal{A}$] determine which transitions between energy eigenstates can be induced by interactions with the bath. In each application of the cooling channel, an operator $A_S$ is sampled from $\mathcal{A}$. The set has to connect relevant parts of the spectrum. Otherwise conserved quantities or disconnected invariant subspaces can prevent convergence to a unique thermal state. For spin systems, a natural choice is a set of local Pauli operators, provided not all of them commute with the system Hamiltonian.
 
 \end{description}
 
 \section{Lindbladian approximation}
-The main approximation result in \cite{ding2025} is that the cooling channel $\lambda$ can approximated by unitary time evolution of the system plus a Lindbladian action:
+The main approximation result \SA{?} in \citet{ding2025} is that the cooling channel $\Lambda$ can be approximated by a unitary time evolution of the system plus a Lindbladian action:
 \begin{align}\label{eq:channelapprox}
-\Lambda[\rho] \approx \Lambda_{\mathcal{M}}[\rho]=\mathcal{U}(T) \circ \exp{\left( \mathcal{M}\alpha^2 \right)} \circ \mathcal{U}(T)     
+\Lambda[\rho] \approx \Lambda_{\mathcal{M}}[\rho]=\mathcal{U}(T) \circ \exp{\left( \mathcal{M}\alpha^2 \right)} \circ \mathcal{U}(T) ,   
 \end{align}
 where 
 \begin{align}
 \mathcal{U}(T)[\rho] = \exp(-iH_0T)\rho \exp(iH_0T)
 \end{align}
-and $\mathcal{M}$ is the generator of a carefully constructed Lindbladian that preserves the Gibbs state $\rho_{\beta}$. It is shown that this approximation is arbitrarily close to an Lindbladian channel that has error $O(\frac{\alpha^4 T^4}{\sigma^2})$. In particular, we see that the Lindbladian part of the evolution evolves with an effective time increment of $\alpha^2$. Since 
+and $\mathcal{M}$ is the generator of a carefully constructed Lindbladian that preserves the Gibbs state $\rho_{\beta}$. It is shown that this approximation is arbitrarily close to an Lindbladian channel that has error $O({\alpha^4 T^4}/{\sigma^2})$. In particular, we see that the Lindbladian part of the evolution evolves with an effective time increment of $\alpha^2$. Since 
 \begin{align}
 \mathcal{U}(T)[\rho_{\beta}] = \frac{1}{\mathcal{Z}}\exp(-iH_0T)\exp(-\beta H_0) \exp(iH_0T) = \frac{1}{\mathcal{Z}}\exp(-\beta H_0) = \rho_{\beta}
-\end{align} leaves Gibbs states invariant and the Lindbladian generator fulfills $\mathcal{M}[\rho_{\beta}]=0$ by construction, the RHS of \cref{eq:channelapprox} has $\rho_{\beta}$ as a fixed point. Hence, as long as the approximation is valid, $\rho_{\beta}$ is an approximate fixed point of the cooling channel $\Lambda[\cdot]$.  In \cite{ding2025} it 
+\end{align} leaves Gibbs states invariant and the Lindbladian generator fulfills $\mathcal{M}[\rho_{\beta}]=0$ by construction, the right-hand side of \cref{eq:channelapprox} has $\rho_{\beta}$ as a fixed point. Hence, as long as the approximation \SA{refer to relevant eq.} is valid, $\rho_{\beta}$ is an approximate fixed point of the cooling channel $\Lambda[\cdot]$.  In \citet{ding2025} it 
 is proven that under certain conditions a matrix norm, namely $\| X\| = \|\rho_{\beta}^{-1/4} X \rho]\rho_{\beta}^{-1/4}\|_2$, can be chosen such that $\Lambda_{\mathcal{M}}$ is a contraction with respect to this norm, hence establishing uniqueness of the fixed point. However, uniqueness of the exact channel $\Lambda$ does not necessarily follow. Also it has to be noted that these arguments are perturbative and hence require $\alpha \ll 1$. 
 
 
 \section{Implementation as quantum circuit}
-The \textsc{pennylane} python package was used to implement concrete realizations of the quantum channel. Here 'concrete' means, that the total cooling Hamiltonian $H$ is built using a specific jump-operator $A\in \mathcal{A}$ and a specific Bohr frequency $\omega\in [0, \omega_0]$ and evolved from time $t=-T$ to time $t=T$. The Trotterization from eq (4) is directly implemented into the circuit, meaning once the total evolution time $2T$ and the sub-step time $\tau$ is chosen, the quantum circuit is built according to this specifications. It consists of $M+1$ layers, each effecting a time increment of $\tau$. In \cref{fig:qc} a circuit which implements two cooling steps each of which is uses individual Trotter steps of length $\tau = T/2$. Here $W(\tau)$ denotes the time-evolution of $H_{\rm int}$, whereas the time evolution of $H_{\rm bath}$ is implemented directly as $Z$-rotation and the time evolution of $H_0$ is obtained by Trotterization with the same step size $\tau$.
+In order to implement concrete realizations of the quantum channel, we used the \textsc{pennylane} python package. Here 'concrete' means, that the total cooling Hamiltonian $H$ is built using a specific jump operator $A\in \mathcal{A}$ and a specific Bohr frequency $\omega\in [0, \omega_0]$ and evolved from time $t=-T$ to time $t=T$. The Trotterization from eq (4) \SA{add link} is directly implemented into the circuit, meaning that once the total evolution time $2T$ and the sub-step time $\tau$ are chosen, the quantum circuit is built according to these specifications. It consists of $M+1$ layers, each effecting a time increment of $\tau$. In \cref{fig:qc} a circuit which implements two cooling steps is shown, each of which uses individual Trotter steps of length $\tau = T/2$. Here $W(\tau)$ denotes the time-evolution of $H_{\rm int}$, whereas the time evolution of $H_{\rm bath}$ is implemented directly as $Z$-rotation, and the time evolution of $H_0$ is obtained by Trotterization with the same step size $\tau$.
 
-After each cooling step, the auxiliary qubit is measured and prepared in the same Gibbs-state of the two-level system. The \textsc{pennylane} framework offers two approaches on how to implement this reset:
+After each cooling step, the auxiliary qubit is measured and prepared in the same Gibbs state of the two-level system. The \textsc{pennylane} framework offers two approaches on how to implement this reset:
 
 \begin{itemize}
     \item we choose the initial state of the auxiliary qubit probabilistically according to the statistics of the Gibbs state, i.e. 
@@ -317,65 +325,71 @@ After each cooling step, the auxiliary qubit is measured and prepared in the sam
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{docu/plots/circuit_2_steps.png}
-     \caption{Quantum Circuit constructed using  the \textsc{pennylane} framework}
+     \caption{Quantum circuit constructed using the \textsc{pennylane} framework.}
      \label{fig:qc}
 \end{figure}
 
-Nota bene: Simulation of the quantum circuit makes it necessary to decide in advance how many iteration steps shall be undertaken. In a physical quantum computer the gate sequence which constitutes one cooling step, would instead be applied iteratively (e.g. a fixed sequence of laser pulses) in a trapped ion or neutral atom setup.
+%Nota bene: 
+We note that the simulation of the quantum circuit makes it necessary to decide in advance how many iteration steps shall be undertaken. In a physical quantum computer the gate sequence which constitutes one cooling step would instead be applied iteratively (e.g. a fixed sequence of laser pulses) in a trapped ion or neutral atom setup.
 
-Furthermore, since for simulation all iteration steps have to be pre-determined, meaning a specific sequence $(A_n,\omega_n)\in \mathcal{A}\times [0, \omega_{\rm max}]$ has to be chosen in advance. In the present implementation this is done with a random seed, in order to allow for reproducibility.
+Furthermore, for the simulation all iteration steps have to be pre-determined, meaning a specific sequence $(A_n,\omega_n)\in \mathcal{A}\times [0, \omega_{\rm max}]$ has to be chosen in advance. In the present implementation this is done with a random seed, in order to allow for reproducibility.
 
 
 \section{Simulation using superoperator representation}
-A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called ,,vectorization'', cf. \cite{watrous2018}.
+A quantum channel is a map that maps density matrices to density matrices, i.e. $\Lambda: \mathbb{C}^{2^N\times 2^N} \to \mathbb{C}^{2^N\times 2^N}$. If we view $\Lambda$ as a transformation of matrices, it is common to use the name superoperator instead. $\Lambda$ can then be treated as a $4^N\times 4^N$ matrix. The identification $\mathbb{C}^{2^N\times 2^N}\cong \mathbb{C}^{4^N}$ is called ,,vectorization'', cf. \citet{watrous2018}.
 
 \subsection{Choi representation}
+
+\SA{...}
 
 \subsection{Kraus representation}
 Every quantum channel has also - at least one - Kraus representation, i.e. can be written in the form
 \begin{align*}
     \Lambda[\rho] = \sum_i K_i \rho K_i^{\dagger}.
 \end{align*}
-
-Since the system's state space $\mathcal{H}=\mathcal{H}_0\otimes \mathcal{H}_b$, where the bath's state space is just two-dimensional, this allows for some simplification: Let us denote by $U=U(t_m,t_{m+1}$ the time evolution of composite system including bath for a particular time interval. We can write
+Since the system's state space is $\mathcal{H}=\mathcal{H}_0\otimes \mathcal{H}_b$, where the bath's state space is just two-dimensional, this allows for some simplification: Let us denote by $U=U(t_m,t_{m+1})$ the time evolution of the composite system including the bath for a particular time interval. We can write
 \begin{align*}
 U =
 \begin{pmatrix}
 U_{00} & U_{10} \\
 U_{01} & U_{11},
-\end{pmatrix}
+\end{pmatrix},
 \end{align*}
-where $U_{ij} = \bra{i}_{b} U  \ket{j}_{b}$ is an operator $\mathcal{H}_0 \to \mathcal{H}_0$, i.e. a $2^N \times 2^N$ matrix. Applying $U\rho U^{\dagger}$ to a density matrix of the form $\rho_0 \otimes \sum_{i} p_i  \ket{i}_{b}\bra{i}_{b}$ we get
+where $U_{ij} = \bra{i}_{b} U  \ket{j}_{b}$ is an operator $\mathcal{H}_0 \to \mathcal{H}_0$, i.e. a $2^N \times 2^N$ matrix. Applying $U\rho U^{\dagger}$ to a density matrix of the form $\rho_0 \otimes \sum_{i} p_i  \ket{i}_{b}\bra{i}_{b}$, we get
 \begin{align*}
      \Tr_{\mathcal H_{\rm bath}} U\rho U^{\dagger} = \sum_{ij} p_j  U_{ij}\rho_0 U_{ij}^{\dagger}.
-\end{align*} This involves only matrix-products of $2^N \times 2^N$ matrices, which is advantageous to multiplying $2^{N+1} \times 2^{N+1}$ matrices.
+\end{align*}
+This involves only matrix products of $2^N \times 2^N$ matrices, which is advantageous with respect to multiplying $2^{N+1} \times 2^{N+1}$ matrices.
 
 \subsection{Time Evolution}
 Matrix exponentials are computed exactly up to complex64 precision.
+\SA{... ?}
 
 
 \subsection{Averaged channel}
-The cooling algorithm proposed by Ding et.al. is probabilistic in the sense, that end-to-end guarantees apply to the \emph{average} channel, where an expectation value is taken both with respect to the jump operators and the Bohr frequencies:
+The cooling algorithm proposed by Ding et al. \SA{add link} is probabilistic in the sense that end-to-end guarantees apply to the \emph{average} channel, where an expectation value is taken both with respect to the jump operators and the Bohr frequencies:
 \begin{align}\label{eq:avg_channel}
     \overline{\Lambda}\,[\rho]:= \mathbb{E}_{A, \omega} \Lambda(A,\omega)\,[\rho]. 
 \end{align}
 
-In choosing the underlying probability distributions on $\mathcal{A}$ resp. $[0,\omega_{\max}$ we follow Ding et. al. and choose uniform distributions on both sets. At least for $\mathcal{A}$ this seems to be the canonical choice - at least if the jump operators correspond to physical sites and the Hamiltonian is translation invariant. 
+In choosing the underlying probability distributions on $\mathcal{A}$ resp. $[0,\omega_{\max}]$, we follow Ding et al. \SA{add link} and choose uniform distributions on both sets. %At least 
+For $\mathcal{A}$ this seems to be the canonical choice - at least if the jump operators correspond to physical sites and the Hamiltonian is translation invariant. 
 
-In this work we focus on the set $\mathcal{A}=\{\pm \sigma_i^{(x)}, \pm \sigma_i^{(z)}: i = 1,\ldots N\}$ and the uniform probability assigning each operator $\frac{1}{4N}$.
-As simple choice for the set of Bohr frequencies $[0,\omega_{\rm}]$ we choose uniform distribution as well. Here however there is a priori no need to exclude other distributions and it could turn out that e.g. distributions 
-that are skewed towards higher frequencies have an advantage. In this work however we don't pursue this particular degree of freedom.
+In this work we focus on the set $\mathcal{A}=\{\pm \sigma_i^{(x)}, \pm \sigma_i^{(z)}: i = 1,\ldots N\}$ and the uniform probability assigning each operator ${1}/({4N})$.
+As simple choice for the set of Bohr frequencies $[0,\omega_{\rm}]$ we choose a uniform distribution as well. Here, however, there is a priori no need to exclude other distributions and it could turn out that e.g. distributions 
+that are skewed towards higher frequencies (not considered here) are advantageous. %have an advantage. 
+%In this work however we don't pursue this particular degree of freedom.
 
-To realize the averaged channel $\overline{\Lambda}$ numerically we approximate
+In order to realize the averaged channel $\overline{\Lambda}$ numerically, we approximate \SA{not reflected in the eq.}
 \begin{align}\label{eq:avg_channel_quadrature}
     \int_0^{\omega_{\rm max}} d\omega\, \Lambda(A,\omega) = \frac{1}{k\omega_{\rm max}}\sum_{i=1}^k \Lambda(A,\omega_i) 
 \end{align} by some quadrature formula, e.g. by the midpoint-formula where $\omega_i = \frac{2i+1}{k}\omega_{\rm max}$. The average channel is thus approximated by the object
 \begin{align}\label{eq:avg_channel_approx}
 \frac{1}{4N  k \omega_{\rm max} }\sum_{A\in\mathcal A} \sum_{i=1}^k \Lambda(A, \tfrac{2i+1}{k}\omega_{\rm max})
 \end{align}
-
-
-up to order $O(\tfrac{1}{k^2})$. Thus the number of individual contributions for a Hamiltonian on $N$ sites scales with $4N\cdot k$. To keep the computational demand in check we let $k = 10$, so for computing the average channel for $N=4,6,8$ we have to run trajectories of length $160, 240$ and $320$ each. 
+up to order $O(1/{k^2})$. Thus the number of individual contributions for a Hamiltonian on $N$ sites scales with $4N%\cdot 
+k$. To keep the computational demand affordable, %in check 
+we choose $k = 10$. For computing the average channel for $N=4,6,8$ we then have to run trajectories of length $160, 240$, and $320$ each. 
 %
 %  \item[number of channel iterations $n$] determines how long the cooling channel is applied. It does not affect the fixed point of the exact channel but determines how closely the iterated state approaches it. In the weak-coupling regime, one application corresponds approximately to a Lindbladian evolution time $\alpha^2$, so that the number of iterations required for a fixed effective evolution time scales approximately as $\alpha^{-2}$.
 %
@@ -384,6 +398,8 @@ up to order $O(\tfrac{1}{k^2})$. Thus the number of individual contributions for
 \pagebreak
 
 \section{Numerical Experiments}
+\SA{maybe add short paragraph on structure of results section in order to guide the reader through it}
+
 \subsection{h-sweep}
 As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\overline{\Lambda}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare four different coupling strengths $\alpha=0.25,0.5,0.75,1.0$, while all remaining parameters of the cooling channel are kept fixed:
 $T=25$ with $\tau = 0.1$ (i.e. $250$ sub-steps per Trotterization), $\sigma = 2$ ensuring that the temporal window $[-T,T]$ is large compared to $\frac{1}{\sigma}$. The frequency cutoff is chosen near the systems bandwidth $\omega_{\max}=8$ and inverse temperature is set to $\beta=1$.
@@ -391,7 +407,7 @@ $T=25$ with $\tau = 0.1$ (i.e. $250$ sub-steps per Trotterization), $\sigma = 2$
 Convergence is measured in number of iterations starting from the pure state $\rho_0=\ket{0000}\bra{0000}$ till the trace distance
 \begin{align}\label{eq:tracedistance}
     D(\overline{\Lambda}^n[\rho_0],\rho_*) = \tfrac 12 \left\| \overline{\Lambda}^n[\rho_0] - \rho_*\right\|_1
-\end{align} is less than $\epsilon = 0.05$. We note that this notion of convergence differs from the one used in \cite{ding2025} insofar as no supremum over initial states is taken. Instead, as is common in quantum computation, the initial state $\ket{0000}$ is fixed.
+\end{align} is less than $\epsilon = 0.05$. We note that this notion of convergence differs from the one used in \citet{ding2025} insofar as no supremum over initial states is taken. Instead, as is common in quantum computation, the initial state $\ket{0000}$ is fixed.
 
 \begin{figure}[htbp]
     \centering
@@ -409,7 +425,7 @@ Convergence is measured in number of iterations starting from the pure state $\r
         \label{fig:iterations_logplot}
     \end{subfigure}
 
-    \caption{TFIM for $N=4$}
+    \caption{TFIM for $N=4$.}
     \label{fig:num_iterations}
 \end{figure}
 
@@ -457,7 +473,7 @@ only for real nonnegative subleading eigenvalue the two notion coincide. Since, 
         \label{fig:spectrum_example}
     \end{subfigure}
 
-    \caption{TFIM for $N=4$}
+    \caption{TFIM for $N=4$.}
     \label{fig:spectral_separation}
 \end{figure}
 The h-sweep therefore eludes to the the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small. %The tipping point where accuracy is lost is the really interesting thing
@@ -472,29 +488,9 @@ The h-sweep therefore eludes to the the main trade-off in the numerics very clea
 
 
 
-\begin{thebibliography}{9}
+\SA{please add journals where available (and keep preprints only if not published and provide links (DOIs)}
 
-\bibitem[Ding et al.(2025)]{ding2025}
-Z.~Ding, Y.~Zhan, J.~Preskill, and L.~Lin,
-\textit{End-to-End Efficient Quantum Thermal and Ground State Preparation Made Simple},
-arXiv:2508.05703 [quant-ph] (2025).
-
-\bibitem[Wang and Ding(2025)]{wang2025}
-K.~Wang and Z.~Ding,
-\textit{Beyond Lindblad Dynamics: Rigorous Guarantees for Thermal and Ground State Preservation under System Bath Interactions},
-arXiv:2512.03457 [quant-ph] (2025).
-
-\bibitem[Oshikawa(2019)]{oshikawa2019}
-M.~Oshikawa,
-\textit{Universal Finite-Size Gap Scaling of the Quantum Ising Chain},
-arXiv:1910.06353 [cond-mat.stat-mech] (2019).
-
-\bibitem[Watrous(2018)]{watrous2018}
-J.~Watrous,
-\textit{The Theory of Quantum Information},
-Cambridge University Press, Cambridge, 2018.
-
-
-\end{thebibliography}
+\bibliographystyle{plainnat}
+\bibliography{references}
 
 \end{document}
