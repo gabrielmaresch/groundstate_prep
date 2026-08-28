@@ -1,0 +1,440 @@
+{
+  "success": true,
+  "message": "Stopped after 5 consecutive equal valid iteration counts.",
+  "function_evaluations": 29,
+  "best_valid_evaluation": {
+    "evaluation": 1,
+    "parameters": {
+      "alpha": 0.5960530121361762,
+      "omega_max": 1.2548063750696754,
+      "sigma": 1.9768826806613076,
+      "T": 36.55395302380355,
+      "tau": 0.12659535884111642
+    },
+    "num_iterations": 7.0,
+    "trace_distance": 0.03962949762719333,
+    "status": "valid",
+    "objective": 7.0
+  },
+  "fixed_parameters": {
+    "N": 4,
+    "J": 1.0,
+    "h_over_J": 2.0,
+    "beta": 1.0,
+    "omega_points": 10,
+    "eps_fit": 0.075,
+    "op_set": "XZ",
+    "normalize_Jh": true,
+    "workers": 8,
+    "trace_distance_tol": 0.05,
+    "dense_spectrum": true
+  },
+  "history": [
+    {
+      "evaluation": 1,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.03962949762719333,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 2,
+      "parameters": {
+        "alpha": 0.6258556627429851,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.043713123589252854,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 3,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.3175466938231593,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.038639281814935394,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 4,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 2.075726814694373,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.03909724104520515,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 5,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 38.38165067499373,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.037292311548733525,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 6,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.13292512678317225
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.03962527604266184,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 7,
+      "parameters": {
+        "alpha": 0.6079740723789,
+        "omega_max": 1.2799025025710689,
+        "sigma": 1.8780385466282428,
+        "T": 37.28503208427963,
+        "tau": 0.12912726601793875
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.04115295603314839,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 8,
+      "parameters": {
+        "alpha": 0.5990332771968572,
+        "omega_max": 1.2610804069450237,
+        "sigma": 2.02630474767784,
+        "T": 36.73672278892257,
+        "tau": 0.127228335635322
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.03966273463070889,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 9,
+      "parameters": {
+        "alpha": 0.6109543374395807,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.04164062295477545,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 10,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 37.46780184939864,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.039312806832131175,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 11,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12976024281214432
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.03962882219611718,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 12,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2861765344464173,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.03910366547101787,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 13,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 2.02630474767784,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.03936675441101965,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 14,
+      "parameters": {
+        "alpha": 0.6020135422575381,
+        "omega_max": 1.267354438820372,
+        "sigma": 1.9274606136447754,
+        "T": 36.91949255404159,
+        "tau": 0.1278613124295276
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.04045333573324331,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 15,
+      "parameters": {
+        "alpha": 0.5975431446665167,
+        "omega_max": 1.2579433910073496,
+        "sigma": 2.001593714169574,
+        "T": 36.64533790636306,
+        "tau": 0.12691184723821922
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.039646951778223936,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 16,
+      "parameters": {
+        "alpha": 0.6035036747878785,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.04062724294382017,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 17,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 37.01087743660109,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.03961340142922772,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 18,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12817780082663038
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.0396294931879416,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 19,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2704914547580464,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.039358579009053,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 20,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 2.001593714169574,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.03949899831340146,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 21,
+      "parameters": {
+        "alpha": 0.5990332771968572,
+        "omega_max": 1.2391212953813044,
+        "sigma": 1.9867670940646138,
+        "T": 36.736722788922556,
+        "tau": 0.12722833563532196
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.040267251906503446,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 22,
+      "parameters": {
+        "alpha": 0.6002253832211297,
+        "omega_max": 1.248532343194327,
+        "sigma": 1.9907208594259367,
+        "T": 36.170136517053606,
+        "tau": 0.12748152635300422
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.040182213107928626,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 23,
+      "parameters": {
+        "alpha": 0.5991822904498914,
+        "omega_max": 1.2501008511631642,
+        "sigma": 1.9872613147347793,
+        "T": 36.380321746940474,
+        "tau": 0.12725998447503228
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.04005919835498619,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 24,
+      "parameters": {
+        "alpha": 0.5970961049074146,
+        "omega_max": 1.2532378671008382,
+        "sigma": 1.980342225352465,
+        "T": 36.800692206714224,
+        "tau": 0.12681690071908835
+      },
+      "num_iterations": 8.0,
+      "trace_distance": 0.03978193471059227,
+      "status": "valid",
+      "objective": 8.0
+    },
+    {
+      "evaluation": 25,
+      "parameters": {
+        "alpha": 0.5986607440642722,
+        "omega_max": 1.2508851051475827,
+        "sigma": 1.9855315423892006,
+        "T": 36.48541436188391,
+        "tau": 0.1271492135360463
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.039994363264512604,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 26,
+      "parameters": {
+        "alpha": 0.5997783434620274,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.04012639989270273,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 27,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9768826806613076,
+        "T": 36.55395302380355,
+        "tau": 0.12738657983387341
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.03962753866547852,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 28,
+      "parameters": {
+        "alpha": 0.5960530121361762,
+        "omega_max": 1.2548063750696754,
+        "sigma": 1.9892381974154407,
+        "T": 36.55395302380355,
+        "tau": 0.12659535884111642
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.039564468591489606,
+      "status": "valid",
+      "objective": 7.0
+    },
+    {
+      "evaluation": 29,
+      "parameters": {
+        "alpha": 0.5975431446665167,
+        "omega_max": 1.24696383522549,
+        "sigma": 1.9818248873629607,
+        "T": 36.64533790636305,
+        "tau": 0.1269118472382192
+      },
+      "num_iterations": 7.0,
+      "trace_distance": 0.039947616965898596,
+      "status": "valid",
+      "objective": 7.0
+    }
+  ]
+}

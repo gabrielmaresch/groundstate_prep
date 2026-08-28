@@ -95,16 +95,20 @@ def read_result(summary_path, h_over_J):
 
 
 def save_sweep(results, snapshot_path, args):
+    num_iterations = np.array([result["num_iterations"] for result in results])
+    alpha_opt = np.array([result["parameters"]["alpha"] for result in results])
+    T_opt = np.array([result["parameters"]["T"] for result in results])
     np.savez_compressed(
         snapshot_path,
         h_over_J=np.array([result["h_over_J"] for result in results]),
         beta=np.full(len(results), args.beta),
-        alpha_opt=np.array([result["parameters"]["alpha"] for result in results]),
+        alpha_opt=alpha_opt,
         omega_max_opt=np.array([result["parameters"]["omega_max"] for result in results]),
         sigma_opt=np.array([result["parameters"]["sigma"] for result in results]),
-        T_opt=np.array([result["parameters"]["T"] for result in results]),
+        T_opt=T_opt,
         tau_opt=np.array([result["parameters"]["tau"] for result in results]),
-        num_iterations=np.array([result["num_iterations"] for result in results]),
+        num_iterations=num_iterations,
+        effective_iteration_time=num_iterations * 2 * T_opt * alpha_opt**2,
         trace_distance=np.array([result["trace_distance"] for result in results]),
         objective=np.array([result["objective"] for result in results]),
         function_evaluations=np.array([result["function_evaluations"] for result in results]),
