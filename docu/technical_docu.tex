@@ -102,32 +102,29 @@ While applicability of the cooling channel beyond weak-coupling is treated in \c
 %In Ding et al. a cooling protocol is proposed and realized as an averaged quantum channel. The convergence of repeated applications of this channel to a thermal state resp. the ground state is shown, providing end-to-end guarantees. The dynamics of this cooling channel are analyzed by relating them to a Lindbladian approximation. Theorems in Ding show that there exist parameter choices such that (1) the Lindbladian approximately fixes the thermal resp. ground state and (2) the Lindbladian approximates the cooling channel sufficiently well, thus implying that also the fixed point of the cooling channel is close to the desired target state. The actual parameters, however, turn out to be both hard to find, as they have to satisfy a self-consistency condition involving the mixing time, and to suffer from the precondition (2), which effectively forces the coupling to be weak.
 
 %In follow-up work of Wang and Ding this restriction is substantially relaxed by deriving state-preservation guarantees directly for the system-bath interaction beyond the weak-coupling Lindblad approximation.
-\SA{part above is too prominent in an abstract (short introduction nd context is fine, but the focus should be on the present work); I would rather include this part in the introduction, as a motivation; please avoid short-hands and refs. should be given explicitly in [..]}
-\SA{add short motivation with outline of the work?}
+%\SA{part above is too prominent in an abstract (short introduction nd context is fine, but the focus should be on the present work); I would rather include this part in the introduction, as a motivation; please avoid short-hands and refs. should be given explicitly in [..]}
+%\SA{add short motivation with outline of the work?}
 
-Quantum mechanics connects with the tangible physical world by predicting  numerical values of actual measured quantities, i.e. by providing expectation values $\langle \mathcal{O} \rangle$ for the observables of interest. These expectation values only make sense once the state of the system, either pure or mixed, is fixed. A well known result from statistical mechanics is, that for systems that are in thermal equilibrium, the states under consideration are precisely the Gibbs states $\rho_{\beta}$ in the case of finite temperature or the ground-state $\ket{\Psi_0}$ in the case of zero-temperature.  Thus preparing thermal and ground states is of considerable interest and many approaches to these ends have been considered. 
+Measurement of observables $\langle \mathcal{O} \rangle$  only make sense once the state of the system, either pure or mixed, is fixed. A well known result from statistical mechanics is, that for systems that are in thermal equilibrium in the grand canonical ensemble, the states under consideration are the Gibbs states $\rho_{\beta}$ in the case of finite temperature or the ground-state $\ket{\Psi_0}$ in the case of zero-temperature.  Thus preparing thermal and ground states is of considerable interest and many approaches to these ends have been considered. 
 
-In quantum many-body physics the time-ordered (resp. retarded) Green's function of a many-body Hamiltonian $H$ at a given inverse temperature $\beta$ is the expectation value for the \emph{correlation} function
-\begin{align*} - i\langle \mathcal{T} c_i(t) c_j^{\dagger}(t')\rangle_{\beta}&=
--i \mbox{Tr}\, \rho_{\beta}\, \mathcal{T} c_i(t) c_j^{\dagger}(t')  \quad {\rm resp.} \\- i\theta(t-t')\langle \{c_i(t) c_j^{\dagger}(t')\}\rangle_{\beta}&=-i \mbox{Tr}\, \rho_{\beta}\, \theta(t-t')\{c_i(t), c_j^{\dagger}(t')\}.
-\end{align*}
+The preparation of these states is a non-trivial task and in full generality as hard as it can get: for general Hamiltonians ground-state preparation is know to belong the  complexity class QMA, which, loosely speaking is the quantum analog of NP and the same is true for thermal states. Therefore efficient preparation algorithms that work for important or prevalent classes of Hamiltonians are of great interest.
 
-Once the (site-dependent) Green's function $G_{i,j}^T(t-t')$ (resp. $G_{i,j}^R(t-t')$) is known, several important one-particle properties can be effectively computed, e.g.
-\begin{description}
-    \item[\qquad Spectral function:] $A_{ij}(\omega)=-\frac{1}{\pi} {\rm Im } G_{i,j}^R(\omega)$ 
-    \item[\qquad Density of states:] $D(\omega) = -\frac{1}{\pi N}   \mbox{Tr}\, {\rm Im }  G_R(\omega)$
-    \item[\qquad Particle density:] $n_i = - i G_{ii}^T(0^-)$
-    \item[\qquad Self-energy:] $\Sigma(\omega) = G_0(\omega)^{-1}-G(\omega)^{-1}$.
-\end{description}
 
-In concluding macro- and mesoscopic properties of a system, it is therefore essential to have reasonably accurate approximations of theses thermal states resp. the ground state available. One way to obtain thermal states is not by using some truncation or approximation scheme, but 
-to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a system has the advantage of being easily implementable on a quantum computer or quantum simulator, and allows for running times that often are merely polynomial in the system's parameters. 
+One particularly important example of expectation values with respect to thermal states is the time-ordered  Green's function of a many-body Hamiltonian $H$ at a given inverse temperature $\beta$: it is the expectation value for the \emph{correlation} function $ - i\langle \mathcal{T} c_i(t) c_j^{\dagger}(t')\rangle_{\beta}$. Once it is known, several important one-particle properties can be effectively computed, e.g. spectral function, density of states, particle density, self-energy etc.
+%\begin{description}
+%    \item[\qquad Spectral function:] $A_{ij}(\omega)=-\frac{1}{\pi} {\rm Im } G_{i,j}^R(\omega)$ 
+%    \item[\qquad Density of states:] $D(\omega) = -\frac{1}{\pi N}   \mbox{Tr}\, {\rm Im }  G_R(\omega)$
+%    \item[\qquad Particle density:] $n_i = - i G_{ii}^T(0^-)$
+%    \item[\qquad Self-energy:] $\Sigma(\omega) = G_0(\omega)^{-1}-%G(\omega)^{-1}$.
+%\end{description}
+It is therefore essential to have reasonably accurate approximations of theses thermal states resp. the ground state available since to dimensional blowup exact computations are infeasible. There are several routes to obtain these approximations. Among the most well-known are variational methods such as Matrix Product states, imaginary time evolution and adiabatic evolution. Another approach is
+to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a dissipative system has not only the advantage of being implementable on a quantum computer or quantum simulator, but also allows for running times that for certain relevant systems are often are merely polynomial in the system's parameters.  This route of using dissipation as effective way to obtain the desired states is the content of this work. We numerically investigate a small model system and use a dissipative algorithm that was introduced in \citet{ding2025}. 
 
-This route of using dissipation as effective way to obtain the desired states is the content of this work. We numerically investigate a small model system and use a dissipative algorithm that was introducted in \citet{ding2025}:  Here the total system's Hamiltonian has three contributions
+
+Here the total system's Hamiltonian has three contributions
 \begin{align}\label{eq:hamiltonian_parts}
     H_{\rm cooling} = H_0 + H_{\rm int} + H_{\rm bath} 
-\end{align}
-and a cooling protocol would typically look like
+\end{align}, where $H_0$ denotes the Hamiltonian of the system whose thermal states should be approximated, $H_{\rm bath}$ the Hamiltonian of the environment and $H_{\rm int}$ the dissipative action between the two. A cooling protocol would typically look like
 \begin{align}\label{eq:qu_channel}
 \rho\otimes\rho_b \longrightarrow U(t)(\rho\otimes\rho_b)\, U^{\dagger}(t)=\Tilde{\rho}  \longrightarrow \Tr_{\mathcal H_{\rm bath}} \Tilde{\rho}  =: \Lambda[\rho]
 \end{align}
@@ -138,10 +135,10 @@ which corresponds to the following steps:
     in natural units where $\hbar = 1$);
     \item discard the bath. %-subsystem.
 \end{enumerate}
-Note, that the last step will in general produce a density matrix rather than a pure state even if the initial state $\rho$ has been pure. Thus, if we think of repeated applications of this scheme, none of the involved states needs to necessarily be pure. 
+The particular protocol from \citet{ding2025} has several advantages: the bath consists only of one qubit and convergence to the thermal state is obtained by repeated interaction with this bath. The protocol \cref{eq:qu_channel} is a quantum channel with the Gibbs state $\rho_{\beta}$ an approximate fixed point: $\Lambda[\rho_{\beta}]\approx \rho_{\beta}$. The channel only relies on forward Hamiltonian reps. effective Lindbladian evolution. Although its dynamics are far richer than purely unitary evolution  it is amenable to numeric implementation.  Note, that the last step in \cref{eq:qu_channel} will in general produce a density matrix rather than a pure state even if the initial state $\rho$ has been pure. Thus, if we think of repeated applications of this scheme, none of the involved states needs to necessarily be pure as $\Lambda^n[\rho_0]\approx \rho_{\beta}$. 
 
-The restricted action of \cref{eq:qu_channel} on the state-space $\mathcal{H}_0$ is usually called a quantum channel ($\Lambda[\,\cdot\,]$) and exhibits far richer dynamics than a purely unitary evolution. 
-Ee report on the concrete implementation of the cooling scheme proposed in \citet{ding2025} using the \textsc{Pennylane framework} which follows along the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state 
+
+We report on the concrete implementation of the cooling scheme proposed in \citet{ding2025} using the \textsc{Pennylane framework} which follows along the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian and small system sizes $N=4-8$, where exact diagonalization is still possible and the thermal target state 
 \begin{align}\label{eq:gibbs_state}
 \rho_{\beta}= \frac{e^{-\beta H_0}}{{\rm Tr}\, e^{-\beta H_0}}
 \end{align}
@@ -206,8 +203,8 @@ Due to the next-neighbor interaction there exists a global $\mathbb{Z}_2$-symmet
 
 The relevant parameter of this system is $J/h$, the ratio of the energy scale of the spin-spin interaction to the potential energy of the spins in the magnetic field. To keep the energy scales of $H(J,h)$ comparable while sweeping $J$ and $h$, we usually will impose the normalization
 \begin{align}\label{eq:JHnormalization}
-    J \to J/\sqrt{J^2+h^2}\notag \\
-    h \to h/\sqrt{J^2+h^2}
+   N\cdot J \to J/\sqrt{J^2+h^2}\notag \\
+   N\cdot h \to h/\sqrt{J^2+h^2}
 \end{align} which leaves the underlying physics unchanged and puts energies, gaps and dynamical timescales essentially on the same scale.  For positive $J,h$ with $J\ll h$ a configuration with all spins aligned in $\ket{\uparrow}_x$ is favored (paramagnetic phase) and the spectrum is gaped with $\Delta \approx 2|h|$. 
 
 For $J\gg h$ the ground state in the thermodynamic limit $N\to\infty$ is twofold degenerate: for $J>0$ all spins are either aligned in $\ket{\uparrow}_z$ %direction 
@@ -257,7 +254,7 @@ Let us quickly review the parameters we encountered so far:
         \centering
         \includegraphics[width=0.85 \linewidth]{docu/plots/bohr_density_plot.png}
         \caption{%Heuristic for $\omega_{\rm max}$, 
-        TFIM for $h/J=1.2$.}
+        TFIM for $h=1.2, J=1$. Normalization factor shrinks bandwith by approx. factor of $6$ }
         \label{fig:bohr_bandwiths}
 \end{figure}
 
