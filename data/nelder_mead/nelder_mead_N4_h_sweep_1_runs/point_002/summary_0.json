@@ -1,0 +1,986 @@
+{
+  "success": true,
+  "message": "Stopped after 5 consecutive equal valid iteration counts.",
+  "function_evaluations": 68,
+  "best_valid_evaluation": {
+    "evaluation": 44,
+    "parameters": {
+      "alpha": 0.5808746176565722,
+      "omega_max": 1.1450118499372608,
+      "sigma": 1.7399756071820631,
+      "T": 33.516775330579776,
+      "tau": 0.1388038660312662
+    },
+    "num_iterations": 21.0,
+    "trace_distance": 0.0447031021533145,
+    "status": "valid",
+    "objective": 21.0
+  },
+  "fixed_parameters": {
+    "N": 4,
+    "J": 1.0,
+    "h_over_J": 0.4,
+    "beta": 1.0,
+    "omega_points": 10,
+    "eps_fit": 0.05,
+    "op_set": "XZ",
+    "normalize_Jh": true,
+    "workers": 8,
+    "trace_distance_tol": 0.05,
+    "dense_spectrum": true
+  },
+  "history": [
+    {
+      "evaluation": 1,
+      "parameters": {
+        "alpha": 0.75,
+        "omega_max": 8.0,
+        "sigma": 2.0,
+        "T": 25.0,
+        "tau": 0.1
+      },
+      "num_iterations": 177.0,
+      "trace_distance": 0.027038609685917644,
+      "status": "valid",
+      "objective": 177.0
+    },
+    {
+      "evaluation": 2,
+      "parameters": {
+        "alpha": 0.7875000000000001,
+        "omega_max": 8.0,
+        "sigma": 2.0,
+        "T": 25.0,
+        "tau": 0.1
+      },
+      "num_iterations": 192.0,
+      "trace_distance": 0.0349270765643761,
+      "status": "valid",
+      "objective": 192.0
+    },
+    {
+      "evaluation": 3,
+      "parameters": {
+        "alpha": 0.75,
+        "omega_max": 8.4,
+        "sigma": 2.0,
+        "T": 25.0,
+        "tau": 0.1
+      },
+      "num_iterations": 203.0,
+      "trace_distance": 0.029585806551998797,
+      "status": "valid",
+      "objective": 203.0
+    },
+    {
+      "evaluation": 4,
+      "parameters": {
+        "alpha": 0.75,
+        "omega_max": 8.0,
+        "sigma": 2.1,
+        "T": 25.0,
+        "tau": 0.1
+      },
+      "num_iterations": 198.0,
+      "trace_distance": 0.027256546186298584,
+      "status": "valid",
+      "objective": 198.0
+    },
+    {
+      "evaluation": 5,
+      "parameters": {
+        "alpha": 0.75,
+        "omega_max": 8.0,
+        "sigma": 2.0,
+        "T": 26.25,
+        "tau": 0.1
+      },
+      "num_iterations": 177.0,
+      "trace_distance": 0.027562176898509066,
+      "status": "valid",
+      "objective": 177.0
+    },
+    {
+      "evaluation": 6,
+      "parameters": {
+        "alpha": 0.75,
+        "omega_max": 8.0,
+        "sigma": 2.0,
+        "T": 25.0,
+        "tau": 0.10500000000000001
+      },
+      "num_iterations": 177.0,
+      "trace_distance": 0.027172021949875884,
+      "status": "valid",
+      "objective": 177.0
+    },
+    {
+      "evaluation": 7,
+      "parameters": {
+        "alpha": 0.7650000000000001,
+        "omega_max": 7.6,
+        "sigma": 2.04,
+        "T": 25.5,
+        "tau": 0.10200000000000001
+      },
+      "num_iterations": 168.0,
+      "trace_distance": 0.03007598217952138,
+      "status": "valid",
+      "objective": 168.0
+    },
+    {
+      "evaluation": 8,
+      "parameters": {
+        "alpha": 0.7725,
+        "omega_max": 7.199999999999999,
+        "sigma": 2.0600000000000005,
+        "T": 25.75,
+        "tau": 0.10300000000000004
+      },
+      "num_iterations": 154.0,
+      "trace_distance": 0.03402134136597629,
+      "status": "valid",
+      "objective": 154.0
+    },
+    {
+      "evaluation": 9,
+      "parameters": {
+        "alpha": 0.774,
+        "omega_max": 7.6800000000000015,
+        "sigma": 1.924,
+        "T": 25.799999999999997,
+        "tau": 0.10319999999999999
+      },
+      "num_iterations": 156.0,
+      "trace_distance": 0.03174917538645653,
+      "status": "valid",
+      "objective": 156.0
+    },
+    {
+      "evaluation": 10,
+      "parameters": {
+        "alpha": 0.7310999999999999,
+        "omega_max": 7.552000000000001,
+        "sigma": 1.9935999999999998,
+        "T": 26.119999999999997,
+        "tau": 0.10447999999999999
+      },
+      "num_iterations": 147.0,
+      "trace_distance": 0.024601736723091867,
+      "status": "valid",
+      "objective": 147.0
+    },
+    {
+      "evaluation": 11,
+      "parameters": {
+        "alpha": 0.7028999999999996,
+        "omega_max": 7.328000000000003,
+        "sigma": 1.9903999999999993,
+        "T": 26.679999999999993,
+        "tau": 0.10671999999999998
+      },
+      "num_iterations": 133.0,
+      "trace_distance": 0.021567055064460886,
+      "status": "valid",
+      "objective": 133.0
+    },
+    {
+      "evaluation": 12,
+      "parameters": {
+        "alpha": 0.7497599999999998,
+        "omega_max": 7.283200000000003,
+        "sigma": 1.9897599999999995,
+        "T": 26.791999999999994,
+        "tau": 0.10016799999999995
+      },
+      "num_iterations": 142.0,
+      "trace_distance": 0.029397582748251366,
+      "status": "valid",
+      "objective": 142.0
+    },
+    {
+      "evaluation": 13,
+      "parameters": {
+        "alpha": 0.7496639999999997,
+        "omega_max": 6.996480000000002,
+        "sigma": 1.9856639999999999,
+        "T": 25.758799999999994,
+        "tau": 0.10523519999999995
+      },
+      "num_iterations": 130.0,
+      "trace_distance": 0.032678543804081334,
+      "status": "valid",
+      "objective": 130.0
+    },
+    {
+      "evaluation": 14,
+      "parameters": {
+        "alpha": 0.7494959999999997,
+        "omega_max": 6.494720000000001,
+        "sigma": 1.9784959999999998,
+        "T": 25.513199999999983,
+        "tau": 0.10785279999999992
+      },
+      "num_iterations": 116.0,
+      "trace_distance": 0.038712488821993254,
+      "status": "valid",
+      "objective": 116.0
+    },
+    {
+      "evaluation": 15,
+      "parameters": {
+        "alpha": 0.7494623999999996,
+        "omega_max": 6.394368000000004,
+        "sigma": 1.9770623999999999,
+        "T": 27.21407999999999,
+        "tau": 0.10837631999999994
+      },
+      "num_iterations": 115.0,
+      "trace_distance": 0.03975991652905334,
+      "status": "valid",
+      "objective": 115.0
+    },
+    {
+      "evaluation": 16,
+      "parameters": {
+        "alpha": 0.7491935999999995,
+        "omega_max": 5.591552000000007,
+        "sigma": 1.9655936,
+        "T": 28.32111999999998,
+        "tau": 0.11256447999999991
+      },
+      "num_iterations": 103.0,
+      "trace_distance": 0.045136857899454645,
+      "status": "valid",
+      "objective": 103.0
+    },
+    {
+      "evaluation": 17,
+      "parameters": {
+        "alpha": 0.7155398399999995,
+        "omega_max": 5.878988800000002,
+        "sigma": 2.0696998399999993,
+        "T": 27.42252799999998,
+        "tau": 0.10892211199999996
+      },
+      "num_iterations": 107.0,
+      "trace_distance": 0.03984282841914615,
+      "status": "valid",
+      "objective": 107.0
+    },
+    {
+      "evaluation": 18,
+      "parameters": {
+        "alpha": 0.6942557759999992,
+        "omega_max": 5.830584320000007,
+        "sigma": 1.9375797759999989,
+        "T": 28.14153919999997,
+        "tau": 0.11149095679999985
+      },
+      "num_iterations": 99.0,
+      "trace_distance": 0.037519431980601065,
+      "status": "valid",
+      "objective": 99.0
+    },
+    {
+      "evaluation": 19,
+      "parameters": {
+        "alpha": 0.6551336639999987,
+        "omega_max": 5.1458764800000125,
+        "sigma": 1.8763696639999985,
+        "T": 29.33730879999996,
+        "tau": 0.11573643519999977
+      },
+      "num_iterations": 84.0,
+      "trace_distance": 0.03343844212924789,
+      "status": "valid",
+      "objective": 84.0
+    },
+    {
+      "evaluation": 20,
+      "parameters": {
+        "alpha": 0.679145241599999,
+        "omega_max": 4.892454912000007,
+        "sigma": 1.962463641599999,
+        "T": 28.117662719999963,
+        "tau": 0.12055033087999986
+      },
+      "num_iterations": 84.0,
+      "trace_distance": 0.03623995217900232,
+      "status": "valid",
+      "objective": 84.0
+    },
+    {
+      "evaluation": 21,
+      "parameters": {
+        "alpha": 0.7165033382399988,
+        "omega_max": 3.8734368768000085,
+        "sigma": 1.95064909824,
+        "T": 28.804727807999953,
+        "tau": 0.11953046323199978
+      },
+      "num_iterations": 68.0,
+      "trace_distance": 0.04092014087142982,
+      "status": "valid",
+      "objective": 68.0
+    },
+    {
+      "evaluation": 22,
+      "parameters": {
+        "alpha": 0.7233050073599983,
+        "omega_max": 2.146155315200012,
+        "sigma": 1.9307736473600006,
+        "T": 29.867091711999933,
+        "tau": 0.1259356948479997
+      },
+      "num_iterations": 37.0,
+      "trace_distance": 0.04216044012179344,
+      "status": "valid",
+      "objective": 37.0
+    },
+    {
+      "evaluation": 23,
+      "parameters": {
+        "alpha": 0.6594309411839983,
+        "omega_max": 2.967291002880014,
+        "sigma": 1.9434641571839988,
+        "T": 31.713084492799943,
+        "tau": 0.12563082117119978
+      },
+      "num_iterations": 50.0,
+      "trace_distance": 0.033863413699226366,
+      "status": "valid",
+      "objective": 50.0
+    },
+    {
+      "evaluation": 24,
+      "parameters": {
+        "alpha": 0.6709435416575982,
+        "omega_max": 2.4183430840320206,
+        "sigma": 1.801766044057599,
+        "T": 31.519979089919936,
+        "tau": 0.13124499283967966
+      },
+      "num_iterations": 38.0,
+      "trace_distance": 0.03466889077728309,
+      "status": "valid",
+      "objective": 38.0
+    },
+    {
+      "evaluation": 25,
+      "parameters": {
+        "alpha": 0.6059897583206375,
+        "omega_max": 1.4364963176448189,
+        "sigma": 1.840341261680638,
+        "T": 31.90093072588791,
+        "tau": 0.13507482997555162
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.03158414758403938,
+      "status": "valid",
+      "objective": 23.0
+    },
+    {
+      "evaluation": 26,
+      "parameters": {
+        "alpha": 0.5343878374809563,
+        "omega_max": 1.0,
+        "sigma": 1.7777150925209568,
+        "T": 33.69083608883187,
+        "tau": 0.1463300049633275
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.051681268321478416,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 27,
+      "parameters": {
+        "alpha": 0.6467759234088934,
+        "omega_max": 1.0,
+        "sigma": 1.7946222681128954,
+        "T": 33.617695208243106,
+        "tau": 0.13289877873377234
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.061919203533120595,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 28,
+      "parameters": {
+        "alpha": 0.6710529120522226,
+        "omega_max": 3.8576436759756914,
+        "sigma": 1.920503298228223,
+        "T": 29.492670842060747,
+        "tau": 0.12363744284344298
+      },
+      "num_iterations": 64.0,
+      "trace_distance": 0.03542675929534456,
+      "status": "valid",
+      "objective": 64.0
+    },
+    {
+      "evaluation": 29,
+      "parameters": {
+        "alpha": 0.6771552002297831,
+        "omega_max": 1.0,
+        "sigma": 1.8983696994041859,
+        "T": 32.46019394506743,
+        "tau": 0.14087307747114974
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.06320028620724447,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 30,
+      "parameters": {
+        "alpha": 0.6606390480574449,
+        "omega_max": 3.855531179573262,
+        "sigma": 1.8818696728510453,
+        "T": 30.118030086266828,
+        "tau": 0.12202059576778726
+      },
+      "num_iterations": 63.0,
+      "trace_distance": 0.03428740029618845,
+      "status": "valid",
+      "objective": 63.0
+    },
+    {
+      "evaluation": 31,
+      "parameters": {
+        "alpha": 0.6570704065796482,
+        "omega_max": 1.2718830837563595,
+        "sigma": 1.8387826150250897,
+        "T": 32.55497560068907,
+        "tau": 0.13232533099744426
+      },
+      "num_iterations": 22.0,
+      "trace_distance": 0.04271881502042336,
+      "status": "valid",
+      "objective": 22.0
+    },
+    {
+      "evaluation": 32,
+      "parameters": {
+        "alpha": 0.650079153843361,
+        "omega_max": 1.0,
+        "sigma": 1.7979222734235227,
+        "T": 34.086127980003226,
+        "tau": 0.1366692750744449
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.06282091800397302,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 33,
+      "parameters": {
+        "alpha": 0.6660568139833072,
+        "omega_max": 1.0,
+        "sigma": 1.8601814172718851,
+        "T": 32.90439456225188,
+        "tau": 0.13806407216496283
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.0627266672622464,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 34,
+      "parameters": {
+        "alpha": 0.6619934895389105,
+        "omega_max": 2.9517824701379536,
+        "sigma": 1.8764476089562554,
+        "T": 30.81462120526309,
+        "tau": 0.12603146486708117
+      },
+      "num_iterations": 48.0,
+      "trace_distance": 0.03381919620387751,
+      "status": "valid",
+      "objective": 48.0
+    },
+    {
+      "evaluation": 35,
+      "parameters": {
+        "alpha": 0.6682899401987188,
+        "omega_max": 1.1225731054284518,
+        "sigma": 1.771780313647834,
+        "T": 30.949954840704024,
+        "tau": 0.13461410423990283
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.05376237251241172,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 36,
+      "parameters": {
+        "alpha": 0.6616456909376784,
+        "omega_max": 2.506111528517123,
+        "sigma": 1.9005431962999575,
+        "T": 31.52230207977596,
+        "tau": 0.12787664193837556
+      },
+      "num_iterations": 41.0,
+      "trace_distance": 0.03392091122580032,
+      "status": "valid",
+      "objective": 41.0
+    },
+    {
+      "evaluation": 37,
+      "parameters": {
+        "alpha": 0.6655882724033136,
+        "omega_max": 1.0,
+        "sigma": 1.8484350968130578,
+        "T": 32.13149047804603,
+        "tau": 0.13495153137253918
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.062237316284838765,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 38,
+      "parameters": {
+        "alpha": 0.6628921852550113,
+        "omega_max": 2.4537901679840104,
+        "sigma": 1.869444480920456,
+        "T": 31.143838523458825,
+        "tau": 0.12826148149344568
+      },
+      "num_iterations": 40.0,
+      "trace_distance": 0.034092238521067526,
+      "status": "valid",
+      "objective": 40.0
+    },
+    {
+      "evaluation": 39,
+      "parameters": {
+        "alpha": 0.6664346687314788,
+        "omega_max": 1.3845556589297652,
+        "sigma": 1.811900023317556,
+        "T": 31.272424181006308,
+        "tau": 0.1332602901232729
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.039240456469864335,
+      "status": "valid",
+      "objective": 23.0
+    },
+    {
+      "evaluation": 40,
+      "parameters": {
+        "alpha": 0.6666051678047332,
+        "omega_max": 1.0091832158411806,
+        "sigma": 1.8199809556558968,
+        "T": 31.702322000342434,
+        "tau": 0.1348749740201336
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.061393596455835975,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 41,
+      "parameters": {
+        "alpha": 0.6638204308924418,
+        "omega_max": 2.0926384299483027,
+        "sigma": 1.8570785996043162,
+        "T": 31.283459392679728,
+        "tau": 0.12991485462511765
+      },
+      "num_iterations": 33.0,
+      "trace_distance": 0.03432207968294789,
+      "status": "valid",
+      "objective": 33.0
+    },
+    {
+      "evaluation": 42,
+      "parameters": {
+        "alpha": 0.6557045670960837,
+        "omega_max": 1.0,
+        "sigma": 1.9097844147374405,
+        "T": 31.23157355498524,
+        "tau": 0.13135940738807478
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.06032192819145253,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 43,
+      "parameters": {
+        "alpha": 0.6671337980172196,
+        "omega_max": 2.0423444225639362,
+        "sigma": 1.8287706367275596,
+        "T": 31.44787770618626,
+        "tau": 0.13127359647677844
+      },
+      "num_iterations": 33.0,
+      "trace_distance": 0.034525146718937465,
+      "status": "valid",
+      "objective": 33.0
+    },
+    {
+      "evaluation": 44,
+      "parameters": {
+        "alpha": 0.5808746176565722,
+        "omega_max": 1.1450118499372608,
+        "sigma": 1.7399756071820631,
+        "T": 33.516775330579776,
+        "tau": 0.1388038660312662
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.0447031021533145,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 45,
+      "parameters": {
+        "alpha": 0.5096594228048592,
+        "omega_max": 1.0,
+        "sigma": 1.6445765870930948,
+        "T": 35.3416171398697,
+        "tau": 0.14523795162289943
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.05229573469976581,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 46,
+      "parameters": {
+        "alpha": 0.6025421548550918,
+        "omega_max": 1.0,
+        "sigma": 1.8064606059963055,
+        "T": 32.76354838615086,
+        "tau": 0.1364780722242826
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.05679796733358074,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 47,
+      "parameters": {
+        "alpha": 0.6509858872266876,
+        "omega_max": 1.754230745303619,
+        "sigma": 1.823193129044746,
+        "T": 31.77679537617741,
+        "tau": 0.13257471541365448
+      },
+      "num_iterations": 27.0,
+      "trace_distance": 0.03264038910983049,
+      "status": "valid",
+      "objective": 27.0
+    },
+    {
+      "evaluation": 48,
+      "parameters": {
+        "alpha": 0.600721704513568,
+        "omega_max": 1.0,
+        "sigma": 1.7645984548957212,
+        "T": 33.12530109305645,
+        "tau": 0.13890075839135813
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.057378402283826374,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 49,
+      "parameters": {
+        "alpha": 0.6480457492977234,
+        "omega_max": 1.7455369805313339,
+        "sigma": 1.8339585634271676,
+        "T": 31.743919817773907,
+        "tau": 0.13216133056667778
+      },
+      "num_iterations": 27.0,
+      "trace_distance": 0.0323569452699192,
+      "status": "valid",
+      "objective": 27.0
+    },
+    {
+      "evaluation": 50,
+      "parameters": {
+        "alpha": 0.6164963861082864,
+        "omega_max": 1.0513340816973957,
+        "sigma": 1.7877184910728698,
+        "T": 32.664840667962274,
+        "tau": 0.136654282449798
+      },
+      "num_iterations": 22.0,
+      "trace_distance": 0.054019504113122674,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 51,
+      "parameters": {
+        "alpha": 0.6401584085003642,
+        "omega_max": 1.5719862558228495,
+        "sigma": 1.8223985453385931,
+        "T": 31.974150030321,
+        "tau": 0.13328456853745785
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.032564271231156,
+      "status": "valid",
+      "objective": 24.0
+    },
+    {
+      "evaluation": 52,
+      "parameters": {
+        "alpha": 0.6092252566887928,
+        "omega_max": 1.0,
+        "sigma": 1.7981660919728302,
+        "T": 32.71090697121621,
+        "tau": 0.13652483885234265
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.05752524461380725,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 53,
+      "parameters": {
+        "alpha": 0.6405457295922139,
+        "omega_max": 1.5581086892609148,
+        "sigma": 1.816936369776767,
+        "T": 32.01032327493711,
+        "tau": 0.13356224627332652
+      },
+      "num_iterations": 24.0,
+      "trace_distance": 0.03279035971182094,
+      "status": "valid",
+      "objective": 24.0
+    },
+    {
+      "evaluation": 54,
+      "parameters": {
+        "alpha": 0.6196654143232665,
+        "omega_max": 1.165864577175507,
+        "sigma": 1.8044228512408091,
+        "T": 32.477379072456515,
+        "tau": 0.1355373079926706
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.0455334230754164,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 55,
+      "parameters": {
+        "alpha": 0.6118555377442769,
+        "omega_max": 1.0,
+        "sigma": 1.7917703980398687,
+        "T": 32.71484393392683,
+        "tau": 0.13671608151062437
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.057857485168183086,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 56,
+      "parameters": {
+        "alpha": 0.6330826908113424,
+        "omega_max": 1.4263742766557959,
+        "sigma": 1.814741508513912,
+        "T": 32.15932350622246,
+        "tau": 0.1341424467807495
+      },
+      "num_iterations": 23.0,
+      "trace_distance": 0.034566134994528715,
+      "status": "valid",
+      "objective": 23.0
+    },
+    {
+      "evaluation": 57,
+      "parameters": {
+        "alpha": 0.6189312554332987,
+        "omega_max": 1.1351503183216887,
+        "sigma": 1.7994274348645498,
+        "T": 32.52967045802537,
+        "tau": 0.13585820326733272
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.047631112142202114,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 58,
+      "parameters": {
+        "alpha": 0.5665779121938903,
+        "omega_max": 1.0772067998044887,
+        "sigma": 1.7972798846797038,
+        "T": 33.919468294049146,
+        "tau": 0.1377795251824333
+      },
+      "num_iterations": 22.0,
+      "trace_distance": 0.04791190869217159,
+      "status": "valid",
+      "objective": 22.0
+    },
+    {
+      "evaluation": 59,
+      "parameters": {
+        "alpha": 0.6112580841540329,
+        "omega_max": 1.0,
+        "sigma": 1.7516140955162482,
+        "T": 34.09837677643204,
+        "tau": 0.1370468634129072
+      },
+      "num_iterations": 22.0,
+      "trace_distance": 0.05936099761508934,
+      "status": "gibbs_constraint_failed",
+      "objective": 1000000.0
+    },
+    {
+      "evaluation": 60,
+      "parameters": {
+        "alpha": 0.6073068397789864,
+        "omega_max": 1.29775982172194,
+        "sigma": 1.8181594701395407,
+        "T": 32.45029223852394,
+        "tau": 0.1355678383348905
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.03685061626296209,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 61,
+      "parameters": {
+        "alpha": 0.6669615013148185,
+        "omega_max": 1.3290610605606137,
+        "sigma": 1.8030273067011175,
+        "T": 31.492168786060724,
+        "tau": 0.13345749346700841
+      },
+      "num_iterations": 22.0,
+      "trace_distance": 0.040997885737709766,
+      "status": "valid",
+      "objective": 22.0
+    },
+    {
+      "evaluation": 62,
+      "parameters": {
+        "alpha": 0.5916738094741223,
+        "omega_max": 1.14017036499352,
+        "sigma": 1.7987167401850572,
+        "T": 33.312643417052044,
+        "tau": 0.13669901725357708
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.04510557821316454,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 63,
+      "parameters": {
+        "alpha": 0.55031036808685,
+        "omega_max": 1.081699689103607,
+        "sigma": 1.745498226419718,
+        "T": 33.15972860596599,
+        "tau": 0.14066116215445057
+      },
+      "num_iterations": 22.0,
+      "trace_distance": 0.04666887644129858,
+      "status": "valid",
+      "objective": 22.0
+    },
+    {
+      "evaluation": 64,
+      "parameters": {
+        "alpha": 0.6303803969564487,
+        "omega_max": 1.2243372350931714,
+        "sigma": 1.8154615178737468,
+        "T": 32.7061638520083,
+        "tau": 0.13440928878669584
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.04287385152960283,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 65,
+      "parameters": {
+        "alpha": 0.5770003777100495,
+        "omega_max": 1.1292455377667951,
+        "sigma": 1.768819323571061,
+        "T": 33.008540354646755,
+        "tau": 0.138577204365199
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.044921438580140784,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 66,
+      "parameters": {
+        "alpha": 0.6170353921448488,
+        "omega_max": 1.2005643107615773,
+        "sigma": 1.8038009692980754,
+        "T": 32.781757977667915,
+        "tau": 0.13545126768132162
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.04319867929299167,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 67,
+      "parameters": {
+        "alpha": 0.6002700159899194,
+        "omega_max": 1.1554382135563839,
+        "sigma": 1.7721992292114361,
+        "T": 32.997077201518145,
+        "tau": 0.1371705870119684
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.04506383116988019,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 68,
+      "parameters": {
+        "alpha": 0.5999029365449355,
+        "omega_max": 1.1400810841294748,
+        "sigma": 1.7697015210233065,
+        "T": 33.02322289430258,
+        "tau": 0.13733103464929947
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.046116386391882196,
+      "status": "valid",
+      "objective": 21.0
+    }
+  ]
+}
