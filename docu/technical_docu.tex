@@ -194,8 +194,6 @@ e^{-iA\Delta t^2}    e^{-i(H_0+H_{\rm bath})\Delta t} e^{iA\Delta t^2} &=   e^{-
 
 Using a more sophisticated quadrature of $f$, or even exact integration, would not necessarily improve the order of the overall approximation, but potentially reduce the constant of the error term. However, we will not pursue this particular direction further.
 
-
-
 \section{Transverse field Ising model}\label{sec:TFIM}
 The benchmark system which is used for validation is given by the Hamiltonian
 \begin{align}\label{eq:TFIM_Hamiltonian}
@@ -245,20 +243,21 @@ Let us quickly review the parameters we encountered so far:
 \begin{description}
     \item[coupling strength $\alpha$] determines the magnitude of the interaction part in the cooling Hamiltonian, i.e. the maximal rate at which cooling processes mediated by the bath can take place. To allow for the description of the cooling process via perturbative Lindblad dynamics, $\alpha$ is treated as small parameter in \citet{ding2025}. However, larger coupling allows for higher energy transfer from the system to the bath and therefore increases cooling. In \citet{wang2025} the validity of the cooling scheme is established also for $\alpha = O(1)$. The numerical experiments of this work underscore these findings.  
     
-    \item[temporal width $\sigma$] denotes the standard deviation of a Gaussian filter function in time space. $\sigma$ tunes the scale at which transitions from bath to system and vice versa with larger than $\frac{1}{\sigma}$ detuning are suppressed. A safe choice is 
-    $\hbar/\sigma\sim \|H_0\|$ resp. the energy bandwidth of the system that is to be cooled.
+    \item[temporal width $\sigma$] denotes the standard deviation of a Gaussian filter function in time. $\sigma$ tunes the scale at which transitions from bath to system and vice versa with larger than $\frac{1}{\sigma}$ detuning are suppressed. A safe choice is 
+    $\hbar/\sigma\lesssim \|H_0\|$ resp. the energy bandwidth of the system that is to be cooled.
 
     \item[frequency cutoff $\omega_{\max}$] determines the range of transition frequencies that are sampled. In \citet{ding2025} this cutoff is necessary since the transition frequencies are sampled uniformly
     \begin{align}\label{eq:omega_distribution}
         g(\omega)=\frac{1}{\omega_{\max}}\mathbb{1}_{[0,\omega_{\max}]}(\omega).
     \end{align}
-    The cutoff has to be large enough to include the relevant Bohr frequencies of the system. A safe choice is the energy bandwidth $\omega_{\max}\geq  2 \|H\|\geq E_{\max}-E_{\min}$. In practice, however, it is not necessary to include \emph{all} but sufficiently many frequencies. Therefore a cutoff at the median transition frequency serves as a good starting point. It should be noted that a uniform distribution is merely convenient, but not necessarily the optimal choice.  In light of \cref{fig:bohr_bandwiths,fig:bohr_quantiles} $\sigma=8$ is safe for TFIM $N=4$, but $\sigma \approx 5$ is still sensible for $N=4-8$.
+    The cutoff has to be large enough to include the relevant Bohr frequencies of the system. A safe choice is the energy bandwidth $\omega_{\max}\geq  2 \|H\|\geq E_{\max}-E_{\min}$. In practice, however, it is not necessary to include \emph{all} but sufficiently many frequencies. Therefore a cutoff at the median transition frequency serves as a good starting point. It should be noted that a uniform distribution is merely convenient, but not necessarily the optimal choice.  In light of \cref{fig:bohr_bandwiths}, $\sigma=4$ is certainly safe for TFIM $N=4-8$, even when accounting for discretization artefacts.
 
+    
 \begin{figure}[h]
         \centering
         \includegraphics[width=0.85 \linewidth]{docu/plots/bohr_density_plot.png}
         \caption{%Heuristic for $\omega_{\rm max}$, 
-        TFIM for $h=1.2, J=1$. Normalization factor shrinks bandwith by approx. factor of $6$ }
+        TFIM for $h=1.2, J=1$ and normalization factor $N \sqrt{J^2+ h^2}$ }
         \label{fig:bohr_bandwiths}
 \end{figure}
 
@@ -273,8 +272,7 @@ Let us quickly review the parameters we encountered so far:
 
     \item[frequency spacing $\Delta\omega$] resp. quadrature rule for the integration of the bath frequency sampling density $g(\omega)$. In the numerical implementation of the algorithm $[0, \omega_{\rm max}]$ is replaced by a discrete frequency grid. The spacing has to be sufficiently small to resolve the relevant Bohr frequencies. On the other hand, a too coarse frequency grid can miss relevant transitions and therefore change both the cooling rate and the averaged channel.
 
-    \item[coupling operators $\mathcal{A}$] determine which transitions between energy eigenstates can be induced by interactions with the bath. In each application of the cooling channel, an operator $A_S$ is sampled from $\mathcal{A}$. The set has to connect relevant parts of the spectrum. Otherwise conserved quantities or disconnected invariant subspaces can prevent convergence to a unique thermal state. For spin systems, a natural choice is a set of local Pauli operators, provided not all of them commute with the system Hamiltonian.
-
+    \item[coupling operators $\mathcal{A}$] determine which transitions between energy eigenstates can be induced by interactions with the bath. In each application of the cooling channel, an operator $A_S$ is sampled from $\mathcal{A}$. The set has to connect relevant parts of the spectrum. Otherwise conserved quantities or disconnected invariant subspaces can prevent convergence to a unique thermal state. For spin systems, a natural choice is a set of local Pauli operators, provided not all of them commute with the system Hamiltonian: We implemented $\mathcal{A}_{XZ}=\{X_i, Z_i\} $ as standard set  as well as  $\mathcal{A}_{XYZ}=\{X_i, Y_i, Z_i\}$ and $\mathcal{A}_{d}=\{X_i, Z_iZ_j\}$. The latter set being of particular interest with respect to the duality of TFIM, however the numerical experiments in this report are restricted to $\mathcal{A}=\mathcal{A}_{XZ}$.
 \end{description}
 
 \section{Lindbladian approximation}
@@ -291,7 +289,61 @@ and $\mathcal{M}$ is the generator of a carefully constructed Lindbladian that p
 \mathcal{U}(T)[\rho_{\beta}] = \frac{1}{\mathcal{Z}}\exp(-iH_0T)\exp(-\beta H_0) \exp(iH_0T) = \frac{1}{\mathcal{Z}}\exp(-\beta H_0) = \rho_{\beta}
 \end{align} leaves Gibbs states invariant and the Lindbladian generator fulfills $\mathcal{M}[\rho_{\beta}]=0$ by construction, the right-hand side of \cref{eq:channelapprox} has $\rho_{\beta}$ as a fixed point. Hence, as long as the approximation  \cref{eq:channelapprox} %\SA{refer to relevant eq.}
 is valid, $\rho_{\beta}$ is an approximate fixed point of the cooling channel $\mathcal{E}[\cdot]$.  In \citet{ding2025} it 
-is proven that under certain conditions a matrix norm, namely $\| X\| = \|\rho_{\beta}^{-1/4} X \rho]\rho_{\beta}^{-1/4}\|_2$, can be chosen such that $\mathcal{E}_{\mathcal{M}}$ is a contraction with respect to this norm, hence establishing uniqueness of the fixed point. However, uniqueness of the exact channel $\mathcal{E}$ does not necessarily follow. Also it has to be noted that these arguments are perturbative and hence require $\alpha \ll 1$. 
+is proven that under certain conditions a matrix norm can be chosen such that $\mathcal{E}_{\mathcal{M}}$ is a contraction with respect to this norm, hence establishing uniqueness of the fixed point. However, uniqueness of the exact channel $\mathcal{E}$ does not necessarily follow.
+
+To construct the Lindbladian we first resolve the system-bath interaction in Bohr-frequency components
+\begin{align}
+A = \sum_{\nu} \overbrace{\sum_{E_n-E_m = \nu} \bra{n}A\ket{m}\ket{n}\bra{m}}^{A_{\nu}}
+\end{align}
+we see, that in the interaction picture these operators simply evolve as
+\begin{align}
+A_I(t) = e^{itH_0}Ae^{-itH_0}=\sum_{\nu} e^{i\nu t}{A_{\nu}}.
+\end{align} The interaction Hamilitonian can be written as
+\begin{align}
+    H_I =  \alpha f(t) \sum_{\nu} e^{i\nu t}{A_{\nu}}\otimes e^{-i\omega t} \sigma_+ + h.c. 
+\end{align}
+Therefore the Dyson expansion of the time propagator from $-T$ to $T$ in powers of $\alpha$ is
+\begin{align}
+    U_{\rm int}(T) &= \mathcal{T} \exp(-i \int_{-T}^T dt' H_I(t'))
+                    \\ &= I - \underbrace{i \int_{-T}^T dt' H_I(t')}_{=-\alpha A_1}-
+                    \underbrace{\int_{-T}^T \int_{-T}^{t'} dt'dt'' H_I(t') H_I(t'')}_{-\alpha^2 A_2} + O(\alpha^3).
+\end{align}
+The action on density matrices is
+
+
+\begin{align} 
+\rho 
+\mapsto U_{\rm int}(T) \rho U_{\rm int}^{\dagger}(T)
+= \rho 
++ \alpha \left(A_1 \rho + \rho A_1^{\dagger}\right)
++ \alpha^2 \left(A_1\rho A_1^{\dagger} + A_2 \rho + \rho A_2^{\dagger}\right) 
++ O(\alpha^3).
+\end{align}
+For $\rho = \rho_S\otimes \rho_{\rm \beta}$ it turns out, that the first order term vanishes and only the second order contributions survive tracing out the bath. The second order terms combine to dissipator contributions in the Lindbladian:
+\begin{align}
+\left(A(\nu)\otimes \sigma_+\right)\rho \left(A^{\dagger}(\mu)\otimes\sigma_-\right)&\int_{-T}^T\int_{-T}^Tdt dt' e^{i(\nu-\omega)t}e^{-i(\mu-\omega)t'} f(t)f(t') & {\rm resp. }\, h.c.\\
+ -\rho \left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_+\sigma_-\right)&\int_{-T}^T\int_{-T}^t dt dt'e^{-i(\nu-\omega)t}e^{i(\mu-\omega)t'}f(t)f(t') & {\rm resp. }\, h.c.\\
+ -\left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_+\sigma_-\right)\rho &\int_{-T}^T \int_{-T}^t dt dt'e^{-i(\nu-\omega)t}e^{i(\mu-\omega)t'}f(t)f(t')& {\rm resp. }\, h.c.
+\end{align}
+After tracing out the bath state $\rho_{\rm \beta}$ each contribution gets weighted either by $p_0$, the Gibbs weight of $\ket{0}\bra{0}$, for $\sigma_+\sigma_-$ processes or by $p_1$, the Gibbs weight of $\ket{1}\bra{1}$, for the hermitian conjugate $\sigma_-\sigma_+$ process.
+
+So Bohr components of $A\in \mathcal{A}$ get weighted according to the frequency filter $f$ and then contributes as jump operators to the second order Lindbladian approximation:
+\begin{align}
+V_A(\omega)  =\sum_{\nu}\int_{-T}^Tdt f(t) e^{i(\nu-\omega)t} A_{\nu}. 
+\end{align}
+In particular the matrix elements
+\begin{align}
+    \bra{i} V(\omega) \ket{j}&= \sum_{\nu}\int_{-T}^Tdt  f(t)e^{i(\nu-\omega)t} \bra{i}A \ket{j} \delta_{E_i-E_j,\nu}=
+     \bra{i}A \ket{j} \cdot \int_{-T}^Tdt f(t)  e^{i(E_i-E_j-\omega)t}\\
+     &\approx \bra{i}A \ket{j} \cdot \sqrt[4]{8 \pi \sigma^2} \int_{-\infty}^{\infty}dt \frac{1}{\sqrt{2\pi \cdot 2\sigma^2}} e^{-\tfrac{t^2}{4\sigma^2}}  e^{i(E_i-E_j-\omega)t} \\
+     &= \sqrt[4]{8 \sigma^2} e^{-\sigma^2(E_i-E_j-\omega)^2}\bra{i}A \ket{j}
+\end{align}
+can be approximated by extending the integration limits. Thus Fermi's Golden rule allows us to approximate the transition \emph{strength} for a given frequency
+\begin{align}
+    T_{i\leftarrow j} = |\bra{i} V(\omega) \ket{j}|^2 \approx 
+    2 \sqrt {2 \pi} \sigma^2 |\bra{i}A \ket{j}|^2 e^{-2\sigma^2(E_i-E_j-\omega)^2}
+\end{align}
+since for reasonable $N$ the matrix elements $|\bra{i}A \ket{j}|$ are available, e.g. by exact diagonalization. This may serve as numerical benchmark on how close the Lindbladian approximation is to the actual cooling channel. Finally averaging over $A\in \mathcal{A}$ and $\omega$ has to be performed.
 
 
 \section{Implementation as quantum circuit}
@@ -397,7 +449,7 @@ Convergence is measured in number of iterations starting from the pure state $\r
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{docu/plots/grid_alpha_num_iterations.png}
+    \includegraphics[width=\textwidth]{docu/plots/grid_alpha_num_iterations_grid_1.png}
     \caption{Description of the image.}
     \label{fig:iterations_fitted}
 \end{figure}
@@ -423,7 +475,7 @@ Convergence is measured in number of iterations starting from the pure state $\r
     \label{fig:num_iterations}
 \end{figure}
 
-In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\epsilon$-close to the fixed point decreases almost monotonically with $h/J$, meaning convergence is reached faster in the paramagnetic regimen than in the ferromagnetic regimen. In particular there seems to be nothing special about the critical region $h/J\approx 1$. However, it should be noted, that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems.
+In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\epsilon$-close to the fixed point decreases almost monotonically with $h/J$, meaning convergence is reached faster in the paramagnetic regimen than in the ferromagnetic regime. In particular there seems to be nothing special about the critical region $h/J\approx 1$. However, it should be noted, that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems.
 
 We also see quite different qualitative behavior for the four tested coupling strengths $\alpha = 0.25, 0.5., 0.75$ and $1.0$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional relationship changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \cref{fig:iterations_logplot}) where as $\alpha = 0.75$ and $\alpha = 1.0$ display a nonlinear approach to a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have  different slopes in the para- resp. ferromagnetic region, see \cref{fig:iterations_fitted}.
 The number of iterations till fixed-point closeness does not decrease uniformly across the parameter space. In the non ferromagnetic regimen higher coupling means faster convergence, although there is only marginal improvement from $\alpha = 0.75$ out on. Qualitatively a transition from log-linear to non-linear takes place between $0.5\le \alpha \le 0.75$.
@@ -491,7 +543,7 @@ The h-sweep therefore eludes to the the main trade-off in the numerics very clea
         \includegraphics[width=\linewidth]{docu/plots/bohr_quantiles_plot.png}
         \caption{%Heuristic for $\omega_{\rm max}$, 
         TFIM for $h/J=1.2$.}
-        \label{fig:bohr_bandwiths}
+        \label{fig:bohr_quantile}
 \end{figure}
 
 
