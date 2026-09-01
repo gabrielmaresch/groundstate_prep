@@ -78,7 +78,7 @@
     showstringspaces=false
 }
 
-\title{Technical Documentation \--- QIST Project:\\ Cooling
+\title{Report \--- QIST Project:\\ Cooling
 Algorithms for Quantum State Preparation}
 \author{Gabriel Maresch}
 \date{\today}
@@ -118,10 +118,9 @@ One particularly important example of expectation values with respect to thermal
 %    \item[\qquad Self-energy:] $\Sigma(\omega) = G_0(\omega)^{-1}-%G(\omega)^{-1}$.
 %\end{description}
 It is therefore essential to have reasonably accurate approximations of these thermal states resp. the ground state available since due to dimensional blowup exact computations are infeasible. There are several routes to obtain these approximations. Among the most well-known are variational methods such as matrix product states, imaginary time evolution and adiabatic evolution. Another approach is
-to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a dissipative system not only has the advantage of being implementable on a quantum computer or quantum simulator, but also allows for running times that for certain relevant systems are often merely polynomial in the system's parameters.  This route of using dissipation as an effective way to obtain the desired states is the content of this work. We numerically investigate a small model system and use a dissipative algorithm that was introduced in \citet{ding2025}. 
+to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a dissipative system not only has the advantage of being implementable on a quantum computer or quantum simulator, but also allows for running times that for certain relevant systems are often merely polynomial in the system's parameters.  This route of using dissipation as an effective way to obtain the desired states is the content of this work. 
 
-
-Here the total system's Hamiltonian has three contributions
+We numerically investigate a small model system and use a dissipative algorithm that was introduced in \citet{ding2025}. Here the total system's Hamiltonian has three contributions
 \begin{align}\label{eq:hamiltonian_parts}
     H_{\rm cooling} = H_0 + H_{\rm int} + H_{\rm bath},
 \end{align} where $H_0$ denotes the Hamiltonian of the system whose thermal states should be approximated, $H_{\rm bath}$ the Hamiltonian of the environment and $H_{\rm int}$ the dissipative action between the two. A cooling protocol would typically look like
