@@ -1,0 +1,174 @@
+{
+  "success": true,
+  "message": "Stopped after 5 consecutive equal valid iteration counts.",
+  "function_evaluations": 10,
+  "best_valid_evaluation": {
+    "evaluation": 5,
+    "parameters": {
+      "alpha": 1.0,
+      "omega_max": 6.800263268646956,
+      "sigma": 0.5,
+      "T": 18.055370316044936,
+      "tau": 0.06837505016222853
+    },
+    "num_iterations": 19.0,
+    "trace_distance": 0.020976642136853657,
+    "status": "valid",
+    "objective": 19.0
+  },
+  "fixed_parameters": {
+    "N": 4,
+    "J": 1.0,
+    "h_over_J": 1.2,
+    "beta": 0.1778279410038923,
+    "omega_points": 10,
+    "eps_fit": 0.05,
+    "op_set": "XZ",
+    "normalize_Jh": false,
+    "workers": 8,
+    "trace_distance_tol": 0.05,
+    "dense_spectrum": true
+  },
+  "history": [
+    {
+      "evaluation": 1,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.800263268646956,
+        "sigma": 0.5,
+        "T": 17.195590777185654,
+        "tau": 0.06837505016222853
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.020959054528646975,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 2,
+      "parameters": {
+        "alpha": 0.95,
+        "omega_max": 6.800263268646956,
+        "sigma": 0.5,
+        "T": 17.195590777185654,
+        "tau": 0.06837505016222853
+      },
+      "num_iterations": 21.0,
+      "trace_distance": 0.01930112089891349,
+      "status": "valid",
+      "objective": 21.0
+    },
+    {
+      "evaluation": 3,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 7.140276432079305,
+        "sigma": 0.5,
+        "T": 17.195590777185654,
+        "tau": 0.06837505016222853
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.019826891707845264,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 4,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.800263268646956,
+        "sigma": 0.525,
+        "T": 17.195590777185654,
+        "tau": 0.06837505016222853
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.019822751616276172,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 5,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.800263268646956,
+        "sigma": 0.5,
+        "T": 18.055370316044936,
+        "tau": 0.06837505016222853
+      },
+      "num_iterations": 19.0,
+      "trace_distance": 0.020976642136853657,
+      "status": "valid",
+      "objective": 19.0
+    },
+    {
+      "evaluation": 6,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.800263268646956,
+        "sigma": 0.5,
+        "T": 17.195590777185654,
+        "tau": 0.07179380267033995
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.02092026010200634,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 7,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.936268534019895,
+        "sigma": 0.51,
+        "T": 17.539502592729367,
+        "tau": 0.0697425511654731
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.02016428616949548,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 8,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.90226721767666,
+        "sigma": 0.5075000000000001,
+        "T": 17.45352463884344,
+        "tau": 0.06940067591466195
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.020432093663725504,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 9,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.8342645849901915,
+        "sigma": 0.5025,
+        "T": 17.28156873107158,
+        "tau": 0.06871692541303967
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.02068908450222544,
+      "status": "valid",
+      "objective": 20.0
+    },
+    {
+      "evaluation": 10,
+      "parameters": {
+        "alpha": 1.0,
+        "omega_max": 6.885266559505043,
+        "sigma": 0.5062500000000001,
+        "T": 17.410535661900475,
+        "tau": 0.06922973828925638
+      },
+      "num_iterations": 20.0,
+      "trace_distance": 0.02057937683601007,
+      "status": "valid",
+      "objective": 20.0
+    }
+  ]
+}

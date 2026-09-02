@@ -40,22 +40,22 @@ def construct_opset(num_qubits:int, *, type:str = "XZ", output:bool = False):
     with qml.QueuingManager.stop_recording():
         op_set = []
 
-        if type == "XZ2":
+        if type == "XZZ": #duality adjusted set
             for i in range(num_qubits):
+                op_set.append(qml.PauliX(i))
+                op_set.append(-qml.PauliX(i))
                 for j in range(i+1, num_qubits):
                     if output:
                         print(i,j)
-                    op_set.append(qml.PauliX(i)@qml.PauliX(j))
-                    op_set.append(-(qml.PauliX(i)@qml.PauliX(j)))
                     op_set.append(qml.PauliZ(i)@qml.PauliZ(j))
                     op_set.append(-(qml.PauliZ(i)@qml.PauliZ(j)))
 
-        elif type == "XZ":
+        elif type == "XZ": #simple paulis
             for i in range(num_qubits):
                 op_set.extend([qml.PauliX(i), -qml.PauliX(i)])
                 op_set.extend([qml.PauliZ(i), -qml.PauliZ(i)])
         
-        elif type == "XYZ":
+        elif type == "XYZ": #extended paulis
             for i in range(num_qubits):
                 op_set.extend([qml.PauliX(i), -qml.PauliX(i)])
                 op_set.extend([qml.PauliY(i), -qml.PauliY(i)])

@@ -19,6 +19,7 @@ INVALID_OBJECTIVE = 1e6
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--h-over-J", type=float, required=True)
+    parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--beta", type=float, required=True)
     parser.add_argument("--N", type=int, default=4)
     parser.add_argument("--omega-points", type=int, default=10)
@@ -31,6 +32,14 @@ def parse_args():
     parser.add_argument("--fatol", type=float, default=0.5)
     parser.add_argument("--output-dir", type=Path, default=Path("data/nelder_mead"))
     parser.add_argument("--initial", type=float, nargs=5, metavar=PARAMETER_NAMES, default=INITIAL)
+    parser.add_argument(
+        "--normalize-Jh", "--normalize_Jh", dest="normalize_Jh", action="store_true", default=True,
+        help="Normalize J and h by N sqrt(J^2 + h^2) (the default).",
+    )
+    parser.add_argument(
+        "--no-normalize-Jh", dest="normalize_Jh", action="store_false",
+        help="Use the supplied physical J and h without normalization.",
+    )
     return parser.parse_args()
 
 
@@ -40,12 +49,14 @@ def run_parallel_average(args, parameters, output_file):
         "--N", str(args.N), "--T", str(parameters["T"]),
         "--alpha", str(parameters["alpha"]), "--sigma", str(parameters["sigma"]),
         "--omega_max", str(parameters["omega_max"]), "--omega-points", str(args.omega_points),
-        "--tau", str(parameters["tau"]), "--J", "1.0", "--h", str(args.h_over_J),
+        "--tau", str(parameters["tau"]), "--J", str(args.J), "--h", str(args.h_over_J * args.J),
         "--beta", str(args.beta), "--eps_fit", str(args.eps_fit), "--op-set", args.op_set,
-        "--normalize_Jh", "--workers", str(args.workers), "--data-dir", str(args.output_dir),
+        "--workers", str(args.workers), "--data-dir", str(args.output_dir),
         "--save-as-nr", "0", "--skip-normality-residual", "--skip-filename-info",
         "--dense-spectrum",
     ]
+    if args.normalize_Jh:
+        command.append("--normalize_Jh")
     subprocess.run(command, check=True)
     with np.load(output_file, allow_pickle=False) as archive:
         return float(archive["num_iterations"]), float(archive["trace_distance"])
@@ -54,8 +65,8 @@ def run_parallel_average(args, parameters, output_file):
 def main():
     args = parse_args()
     initial = np.asarray(args.initial, dtype=float)
-    if args.N < 1 or args.beta <= 0 or args.workers < 1:
-        raise ValueError("N, beta, and workers must be positive.")
+    if args.N < 1 or args.J <= 0 or args.beta <= 0 or args.workers < 1:
+        raise ValueError("N, J, beta, and workers must be positive.")
     if args.maxfev < len(PARAMETER_NAMES) + 1:
         raise ValueError("maxfev must allow one full Nelder-Mead simplex.")
     if any(value < lower or value > upper for value, (lower, upper) in zip(initial, BOUNDS)):
@@ -153,9 +164,9 @@ def main():
         "function_evaluations": function_evaluations,
         "best_valid_evaluation": best_valid,
         "fixed_parameters": {
-            "N": args.N, "J": 1.0, "h_over_J": args.h_over_J, "beta": args.beta,
+            "N": args.N, "J": args.J, "h_over_J": args.h_over_J, "beta": args.beta,
             "omega_points": args.omega_points, "eps_fit": args.eps_fit, "op_set": args.op_set,
-            "normalize_Jh": True, "workers": args.workers, "trace_distance_tol": args.trace_distance_tol,
+            "normalize_Jh": args.normalize_Jh, "workers": args.workers, "trace_distance_tol": args.trace_distance_tol,
             "dense_spectrum": True,
         },
         "history": history,
