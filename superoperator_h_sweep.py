@@ -14,6 +14,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
+    get_transition_generator_and_classical_populations,
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
@@ -46,6 +47,11 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--save-classical-populations",
+        help="Store the transition generator and classical population map.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--dense-spectrum",
         help="Diagonalize the full dense channel spectrum instead of using ARPACK.",
         action="store_true",
@@ -57,14 +63,18 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum):
+def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, save_classical_populations, dense_spectrum):
     temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
+    transition_generators = [entry["transition_generator"] for entry in sweep_data] if save_classical_populations else []
+    classical_populations = [entry["classical_populations"] for entry in sweep_data] if save_classical_populations else []
     np.savez_compressed(
         temp_path,
         h_over_J=np.array([entry["h_over_J"] for entry in sweep_data]),
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
+        transition_generator=np.stack(transition_generators) if save_classical_populations else np.array([]),
+        classical_populations=np.stack(classical_populations) if save_classical_populations else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
         Delta_sep=np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data]),
         Delta_gap=np.array([entry["spectrum_data"]["Delta_gap"] for entry in sweep_data]),
@@ -74,6 +84,7 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum)
         normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
         num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
         dense_spectrum=dense_spectrum,
+        save_classical_populations=save_classical_populations,
     )
     temp_path.replace(snapshot_path)
 
@@ -93,6 +104,7 @@ def compute_sweep(
     h_values,
     normalize_Jh,
     save_channel,
+    save_classical_populations,
     dense_spectrum,
     snapshot_path,
 ):
@@ -129,8 +141,7 @@ def compute_sweep(
         print(f"iterations for eps={eps_fit:.4g}: {iteration_count}")
         
         
-        sweep_data.append(
-            {
+        entry = {
                 "h": h,
                 "h_over_J": h / J,
                 "beta": beta,
@@ -147,8 +158,14 @@ def compute_sweep(
                     "num_iterations": np.nan if iteration_count is None else float(iteration_count),
                 },
             }
+        if save_classical_populations:
+            entry["transition_generator"], entry["classical_populations"] = get_transition_generator_and_classical_populations(
+                channel, h_sys, op_set, beta, omega_max, sigma
+            )
+        sweep_data.append(entry)
+        save_sweep_snapshot(
+            sweep_data, snapshot_path, save_channel, save_classical_populations, dense_spectrum
         )
-        save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum)
 
     return sweep_data
 
@@ -240,6 +257,7 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
+    save_classical_populations = args.save_classical_populations
     dense_spectrum = args.dense_spectrum
 
     h_values = np.linspace(args.h_min, args.h_max, args.h_points)
@@ -281,6 +299,7 @@ def main():
             h_values=h_values,
             normalize_Jh=normalize_Jh,
             save_channel=save_channel,
+            save_classical_populations=save_classical_populations,
             dense_spectrum=dense_spectrum,
             snapshot_path=snapshot_path,
         )

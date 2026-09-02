@@ -13,6 +13,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
+    get_transition_generator_and_classical_populations,
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
@@ -43,6 +44,11 @@ def parse_args():
     parser.add_argument(
         "--save-channel",
         help="Whether to store the full channel matrices in the output file.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--save-classical-populations",
+        help="Store the transition generator and classical population map.",
         action="store_true",
     )
     parser.add_argument(
@@ -93,6 +99,7 @@ def compute_single_point(
     method,
     normalize_Jh,
     save_channel,
+    save_classical_populations,
     dense_spectrum,
     verbose=False,
 ):
@@ -157,6 +164,10 @@ def compute_single_point(
     }
     if save_channel:
         result["channel"] = channel
+    if save_classical_populations:
+        result["transition_generator"], result["classical_populations"] = get_transition_generator_and_classical_populations(
+            channel, h_sys, op_set, beta, omega_max, sigma
+        )
 
     return result
 
@@ -185,6 +196,7 @@ def worker(point, *, fixed):
         method=fixed["method"],
         normalize_Jh=fixed["normalize_Jh"],
         save_channel=fixed["save_channel"],
+        save_classical_populations=fixed["save_classical_populations"],
         dense_spectrum=fixed["dense_spectrum"],
         verbose=False,
     )
@@ -205,8 +217,10 @@ def render_status(completed, total, active_points, elapsed):
     return lines
 
 
-def save_grid(rows, snapshot_path, save_channel, dense_spectrum):
+def save_grid(rows, snapshot_path, save_channel, save_classical_populations, dense_spectrum):
     channel_entries = [row["channel"] for row in rows] if save_channel else []
+    transition_generators = [row["transition_generator"] for row in rows] if save_classical_populations else []
+    classical_populations = [row["classical_populations"] for row in rows] if save_classical_populations else []
     np.savez(
         snapshot_path,
         h=np.array([row["h"] for row in rows]),
@@ -224,7 +238,10 @@ def save_grid(rows, snapshot_path, save_channel, dense_spectrum):
         normality_residual=np.array([row["spectrum_data"]["normality_residual"] for row in rows]),
         num_iterations=np.array([row["spectrum_data"]["num_iterations"] for row in rows]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
+        transition_generator=np.stack(transition_generators) if save_classical_populations else np.array([]),
+        classical_populations=np.stack(classical_populations) if save_classical_populations else np.array([]),
         dense_spectrum=dense_spectrum,
+        save_classical_populations=save_classical_populations,
     )
 
 
@@ -257,6 +274,7 @@ def main():
         "method": args.method,
         "normalize_Jh": args.normalize_Jh,
         "save_channel": args.save_channel,
+        "save_classical_populations": args.save_classical_populations,
         "dense_spectrum": args.dense_spectrum,
     }
 
@@ -292,7 +310,9 @@ def main():
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-    save_grid(rows, snapshot_path, args.save_channel, args.dense_spectrum)
+    save_grid(
+        rows, snapshot_path, args.save_channel, args.save_classical_populations, args.dense_spectrum
+    )
     print(f"Saved grid to {snapshot_path}")
 
 

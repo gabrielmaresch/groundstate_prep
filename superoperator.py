@@ -27,7 +27,11 @@ def next_running_number(folder, ext="png"):
 
 
 ##################
-from ed import thermal_state, transverse_ising_hamiltonian as ed_transverse_ising_hamiltonian
+from ed import (
+    get_transition_generator_average,
+    thermal_state,
+    transverse_ising_hamiltonian as ed_transverse_ising_hamiltonian,
+)
 
 
 def get_gibbs(N, J, h, beta):
@@ -400,6 +404,38 @@ def plot_superoperator_spectrum(S, S_params, J, h, output = True):
 def vectorize(rho):
     #we use row stacking
     return rho.reshape(-1)
+
+
+def get_classical_populations(S, H0_basis):
+    """Return the induced population map in the basis whose columns are ``H0_basis``."""
+    U = np.asarray(H0_basis, dtype=np.complex128)
+    if U.ndim != 2 or U.shape[0] != U.shape[1]:
+        raise ValueError("H0_basis must be a square matrix with basis vectors as columns")
+
+    d = U.shape[0]
+    P = np.zeros((d, d), dtype=float)
+    for n in range(d):
+        ket_n = U[:, n]
+        rho_n = np.outer(ket_n, ket_n.conj())
+        rho_out = (S @ vectorize(rho_n)).reshape(d, d)
+        rho_out_energy = U.conj().T @ rho_out @ U
+        P[:, n] = np.real(np.diag(rho_out_energy))
+
+    return P
+
+
+def get_transition_generator_and_classical_populations(channel, H0, operators, beta, omega_max, sigma, quadrature_points=100):
+    wire_order = range(len(H0.wires)) if hasattr(H0, "wires") else None
+    H0_matrix = qml.matrix(H0, wire_order=wire_order) if wire_order is not None else H0
+    operators = [qml.matrix(op, wire_order=wire_order) if hasattr(op, "wires") else op for op in operators]
+    eigensystem = np.linalg.eigh(H0_matrix)
+    return (
+        get_transition_generator_average(
+            H0_matrix, operators, beta, omega_max, sigma, quadrature_points, eigensystem
+        ),
+        get_classical_populations(channel, eigensystem[1]),
+    )
+
 
 def apply_channel(S, rho, output='matrix'):
     rho_vec = vectorize(rho)

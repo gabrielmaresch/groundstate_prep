@@ -40,6 +40,11 @@ def parse_args():
         help="Initialize each beta optimization from the preceding valid optimum.",
     )
     parser.add_argument(
+        "--save-classical-populations",
+        help="Store final-optimum transition and population matrices.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--normalize-Jh", "--normalize_Jh", dest="normalize_Jh", action="store_true",
         help="Normalize J and h by N sqrt(J^2 + h^2). Disabled by default to match the ordinary beta sweep.",
     )
@@ -72,7 +77,7 @@ def empty_result(beta, status):
     }
 
 
-def read_result(summary_path, beta):
+def read_result(summary_path, beta, save_classical_populations):
     try:
         summary = json.loads(summary_path.read_text())
     except (OSError, ValueError) as error:
@@ -83,28 +88,34 @@ def read_result(summary_path, beta):
         result = empty_result(beta, summary.get("message", "no_valid_candidate"))
         result["function_evaluations"] = int(summary.get("function_evaluations", 0))
         result["optimizer_success"] = bool(summary.get("success", False))
-        return result
-
-    try:
-        return {
-            "beta": beta,
-            "parameters": {name: float(best["parameters"][name]) for name in PARAMETER_NAMES},
-            "num_iterations": float(best["num_iterations"]),
-            "trace_distance": float(best["trace_distance"]),
-            "objective": float(best["objective"]),
-            "function_evaluations": int(summary["function_evaluations"]),
-            "optimizer_success": bool(summary["success"]),
-            "has_valid_candidate": True,
-            "status": summary["message"],
-        }
-    except (KeyError, TypeError, ValueError) as error:
-        return empty_result(beta, f"invalid_summary: {error}")
+    else:
+        try:
+            result = {
+                "beta": beta,
+                "parameters": {name: float(best["parameters"][name]) for name in PARAMETER_NAMES},
+                "num_iterations": float(best["num_iterations"]),
+                "trace_distance": float(best["trace_distance"]),
+                "objective": float(best["objective"]),
+                "function_evaluations": int(summary["function_evaluations"]),
+                "optimizer_success": bool(summary["success"]),
+                "has_valid_candidate": True,
+                "status": summary["message"],
+            }
+        except (KeyError, TypeError, ValueError) as error:
+            result = empty_result(beta, f"invalid_summary: {error}")
+    if save_classical_populations:
+        with np.load(summary_path.with_name("classical_matrices_0.npz"), allow_pickle=False) as archive:
+            result["transition_generator"] = archive["transition_generator"]
+            result["classical_populations"] = archive["classical_populations"]
+    return result
 
 
 def save_sweep(results, snapshot_path, args):
     num_iterations = np.array([result["num_iterations"] for result in results])
     alpha_opt = np.array([result["parameters"]["alpha"] for result in results])
     T_opt = np.array([result["parameters"]["T"] for result in results])
+    transition_generators = [result["transition_generator"] for result in results] if args.save_classical_populations else []
+    classical_populations = [result["classical_populations"] for result in results] if args.save_classical_populations else []
     np.savez_compressed(
         snapshot_path,
         beta=np.array([result["beta"] for result in results]),
@@ -122,6 +133,8 @@ def save_sweep(results, snapshot_path, args):
         optimizer_success=np.array([result["optimizer_success"] for result in results]),
         has_valid_candidate=np.array([result["has_valid_candidate"] for result in results]),
         status=np.array([result["status"] for result in results]),
+        transition_generator=np.stack(transition_generators) if args.save_classical_populations else np.array([]),
+        classical_populations=np.stack(classical_populations) if args.save_classical_populations else np.array([]),
         N=args.N,
         J=args.J,
         h_over_J=args.h / args.J,
@@ -135,6 +148,7 @@ def save_sweep(results, snapshot_path, args):
         xatol=args.xatol,
         fatol=args.fatol,
         warm_start=args.warm_start,
+        save_classical_populations=args.save_classical_populations,
         ordinary_beta_initial=np.asarray(args.initial, dtype=float),
     )
 
@@ -169,15 +183,20 @@ def main():
             "--xatol", str(args.xatol), "--fatol", str(args.fatol), "--output-dir", str(point_dir),
             "--initial", *(str(value) for value in initial),
         ]
+        if args.save_classical_populations:
+            command.append("--save-classical-populations")
         if not args.normalize_Jh:
             command.append("--no-normalize-Jh")
         print(f"\nbeta = {beta:.6g} ({index}/{len(beta_values)})", flush=True)
         completed = subprocess.run(command, check=False)
         result = (
-            read_result(point_dir / "summary_0.json", beta)
+            read_result(point_dir / "summary_0.json", beta, args.save_classical_populations)
             if completed.returncode == 0
             else empty_result(beta, f"subprocess_failed: {completed.returncode}")
         )
+        if args.save_classical_populations and "transition_generator" not in result:
+            result["transition_generator"] = np.full((2 ** args.N, 2 ** args.N), np.nan)
+            result["classical_populations"] = np.full((2 ** args.N, 2 ** args.N), np.nan)
         results.append(result)
 
         if args.warm_start and result["has_valid_candidate"]:

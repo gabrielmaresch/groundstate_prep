@@ -9,6 +9,8 @@ from pathlib import Path
 import numpy as np
 from scipy.optimize import minimize
 
+from cooling_channel import construct_opset, transverse_ising_hamiltonian
+from superoperator import get_averaged_channel, get_transition_generator_and_classical_populations
 
 PARAMETER_NAMES = ("alpha", "omega_max", "sigma", "T", "tau")
 INITIAL = (0.75, 8.0, 2.0, 25.0, 0.1)
@@ -40,6 +42,11 @@ def parse_args():
         "--no-normalize-Jh", dest="normalize_Jh", action="store_false",
         help="Use the supplied physical J and h without normalization.",
     )
+    parser.add_argument(
+        "--save-classical-populations",
+        help="Store final-optimum transition and population matrices.",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -60,6 +67,44 @@ def run_parallel_average(args, parameters, output_file):
     subprocess.run(command, check=True)
     with np.load(output_file, allow_pickle=False) as archive:
         return float(archive["num_iterations"]), float(archive["trace_distance"])
+
+
+def save_final_classical_matrices(args, best_valid):
+    dimension = 2 ** args.N
+    transition_generator = np.full((dimension, dimension), np.nan)
+    classical_populations = np.full((dimension, dimension), np.nan)
+    if best_valid is not None:
+        parameters = best_valid["parameters"]
+        J, h = args.J, args.h_over_J * args.J
+        if args.normalize_Jh:
+            scale = args.N * np.sqrt(J**2 + h**2)
+            J, h = J / scale, h / scale
+        operators = construct_opset(args.N, type=args.op_set)
+        H_sys = transverse_ising_hamiltonian(J, h, args.N)
+        channel, _ = get_averaged_channel(
+            args.N,
+            parameters["tau"],
+            parameters["T"],
+            parameters["sigma"],
+            operators,
+            parameters["omega_max"],
+            H_sys,
+            parameters["alpha"],
+            args.beta,
+        )
+        transition_generator, classical_populations = get_transition_generator_and_classical_populations(
+            channel,
+            H_sys,
+            operators,
+            args.beta,
+            parameters["omega_max"],
+            parameters["sigma"],
+        )
+    np.savez_compressed(
+        args.output_dir / "classical_matrices_0.npz",
+        transition_generator=transition_generator,
+        classical_populations=classical_populations,
+    )
 
 
 def main():
@@ -173,6 +218,8 @@ def main():
     }
     summary_path = args.output_dir / "summary_0.json"
     summary_path.write_text(json.dumps(summary, indent=2) + "\n")
+    if args.save_classical_populations:
+        save_final_classical_matrices(args, best_valid)
     print(f"Optimization finished: {summary_path}")
 
 
