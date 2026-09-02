@@ -27,12 +27,12 @@ def next_running_number(folder, ext="png"):
 
 
 ##################
-from ed import get_transverse_ising_gibbsstate
+from ed import thermal_state, transverse_ising_hamiltonian as ed_transverse_ising_hamiltonian
 
 
 def get_gibbs(N, J, h, beta):
-    gibbs_state, energy = get_transverse_ising_gibbsstate(N, J, h, beta)
-    return gibbs_state, energy
+    H = ed_transverse_ising_hamiltonian(N, J, h)
+    return thermal_state(H, beta)
 ####################
 
 
@@ -287,8 +287,7 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
     # eigenvalue whose eigenvector has maximal overlap with the thermal state
     thermal_ev = eigvals[closest_eval_to_thermal]
     thermal_dist = abs(thermal_ev - target_ev)
-    num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
-
+    num_closer = np.sum(np.abs(other_eigvals - target_ev) < thermal_dist)
     # Separation from the fixed-point eigenvalue and conventional modulus gap.
     Delta_sep = np.min(np.abs(other_eigvals - target_ev))
     Delta_gap = 1 - np.max(np.abs(other_eigvals))

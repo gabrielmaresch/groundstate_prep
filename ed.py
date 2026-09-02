@@ -94,21 +94,50 @@ def ground_state_expectation_value(H: np.ndarray, A: np.ndarray):
     return np.complex128(gs.conj().T @ A @ gs)
 
 
-def get_transverse_ising_groundstate(N: int, J: float, h: float):
-    """Convenience wrapper returning the ground state and its energy."""
-    H = transverse_ising_hamiltonian(N, J, h)
-    return ground_state(H)
+
+def get_transition_generator_single(H0: np.ndarray, A: np.ndarray, beta: float, omega_max: float, sigma: float, quadrature_points=100):
+    H0 = np.asarray(H0, dtype=np.complex128)
+    A = np.asarray(A, dtype=np.complex128)
+    if H0.ndim != 2 or H0.shape[0] != H0.shape[1]:
+        raise ValueError("H0 must be square")
+    if A.shape != H0.shape:
+        raise ValueError("A must have the same shape as H0")
+    if omega_max <= 0:
+        raise ValueError("omega_max must be positive")
+    if sigma <= 0:
+        raise ValueError("sigma must be positive")
+    if quadrature_points < 2:
+        raise ValueError("quadrature_points must be at least 2")
+
+    E, U = np.linalg.eigh(H0)
+    M = np.conj(U).T @ A @ U
+    T = np.zeros_like(M, dtype=float) 
+
+    n = H0.shape[0]
+    omegas = np.linspace(0,omega_max, quadrature_points)
+    for i in range(n):
+        for j in range(n):
+            def f(omega):
+                return np.exp(-2*sigma**2*(E[i]-E[j]-omega)**2)
+            
+            int_plus = np.trapezoid([f(w)*(1+np.exp(-beta*w))**(-1) for w in omegas], omegas)
+            int_minus = np.trapezoid([f(-w)*(1+np.exp(beta*w))**(-1) for w in omegas], omegas)
+            if i != j:
+                T[i,j] = np.abs(M[i,j])**2* int_plus + np.abs(M)[j,i]**2* int_minus
+    for i in range(n):
+        T[i,i] = -sum(T[:,i])
+
+    T *= np.sqrt(8*np.sqrt(np.pi)) * sigma
+
+    return T
 
 
-def get_transverse_ising_gibbsstate(N: int, J: float, h: float, beta: float):
-    """Convenience wrapper returning the Gibbs state and its energy."""
-    H = transverse_ising_hamiltonian(N, J, h)
-    return thermal_state(H, beta)
+def get_transition_generator_average(H0: np.ndarray, operators, beta: float, omega_max: float, sigma: float, quadrature_points=100):
+    operators = list(operators)
+    if not operators:
+        raise ValueError("operators must not be empty")
 
-
-def get_spectrum(H: np.ndarray):
-    """Return the eigenvalues of H in ascending order."""
-    H = np.asarray(H, dtype=np.complex128)
-    if H.shape[0] != H.shape[1]:
-        raise ValueError("H must be square")
-    return np.linalg.eigvalsh(H)
+    return sum(
+        get_transition_generator_single(H0, A, beta, omega_max, sigma, quadrature_points)
+        for A in operators
+    ) / len(operators)
