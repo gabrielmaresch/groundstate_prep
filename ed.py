@@ -95,7 +95,7 @@ def ground_state_expectation_value(H: np.ndarray, A: np.ndarray):
 
 
 
-def get_transition_generator_single(H0: np.ndarray, A: np.ndarray, beta: float, omega_max: float, sigma: float, quadrature_points=100):
+def get_transition_generator_single(H0: np.ndarray, A: np.ndarray, beta: float, omega_max: float, sigma: float, quadrature_points=100, eigensystem=None):
     H0 = np.asarray(H0, dtype=np.complex128)
     A = np.asarray(A, dtype=np.complex128)
     if H0.ndim != 2 or H0.shape[0] != H0.shape[1]:
@@ -109,35 +109,36 @@ def get_transition_generator_single(H0: np.ndarray, A: np.ndarray, beta: float, 
     if quadrature_points < 2:
         raise ValueError("quadrature_points must be at least 2")
 
-    E, U = np.linalg.eigh(H0)
+    E, U = np.linalg.eigh(H0) if eigensystem is None else eigensystem
     M = np.conj(U).T @ A @ U
-    T = np.zeros_like(M, dtype=float) 
+    T = np.zeros_like(M, dtype=float)
 
     n = H0.shape[0]
     omegas = np.linspace(0,omega_max, quadrature_points)
     for i in range(n):
         for j in range(n):
             def f(omega):
-                return np.exp(-2*sigma**2*(E[i]-E[j]-omega)**2)
-            
-            int_plus = np.trapezoid([f(w)*(1+np.exp(-beta*w))**(-1) for w in omegas], omegas)
-            int_minus = np.trapezoid([f(-w)*(1+np.exp(beta*w))**(-1) for w in omegas], omegas)
+                return np.exp(-2*sigma**2*(E[i]-E[j]+omega)**2)
+
+            int_plus = np.trapezoid([f(w)*(1+np.exp(-beta*w))**(-1) for w in omegas], omegas)/omega_max
+            int_minus = np.trapezoid([f(-w)*(1+np.exp(beta*w))**(-1) for w in omegas], omegas)/omega_max
             if i != j:
                 T[i,j] = np.abs(M[i,j])**2* int_plus + np.abs(M)[j,i]**2* int_minus
     for i in range(n):
         T[i,i] = -sum(T[:,i])
 
-    T *= np.sqrt(8*np.sqrt(np.pi)) * sigma
+    T *= np.sqrt(8*np.pi) * sigma
 
     return T
 
 
-def get_transition_generator_average(H0: np.ndarray, operators, beta: float, omega_max: float, sigma: float, quadrature_points=100):
+def get_transition_generator_average(H0: np.ndarray, operators, beta: float, omega_max: float, sigma: float, quadrature_points=100, eigensystem=None):
     operators = list(operators)
     if not operators:
         raise ValueError("operators must not be empty")
 
+    eigensystem = np.linalg.eigh(H0) if eigensystem is None else eigensystem
     return sum(
-        get_transition_generator_single(H0, A, beta, omega_max, sigma, quadrature_points)
+        get_transition_generator_single(H0, A, beta, omega_max, sigma, quadrature_points, eigensystem)
         for A in operators
     ) / len(operators)

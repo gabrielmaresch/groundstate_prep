@@ -9,6 +9,7 @@ from scipy.sparse.linalg import LinearOperator
 from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
+    get_transition_generator_and_classical_populations,
     get_U_matrix,
     get_kraus_blocks,
     get_normality_residual,
@@ -54,6 +55,11 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--save-classical-populations",
+        help="Store the transition generator and classical population map.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--dense-spectrum",
         help="Whether dense superoprator matrix instead of linear operator/ARPACK.",
         action="store_true",
@@ -73,13 +79,15 @@ def validate_dense_size(N, dense_requested, *, max_dense_dim=4096):
         )
 
 
-def save_instance(result, snapshot_path, save_channel, dense_spectrum):
+def save_instance(result, snapshot_path, save_channel, save_classical_populations, dense_spectrum):
     np.savez_compressed(
         snapshot_path,
         h=result["h"],
         h_over_J=result["h_over_J"],
         beta=result["beta"],
         channel=result["channel"] if save_channel else np.array([]),
+        transition_generator=result["transition_generator"] if save_classical_populations else np.array([]),
+        classical_populations=result["classical_populations"] if save_classical_populations else np.array([]),
         eigvals=result["spectrum_data"]["eigvals"],
         Delta_sep=result["spectrum_data"]["Delta_sep"],
         Delta_gap=result["spectrum_data"]["Delta_gap"],
@@ -89,6 +97,7 @@ def save_instance(result, snapshot_path, save_channel, dense_spectrum):
         normality_residual=result["spectrum_data"]["normality_residual"],
         num_iterations=result["spectrum_data"]["num_iterations"],
         dense_spectrum=dense_spectrum,
+        save_classical_populations=save_classical_populations,
     )
 
 
@@ -212,6 +221,7 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
+    save_classical_populations = args.save_classical_populations
     validate_dense_size(N, save_channel or args.dense_spectrum)
     workers = args.workers
     save_as_nr = args.save_as_nr
@@ -284,8 +294,14 @@ def main():
     }
     if save_channel:
         result["channel"] = analysis_channel if args.dense_spectrum else linear_operator_to_dense(channel)
+    if save_classical_populations:
+        result["transition_generator"], result["classical_populations"] = get_transition_generator_and_classical_populations(
+            channel, H_sys, op_set, beta, omega_max, sigma
+        )
 
-    save_instance(result, snapshot_path, save_channel, args.dense_spectrum)
+    save_instance(
+        result, snapshot_path, save_channel, save_classical_populations, args.dense_spectrum
+    )
 
 
 if __name__ == "__main__":

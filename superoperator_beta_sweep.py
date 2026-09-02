@@ -14,6 +14,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
+    get_transition_generator_and_classical_populations,
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
@@ -51,6 +52,11 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--save-classical-populations",
+        help="Store the transition generator and classical population map.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--dense-spectrum",
         help="Diagonalize the full dense channel spectrum instead of using ARPACK.",
         action="store_true",
@@ -58,13 +64,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum):
+def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, save_classical_populations, dense_spectrum):
     temp_path = snapshot_path.with_name(snapshot_path.stem + ".tmp" + snapshot_path.suffix)
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
+    transition_generators = [entry["transition_generator"] for entry in sweep_data] if save_classical_populations else []
+    classical_populations = [entry["classical_populations"] for entry in sweep_data] if save_classical_populations else []
     np.savez_compressed(
         temp_path,
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
+        transition_generator=np.stack(transition_generators) if save_classical_populations else np.array([]),
+        classical_populations=np.stack(classical_populations) if save_classical_populations else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
         Delta_sep=np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data]),
         Delta_gap=np.array([entry["spectrum_data"]["Delta_gap"] for entry in sweep_data]),
@@ -74,6 +84,7 @@ def save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum)
         normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
         num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
         dense_spectrum=dense_spectrum,
+        save_classical_populations=save_classical_populations,
     )
     temp_path.replace(snapshot_path)
 
@@ -93,6 +104,7 @@ def precompute_sweep(
     beta_values,
     snapshot_path,
     save_channel,
+    save_classical_populations,
     dense_spectrum,
 ):
     sweep_data = []
@@ -125,8 +137,7 @@ def precompute_sweep(
         normality_residual = get_normality_residual(channel)
         iteration_count = num_iterations(channel, fixedpoint)
 
-        sweep_data.append(
-            {
+        entry = {
                 "beta": beta,
                 "channel": channel,
                 "channel_params": channel_params,
@@ -141,8 +152,14 @@ def precompute_sweep(
                     "num_iterations": np.nan if iteration_count is None else float(iteration_count),
                 },
             }
+        if save_classical_populations:
+            entry["transition_generator"], entry["classical_populations"] = get_transition_generator_and_classical_populations(
+                channel, h_sys, op_set, beta, omega_max, sigma
+            )
+        sweep_data.append(entry)
+        save_sweep_snapshot(
+            sweep_data, snapshot_path, save_channel, save_classical_populations, dense_spectrum
         )
-        save_sweep_snapshot(sweep_data, snapshot_path, save_channel, dense_spectrum)
 
     return sweep_data
 
@@ -302,6 +319,7 @@ def main():
     data_dir = args.data_dir
     plot_dir = args.plot_dir
     save_channel = args.save_channel
+    save_classical_populations = args.save_classical_populations
     dense_spectrum = args.dense_spectrum
 
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -377,6 +395,7 @@ def main():
             beta_values=beta_values,
             snapshot_path=snapshot_path,
             save_channel=save_channel,
+            save_classical_populations=save_classical_populations,
             dense_spectrum=dense_spectrum,
         )
         beta_grid = beta_values

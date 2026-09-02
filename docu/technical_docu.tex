@@ -300,7 +300,7 @@ we see, that in the interaction picture these operators simply evolve as
 A_I(t) = e^{itH_0}Ae^{-itH_0}=\sum_{\nu} e^{i\nu t}{A_{\nu}}.
 \end{align} The interaction Hamilitonian can be written as
 \begin{align}
-    H_I =  \alpha f(t) \sum_{\nu} e^{i\nu t}{A_{\nu}}\otimes e^{-i\omega t} \sigma_+ + h.c. 
+    H_I =  \alpha f(t) \sum_{\nu} e^{i\nu t}{A_{\nu}}\otimes e^{i\omega t} \sigma_+ + h.c.
 \end{align}
 Therefore the Dyson expansion of the time propagator from $-T$ to $T$ in powers of $\alpha$ is
 \begin{align}
@@ -321,27 +321,27 @@ The action on density matrices is
 \end{align}
 For $\rho = \rho_S\otimes \rho_{\rm \beta}$ it turns out, that the first order term vanishes and only the second order contributions survive tracing out the bath. The second order terms combine to dissipator contributions in the Lindbladian:
 \begin{align}
-\left(A(\nu)\otimes \sigma_+\right)\rho \left(A^{\dagger}(\mu)\otimes\sigma_-\right)&\int_{-T}^T\int_{-T}^Tdt dt' e^{i(\nu-\omega)t}e^{-i(\mu-\omega)t'} f(t)f(t') & {\rm resp. }\, h.c.\\
- -\rho \left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-\sigma_+\right)&\int_{-T}^T\int_{-T}^t dt dt'e^{-i(\nu-\omega)t}e^{i(\mu-\omega)t'}f(t)f(t') & {\rm resp. }\, h.c.\\
- -\left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-+\sigma_-\right)\rho &\int_{-T}^T \int_{-T}^t dt dt'e^{-i(\nu-\omega)t}e^{i(\mu-\omega)t'}f(t)f(t')& {\rm resp. }\, h.c.
+\left(A(\nu)\otimes \sigma_+\right)\rho \left(A^{\dagger}(\mu)\otimes\sigma_-\right)&\int_{-T}^T\int_{-T}^Tdt dt' e^{i(\nu+\omega)t}e^{-i(\mu+\omega)t'} f(t)f(t') & {\rm resp. }\, h.c.\\
+ -\rho \left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-\sigma_+\right)&\int_{-T}^T\int_{-T}^t dt dt'e^{-i(\nu+\omega)t}e^{i(\mu+\omega)t'}f(t)f(t') & {\rm resp. }\, h.c.\\
+ -\left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-+\sigma_-\right)\rho &\int_{-T}^T \int_{-T}^t dt dt'e^{-i(\nu+\omega)t}e^{i(\mu+\omega)t'}f(t)f(t')& {\rm resp. }\, h.c.
 \end{align}
 After tracing out the bath state $\rho_{\rm \beta}$ each contribution gets weighted either by $p_0$, the Gibbs weight of $\ket{0}\bra{0}$, for $\sigma_-\sigma_+$ processes or by $p_1$, the Gibbs weight of $\ket{1}\bra{1}$, for the hermitian conjugate $\sigma_+\sigma_-$ process.
 
 So Bohr components of $A\in \mathcal{A}$ get weighted according to the frequency filter $f$ and then contributes as jump operators to the second order Lindbladian approximation:
 \begin{align}
-V_A(\omega)  =\sum_{\nu}\int_{-T}^Tdt f(t) e^{i(\nu-\omega)t} A_{\nu}. 
+V_A(\omega)  =\sum_{\nu}\int_{-T}^Tdt f(t) e^{i(\nu+\omega)t} A_{\nu}.
 \end{align}
 In particular the matrix elements in the energy basis of $H_0$
 \begin{align}
-    \bra{i} V(\omega) \ket{j}&= \sum_{\nu}\int_{-T}^Tdt  f(t)e^{i(\nu-\omega)t} \bra{i}A \ket{j} \delta_{E_i-E_j,\nu}=
-     \bra{i}A \ket{j} \cdot \int_{-T}^Tdt f(t)  e^{i(E_i-E_j-\omega)t}\\
-     &\approx \bra{i}A \ket{j} \cdot \sqrt[4]{8 \pi \sigma^2} \int_{-\infty}^{\infty}dt \frac{1}{\sqrt{2\pi \cdot 2\sigma^2}} e^{-\tfrac{t^2}{4\sigma^2}}  e^{i(E_i-E_j-\omega)t} \\
-     &= \sqrt[4]{8 \pi \sigma^2} e^{-\sigma^2(E_i-E_j-\omega)^2}\bra{i}A \ket{j}
+    \bra{i} V(\omega) \ket{j}&= \sum_{\nu}\int_{-T}^Tdt  f(t)e^{i(\nu+\omega)t} \bra{i}A \ket{j} \delta_{E_i-E_j,\nu}=
+     \bra{i}A \ket{j} \cdot \int_{-T}^Tdt f(t)  e^{i(E_i-E_j+\omega)t}\\
+     &\approx \bra{i}A \ket{j} \cdot \sqrt[4]{8 \pi \sigma^2} \int_{-\infty}^{\infty}dt \frac{1}{\sqrt{2\pi \cdot 2\sigma^2}} e^{-\tfrac{t^2}{4\sigma^2}}  e^{i(E_i-E_j+\omega)t} \\
+     &= \sqrt[4]{8 \pi \sigma^2} e^{-\sigma^2(E_i-E_j+\omega)^2}\bra{i}A \ket{j}
 \end{align}
 can be approximated by extending the integration limits. Thus Fermi's Golden rule allows us to approximate the transition \emph{strength} for a given frequency
 \begin{align}
     T_{i\leftarrow j}(\omega) = |\bra{i} V(\omega) \ket{j}|^2 \approx 
-    2 \sqrt {2 \pi} \sigma |\bra{i}A \ket{j}|^2 e^{-2\sigma^2(E_i-E_j-\omega)^2}
+    2 \sqrt {2 \pi} \sigma |\bra{i}A \ket{j}|^2 e^{-2\sigma^2(E_i-E_j+\omega)^2}
 \end{align}
 %since for reasonable $N$ the matrix elements $|\bra{i}A \ket{j}|$ are available, e.g. by exact diagonalization and for the dissipator D_V it can be shown that V_ij actually are responsible for the population transfer in the H0 energy basis.
 
