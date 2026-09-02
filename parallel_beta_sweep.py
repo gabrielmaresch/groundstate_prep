@@ -21,16 +21,16 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--N", type=int, default=4)
     parser.add_argument("--T", type=float, default=25.0)
-    parser.add_argument("--alpha", type=float, default=0.75)
+    parser.add_argument("--alpha", type=float, default=0.5)
     parser.add_argument("--sigma", type=float, default=2.0)
-    parser.add_argument("--omega_max", type=float, default=20)
+    parser.add_argument("--omega_max", type=float, default=2.5)
     parser.add_argument("--tau", type=float, default=0.1)
     parser.add_argument("--J", type=float, default=1.0)
-    parser.add_argument("--h", type=float, default=1.0)
+    parser.add_argument("--h", type=float, default=1.2)
     parser.add_argument("--eps_fit", type=float, default=0.05)
     parser.add_argument("--beta_min", type=float, default=0.1)
-    parser.add_argument("--beta_max", type=float, default=2.0)
-    parser.add_argument("--beta_points", type=int, default=20)
+    parser.add_argument("--beta_max", type=float, default=10.0)
+    parser.add_argument("--beta_points", type=int, default=25)
     parser.add_argument(
         "--normalize_Jh",
         help="Whether to normalize the Hamiltonian.",
