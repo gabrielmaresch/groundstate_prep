@@ -1,0 +1,3 @@
+[tool.ruff.lint]
+# Start with high-signal correctness checks; do not enforce formatting yet.
+select = ["F"]

@@ -33,6 +33,7 @@ def parse_args():
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--h_min", type=float, default=0.1)
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=5)
@@ -101,6 +102,7 @@ def compute_sweep(
     J,
     beta,
     eps_fit,
+    skip_iterations,
     h_values,
     normalize_Jh,
     save_channel,
@@ -137,8 +139,9 @@ def compute_sweep(
         )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
         normality_residual = get_normality_residual(channel)
-        iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
-        print(f"iterations for eps={eps_fit:.4g}: {iteration_count}")
+        iteration_count = None if skip_iterations else num_iterations(channel, fixedpoint, eps=eps_fit)
+        if not skip_iterations:
+            print(f"iterations for eps={eps_fit:.4g}: {iteration_count}")
         
         
         entry = {
@@ -296,6 +299,7 @@ def main():
             J=J,
             beta=beta,
             eps_fit=eps_fit,
+            skip_iterations=args.skip_iterations,
             h_values=h_values,
             normalize_Jh=normalize_Jh,
             save_channel=save_channel,

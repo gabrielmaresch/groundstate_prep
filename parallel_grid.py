@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--tau", type=float, default=0.1)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument(
         "--method",
         type=str,
@@ -96,6 +97,7 @@ def compute_single_point(
     h,
     beta,
     eps_fit,
+    skip_iterations,
     method,
     normalize_Jh,
     save_channel,
@@ -134,7 +136,7 @@ def compute_single_point(
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     normality_residual = get_normality_residual(channel)
-    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+    iteration_count = None if skip_iterations else num_iterations(channel, fixedpoint, eps=eps_fit)
 
     result = {
         "N": N,
@@ -193,6 +195,7 @@ def worker(point, *, fixed):
         h=h,
         beta=fixed["beta"],
         eps_fit=fixed["eps_fit"],
+        skip_iterations=fixed["skip_iterations"],
         method=fixed["method"],
         normalize_Jh=fixed["normalize_Jh"],
         save_channel=fixed["save_channel"],
@@ -271,6 +274,7 @@ def main():
         "beta": args.beta,
         "tau": args.tau,
         "eps_fit": args.eps_fit,
+        "skip_iterations": args.skip_iterations,
         "method": args.method,
         "normalize_Jh": args.normalize_Jh,
         "save_channel": args.save_channel,

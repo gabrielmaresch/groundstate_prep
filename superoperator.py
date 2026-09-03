@@ -1,12 +1,8 @@
 import pennylane as qml
-import pennylane.numpy as np
-import random
-import os
-import sys
+import numpy as np
 import re
 from pathlib import Path
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
@@ -63,7 +59,7 @@ def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
 
 def get_superoperator_basis_output(i,j, num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
-    rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex128)
+    rho_sys  = np.zeros((d_sys, d_sys), dtype=np.complex128)
     rho_sys[i,j]  = 1 
 
     # Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
@@ -186,7 +182,7 @@ def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alph
         delta_omega = omega_max / n_omega
         omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
     
-    S = np.zeros((2**(2*N),2**(2*N)), dtype = np.complex128)
+    S = np.zeros((2**(2*N),2**(2*N)), dtype=np.complex128)
 
     for op in op_set:
         for omega in omegas:
@@ -478,7 +474,7 @@ def num_iterations(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
-    rho = np.zeros((d_sys, d_sys), dtype = np.complex128)
+    rho = np.zeros((d_sys, d_sys), dtype=np.complex128)
     rho[0,0] = 1
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((d_sys, d_sys)))
     dist = [trace_distance(rho, fixedpoint)]
@@ -540,7 +536,7 @@ if __name__ == "__main__":
     print('number of iterations from fit:', num_iterations(S, fixedpoint))
 
     # initialize rho
-    rho = np.zeros((2**N, 2**N), dtype = np.complex128)
+    rho = np.zeros((2**N, 2**N), dtype=np.complex128)
     rho[0,0] = 1
 
     eps = 1e-2

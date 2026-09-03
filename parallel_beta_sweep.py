@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--h", type=float, default=1.2)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--beta_min", type=float, default=0.1)
     parser.add_argument("--beta_max", type=float, default=10.0)
     parser.add_argument("--beta_points", type=int, default=25)
@@ -103,6 +104,7 @@ def compute_single_beta(
     J,
     h,
     eps_fit,
+    skip_iterations,
     normalize_Jh,
     save_channel,
     save_classical_populations,
@@ -139,7 +141,7 @@ def compute_single_beta(
     spectral_success = np.all(np.isfinite(eigvals)) and np.all(np.isfinite(fixedpoint))
     if spectral_success:
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
-        iteration_count = num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
+        iteration_count = None if skip_iterations else num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
         num_closer_value = int(num_closer)
     else:
         print(f"Spectral computation failed for beta={beta:.4g}; storing NaN diagnostics", flush=True)
@@ -148,7 +150,8 @@ def compute_single_beta(
         num_closer_value = np.nan
 
     normality_residual = get_normality_residual(analysis_channel)
-    print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
+    if not skip_iterations:
+        print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
 
     result = {
         "h": h,
@@ -186,6 +189,7 @@ def compute_sweep(
     J,
     h,
     eps_fit,
+    skip_iterations,
     normalize_Jh,
     beta_values,
     save_channel,
@@ -204,6 +208,7 @@ def compute_sweep(
         J=J,
         h=h,
         eps_fit=eps_fit,
+        skip_iterations=skip_iterations,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
         save_classical_populations=save_classical_populations,
@@ -259,6 +264,7 @@ def main():
         J=J,
         h=h,
         eps_fit=eps_fit,
+        skip_iterations=args.skip_iterations,
         normalize_Jh=normalize_Jh,
         beta_values=beta_values,
         save_channel=save_channel,

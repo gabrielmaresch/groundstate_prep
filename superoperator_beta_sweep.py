@@ -42,6 +42,7 @@ def parse_args():
     parser.add_argument("--beta-min", dest="beta_min", type=float, default=0.5)
     parser.add_argument("--beta-max", dest="beta_max", type=float, default=20.0)
     parser.add_argument("--beta-points", dest="beta_points", type=int, default=10)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--load", action="store_true")
     parser.add_argument("--npz-number", type=int, default=None)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
@@ -106,6 +107,7 @@ def precompute_sweep(
     save_channel,
     save_classical_populations,
     dense_spectrum,
+    skip_iterations,
 ):
     sweep_data = []
     J_hot, h_hot = J, h
@@ -135,7 +137,7 @@ def precompute_sweep(
         )
         _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
         normality_residual = get_normality_residual(channel)
-        iteration_count = num_iterations(channel, fixedpoint)
+        iteration_count = None if skip_iterations else num_iterations(channel, fixedpoint)
 
         entry = {
                 "beta": beta,
@@ -397,6 +399,7 @@ def main():
             save_channel=save_channel,
             save_classical_populations=save_classical_populations,
             dense_spectrum=dense_spectrum,
+            skip_iterations=args.skip_iterations,
         )
         beta_grid = beta_values
 

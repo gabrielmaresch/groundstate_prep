@@ -32,6 +32,7 @@ def parse_args():
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--h", type=float, default=0.2)
     parser.add_argument("--op-set", type=str, default="XZ")
     parser.add_argument(
@@ -274,7 +275,7 @@ def main():
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J, h])
     normality_residual = np.nan if args.skip_normality_residual else get_normality_residual(analysis_channel)
-    iteration_count = num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
+    iteration_count = None if args.skip_iterations else num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
 
     result = {
         "h": h,
