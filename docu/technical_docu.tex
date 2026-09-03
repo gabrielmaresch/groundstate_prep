@@ -97,6 +97,7 @@ While applicability of the cooling channel beyond weak-coupling is treated in \c
 %\SA{reformulated (I would leave the details to the results and conclusion)}
 %Concerning the applicability of the cooling channel beyond weak-coupling, our numerical results for the transverse field Ising model are consistent with the predictions of \citet{wang2025}. 
 \end{abstract}
+\tableofcontents
 
 \section*{Introduction}
 %In Ding et al. a cooling protocol is proposed and realized as an averaged quantum channel. The convergence of repeated applications of this channel to a thermal state resp. the ground state is shown, providing end-to-end guarantees. The dynamics of this cooling channel are analyzed by relating them to a Lindbladian approximation. Theorems in Ding show that there exist parameter choices such that (1) the Lindbladian approximately fixes the thermal resp. ground state and (2) the Lindbladian approximates the cooling channel sufficiently well, thus implying that also the fixed point of the cooling channel is close to the desired target state. The actual parameters, however, turn out to be both hard to find, as they have to satisfy a self-consistency condition involving the mixing time, and to suffer from the precondition (2), which effectively forces the coupling to be weak.
@@ -235,7 +236,7 @@ In particular for $J=h$ one gets
 
 The equivalence of TFIM to a free fermionic Hamiltonian allows for a priori estimates of the integer mixing time of the cooling algorithm. This %that 
 would be much harder to obtain %come by 
-for other models, see Appendix F.2 in \citet{ding2025}. Therein an $\mathcal{O}(N^2\log \tfrac{N}{\varepsilon})$ dependence on system size and tolerated error is asserted. However this approach hinges on the choice $\mathcal{A}=\{\pm \gamma_k, \pm \gamma_k^{\dagger}\}$ of coupling operators, which are \emph{not} simply Pauli operators on individual sites but rather nonlocal combinations thereof. In our implementation we aim to have both operations $P$ and $Q$ available and thus are more interested in sets of coupling operators that contain $\sigma^{(x)}_{1}, \dots, \sigma^{(x)}_{N}$ \emph{and} $\sigma^{(z)}_{1}, \dots, \sigma^{(z)}_{N}$.
+for other models, see \citet[Appendix F.2]{ding2025}. Therein an $\mathcal{O}(N^2\log \tfrac{N}{\varepsilon})$ dependence on system size and tolerated error is asserted. However this approach hinges on the choice $\mathcal{A}=\{\pm \gamma_k, \pm \gamma_k^{\dagger}\}$ of coupling operators, which are \emph{not} simply Pauli operators on individual sites but rather nonlocal combinations thereof. In our implementation we aim to have both operations $P$ and $Q$ available and thus are more interested in sets of coupling operators that contain $\sigma^{(x)}_{1}, \dots, \sigma^{(x)}_{N}$ \emph{and} $\sigma^{(z)}_{1}, \dots, \sigma^{(z)}_{N}$.
 
 \section{Parameter dependence}
 Let us quickly review the parameters we encountered so far:
@@ -287,11 +288,11 @@ where
 and $\mathcal{M}$ is the generator of a carefully constructed Lindbladian that preserves the Gibbs state $\rho_{\beta}$. It is shown that this approximation is arbitrarily close to an Lindbladian channel that has error $O({\alpha^4 T^4}/{\sigma^2})$. In particular, we see that the Lindbladian part of the evolution evolves with an effective time increment of $\alpha^2$. Since 
 \begin{align}
 \mathcal{U}(T)[\rho_{\beta}] = \frac{1}{\mathcal{Z}}\exp(-iH_0T)\exp(-\beta H_0) \exp(iH_0T) = \frac{1}{\mathcal{Z}}\exp(-\beta H_0) = \rho_{\beta}
-\end{align} leaves Gibbs states invariant and the Lindbladian generator fulfills $\mathcal{M}[\rho_{\beta}]=0$ by construction, the right-hand side of \cref{eq:channelapprox} has $\rho_{\beta}$ as a fixed point. Hence, as long as the approximation  \cref{eq:channelapprox} %\SA{refer to relevant eq.}
+\end{align} leaves Gibbs states invariant and the Lindbladian generator fulfills $\mathcal{M}[\rho_{\beta}]\approx 0$ by construction, the right-hand side of \cref{eq:channelapprox} has $\rho_{\beta}$ as an approximate fixed point. Hence, as long as the approximation  \cref{eq:channelapprox} %\SA{refer to relevant eq.}
 is valid, $\rho_{\beta}$ is an approximate fixed point of the cooling channel $\mathcal{E}[\cdot]$.  In \citet{ding2025} it 
 is proven that under certain conditions a matrix norm can be chosen such that $\mathcal{E}_{\mathcal{M}}$ is a contraction with respect to this norm, hence establishing uniqueness of the fixed point. However, uniqueness of the exact channel $\mathcal{E}$ does not necessarily follow.
 
-To construct the Lindbladian we first resolve the system-bath interaction in Bohr-frequency components
+To construct the Lindbladian we first resolve the system-bath interaction in Bohr-frequency components with respect to the $H_0$ eigenbasis
 \begin{align}
 A = \sum_{\nu} \overbrace{\sum_{E_n-E_m = \nu} \bra{n}A\ket{m}\ket{n}\bra{m}}^{A_{\nu}}
 \end{align}
@@ -300,13 +301,13 @@ we see, that in the interaction picture these operators simply evolve as
 A_I(t) = e^{itH_0}Ae^{-itH_0}=\sum_{\nu} e^{i\nu t}{A_{\nu}}.
 \end{align} The interaction Hamilitonian can be written as
 \begin{align}
-    H_I =  \alpha f(t) \sum_{\nu} e^{i\nu t}{A_{\nu}}\otimes e^{i\omega t} \sigma_+ + h.c.
+    H_I =  \alpha f(t) \sum_{\nu} e^{i\nu t}{A_{\nu}}\otimes e^{i\omega t} \sigma_+ + h.c. 
 \end{align}
 Therefore the Dyson expansion of the time propagator from $-T$ to $T$ in powers of $\alpha$ is
 \begin{align}
     U_{\rm int}(T) &= \mathcal{T} \exp(-i \int_{-T}^T dt' H_I(t'))
                     \\ &= I - \underbrace{i \int_{-T}^T dt' H_I(t')}_{=-\alpha A_1}-
-                    \underbrace{\int_{-T}^T \int_{-T}^{t'} dt'dt'' H_I(t') H_I(t'')}_{-\alpha^2 A_2} + O(\alpha^3).
+                    \underbrace{\int_{-T}^T \int_{-T}^{t'} dt'dt'' H_I(t') H_I(t'')}_{-\alpha^2 A_2} + o(\alpha^2).
 \end{align}
 The action on density matrices is
 
@@ -317,36 +318,48 @@ The action on density matrices is
 = \rho 
 + \alpha \left(A_1 \rho + \rho A_1^{\dagger}\right)
 + \alpha^2 \left(A_1\rho A_1^{\dagger} + A_2 \rho + \rho A_2^{\dagger}\right) 
-+ O(\alpha^3).
++ o(\alpha^2).
 \end{align}
 For $\rho = \rho_S\otimes \rho_{\rm \beta}$ it turns out, that the first order term vanishes and only the second order contributions survive tracing out the bath. The second order terms combine to dissipator contributions in the Lindbladian:
 \begin{align}
 \left(A(\nu)\otimes \sigma_+\right)\rho \left(A^{\dagger}(\mu)\otimes\sigma_-\right)&\int_{-T}^T\int_{-T}^Tdt dt' e^{i(\nu+\omega)t}e^{-i(\mu+\omega)t'} f(t)f(t') & {\rm resp. }\, h.c.\\
  -\rho \left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-\sigma_+\right)&\int_{-T}^T\int_{-T}^t dt dt'e^{-i(\nu+\omega)t}e^{i(\mu+\omega)t'}f(t)f(t') & {\rm resp. }\, h.c.\\
- -\left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-+\sigma_-\right)\rho &\int_{-T}^T \int_{-T}^t dt dt'e^{-i(\nu+\omega)t}e^{i(\mu+\omega)t'}f(t)f(t')& {\rm resp. }\, h.c.
+ -\left(A^{\dagger}(\nu)A(\mu)\otimes \sigma_-\sigma_+\right)\rho &\int_{-T}^T \int_{-T}^t dt dt'e^{-i(\nu+\omega)t}e^{i(\mu+\omega)t'}f(t)f(t')& {\rm resp. }\, h.c.
 \end{align}
-After tracing out the bath state $\rho_{\rm \beta}$ each contribution gets weighted either by $p_0$, the Gibbs weight of $\ket{0}\bra{0}$, for $\sigma_-\sigma_+$ processes or by $p_1$, the Gibbs weight of $\ket{1}\bra{1}$, for the hermitian conjugate $\sigma_+\sigma_-$ process.
+After tracing out the bath state $\rho_{\rm \beta}$ each contribution gets weighted either by $p_0$, the Gibbs weight of $\ket{0}\bra{0}$, for $\sigma_-\sigma_+$ and $\sigma_+\rho \sigma_-$ processes or by $p_1$, the Gibbs weight of $\ket{1}\bra{1}$, for the hermitian conjugate $\sigma_+\sigma_-$ and $\sigma_-\rho \sigma_+$process.
 
-So Bohr components of $A\in \mathcal{A}$ get weighted according to the frequency filter $f$ and then contributes as jump operators to the second order Lindbladian approximation:
+So, Bohr components of $A\in \mathcal{A}$ get weighted according to the frequency filter $f$ and then contributes as jump operators to the second order Lindbladian approximation:
 \begin{align}
-V_A(\omega)  =\sum_{\nu}\int_{-T}^Tdt f(t) e^{i(\nu+\omega)t} A_{\nu}.
+V_A(\omega)  &=\sum_{\nu}\int_{-T}^Tdt f(t) e^{i(\nu+\omega)t} A_{\nu}\\ \label{eq:dissipator}
+\mathcal{D}_{A}[\rho_S] &= \bra{0}\rho_{\rm \beta}\ket{0}\left(V_A \rho_S V_A^{\dagger} - \frac12 \{\rho_S, V_A^{\dagger}V_A\}\right)\\\label{eq:dissipator_dagger}
+\mathcal{D}_{A^{\dagger}}[\rho_S] &= \bra{1}\rho_{\rm \beta}\ket{1}\left(V_A^{\dagger} \rho_S V_A - \frac12 \{\rho_S, V_AV_A^{\dagger}\}\right)
 \end{align}
-In particular the matrix elements in the energy basis of $H_0$
+Note that $A$ always corresponds to the $\sigma_+$ factor and $A^{\dagger}$ to the $\sigma_-$ factor in  \cref{eq:single_cooling_process}. Also, along with the dissipators \cref{eq:dissipator,eq:dissipator_dagger} also imaginary contributions, the Lamb-shift terms, arise. Since we are mainly interested in the dissipative processes of the quantum channel we don't follow this direction and instead refer to \citet[Appendix C]{ding2025}.
+
+In particular for $T\gg \sigma$ the matrix elements in the energy basis of $H_0$ can be approximated by extending the integration limits: 
 \begin{align}
     \bra{i} V(\omega) \ket{j}&= \sum_{\nu}\int_{-T}^Tdt  f(t)e^{i(\nu+\omega)t} \bra{i}A \ket{j} \delta_{E_i-E_j,\nu}=
-     \bra{i}A \ket{j} \cdot \int_{-T}^Tdt f(t)  e^{i(E_i-E_j+\omega)t}\\
+     \bra{i}A \ket{j} \cdot \int_{-T}^Tdt f(t)  e^{i(E_i-E_j+\omega)t}\\ 
      &\approx \bra{i}A \ket{j} \cdot \sqrt[4]{8 \pi \sigma^2} \int_{-\infty}^{\infty}dt \frac{1}{\sqrt{2\pi \cdot 2\sigma^2}} e^{-\tfrac{t^2}{4\sigma^2}}  e^{i(E_i-E_j+\omega)t} \\
      &= \sqrt[4]{8 \pi \sigma^2} e^{-\sigma^2(E_i-E_j+\omega)^2}\bra{i}A \ket{j}
 \end{align}
-can be approximated by extending the integration limits. Thus Fermi's Golden rule allows us to approximate the transition \emph{strength} for a given frequency
+Careful inspection of the dissipator terms \cref{eq:dissipator,eq:dissipator_dagger} reveals that
+the dissipator contribution of $A\in\mathcal{A}$ at frequency $\omega$ is responsible for the transfer of $H_0$ eigenstates with transition strength
 \begin{align}
     T_{i\leftarrow j}(\omega) = |\bra{i} V(\omega) \ket{j}|^2 \approx 
-    2 \sqrt {2 \pi} \sigma |\bra{i}A \ket{j}|^2 e^{-2\sigma^2(E_i-E_j+\omega)^2}
+    \sqrt {8 \pi} \sigma |\bra{i}A \ket{j}|^2 e^{-2\sigma^2(E_i-E_j+\omega)^2} &&(i\neq j)
 \end{align}
-%since for reasonable $N$ the matrix elements $|\bra{i}A \ket{j}|$ are available, e.g. by exact diagonalization and for the dissipator D_V it can be shown that V_ij actually are responsible for the population transfer in the H0 energy basis.
-
-This may serve as numerical benchmark on how close the Lindbladian approximation is to the actual cooling channel. Finally averaging over $A\in \mathcal{A}$ and $\omega$ has to be performed.
-
+Consequently, the population dynamics of the Lindbladian dynamics in the $H_0$ eigenbasis play out with transition rates
+\begin{align}\notag
+    t_{i\leftarrow j} \approx     \sqrt {8 \pi} \sigma \left( \right.&\mathbb{E}_{\mathcal{A}}
+     |\bra{i}A \ket{j}|^2\,\cdot \mathbb{E}_{[0, \omega_{\rm max}]} p_0(\omega) e^{-2\sigma^2(E_i-E_j+\omega)^2} +\\ & \mathbb{E}_{\mathcal{A}}
+     |\bra{i}A^{\dagger} \ket{j}|^2\cdot \mathbb{E}_{[0, \omega_{\rm max}]} p_1(\omega) e^{-2\sigma^2(E_i-E_j-\omega)^2}\left.\right)&&(i\neq j)
+\end{align}
+and the rates $t_{i\leftarrow i} = - \sum_{j\neq i} t_{j\leftarrow i}$ are computed asserting balance. Thus, if the matrix elements $|\bra{i}A \ket{j}|$ are available, e.g. by exact diagonalization for small $N$, 
+this may serve as numerical benchmark on how close the Lindbladian approximation is to the actual cooling channel for $T\gg \sigma$:
+\begin{align}\label{eq:lindbladian_benchmark}
+   p_{i\leftarrow j} = \bra{i} \mathcal{E}[\ket{j}\bra{j}]\ket{i} =  \delta_{ij} + \alpha^2 t_{i\leftarrow j} + o(\alpha^2).
+\end{align}
 
 \section{Implementation as quantum circuit}
 In order to implement concrete realizations of the quantum channel, we used the \textsc{pennylane} python package. Here 'concrete' means, that the total cooling Hamiltonian $H$ is built using a specific jump operator $A\in \mathcal{A}$ and a specific Bohr frequency $\omega\in [0, \omega_0]$ and evolved from time $t=-T$ to time $t=T$. The Trotterization from \cref{eq:trotterization_with_freezing} is directly implemented into the circuit, meaning that once the total evolution time $2T$ and the sub-step time $\tau$ are chosen, the quantum circuit is built according to these specifications. It consists of $M+1$ layers, each effecting a time increment of $\tau$. In \cref{fig:qc} a circuit which implements two cooling steps is shown, each of which uses individual Trotter steps of length $\tau = T/2$. Here $W(\tau)$ denotes the time-evolution of $H_{\rm int}$, whereas the time evolution of $H_{\rm bath}$ is implemented directly as $Z$-rotation, and the time evolution of $H_0$ is obtained by Trotterization with the same step size $\tau$.
@@ -356,7 +369,7 @@ After each cooling step, the auxiliary qubit is measured and prepared in the sam
 \begin{itemize}
     \item we choose the initial state of the auxiliary qubit probabilistically according to the statistics of the Gibbs state, i.e. 
     \begin{align}
-        p_0=p(\ket{0}) = \frac{e^{\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}} \quad\mbox{resp.}\quad p_1=p(\ket{1}) = \frac{e^{-\beta \tfrac{\omega}{2}}}{2\cosh{\beta \tfrac{\omega}{2}}}.
+        p_0(\omega)=\bra{0}\rho_{\rm \beta}\ket{0} = \frac{1}{1+e^{-\beta \omega}} \quad\mbox{resp.}\quad p_1(\omega)=\bra{1}\rho_{\rm \beta}\ket{1} = \frac{1}{1+e^{\beta \omega}} .
     \end{align}
     \item we run the simulation in mixed mode, meaning states are not assumed to be pure but mixed instead. In this case we can implement the constant 2-dimensional quantum channel 
     \begin{align}\label{eq:constant_channel}
@@ -412,23 +425,23 @@ This involves only matrix products of $2^N \times 2^N$ matrices, which is advant
 \subsection{Averaged channel}
 The cooling algorithm proposed in \citet{ding2025} is probabilistic in the sense that end-to-end guarantees apply to the \emph{average} channel, where an expectation value is taken both with respect to the jump operators and the Bohr frequencies:
 \begin{align}\label{eq:avg_channel}
-    \overline{\Lambda}\,[\rho]:= \mathbb{E}_{A, \omega} \Lambda(A,\omega)\,[\rho]. 
+    \mathcal{E}\,[\rho]:= \mathbb{E}_{A, \omega} \Lambda(A,\omega)\,[\rho]. 
 \end{align}
 
 In choosing the underlying probability distributions on $\mathcal{A}$ resp. $[0,\omega_{\max}]$, we follow \citet{ding2025} and choose uniform distributions on both sets. %At least 
 For $\mathcal{A}$ this seems to be the canonical choice - at least if the jump operators correspond to physical sites and the Hamiltonian is translation invariant. 
 
 In this work we focus on the set $\mathcal{A}=\{\pm \sigma_i^{(x)}, \pm \sigma_i^{(z)}: i = 1,\ldots N\}$ and the uniform probability assigning each operator ${1}/({4N})$.
-As simple choice for the set of Bohr frequencies $[0,\omega_{\rm}]$ we choose a uniform distribution as well. Here, however, there is a priori no need to exclude other distributions and it could turn out that e.g. distributions 
+As simple choice for the set of Bohr frequencies $[0,\omega_{\rm max}]$ we choose a uniform distribution as well. Here, however, there is a priori no need to exclude other distributions and it could turn out that e.g. distributions 
 that are skewed towards higher frequencies (not considered here) are advantageous. %have an advantage. 
 %In this work however we don't pursue this particular degree of freedom.
 
-In order to realize the averaged channel $\overline{\Lambda}[\cdot]$ numerically, we approximate using numerical integration
+In order to realize the averaged channel $\mathcal{E}[\cdot]$ numerically, we approximate using numerical integration
 \begin{align}\label{eq:avg_channel_quadrature} \frac{1}{\omega_{\rm max}}
     \int_0^{\omega_{\rm max}} d\omega\, \Lambda(A,\omega) = \frac{1}{k}\sum_{i=1}^k \Lambda(A,\omega_i) + O(k^{-2})
 \end{align} by some quadrature formula, e.g. by the midpoint-formula where $\omega_i = \frac{2i-1}{2k}\omega_{\rm max}$. The average channel is thus approximated by
 \begin{align}\label{eq:avg_channel_approx}
-\overline{\Lambda} \approx
+\mathcal{E} \approx
 \frac{1}{4N  k }\sum_{A\in\mathcal A} \sum_{i=1}^k \Lambda(A, \tfrac{2i-1}{2k}\omega_{\rm max}) 
 \end{align}
 up to order $O(k^{-2})$. Thus the number of individual contributions for a Hamiltonian on $N$ sites scales with $4N\,k$. To keep the computational demand affordable, we choose $k = 10$. For computing the average channel for $N=4,6,8$ we then have to run trajectories of length $160, 240$, and $320$ each. 
@@ -441,41 +454,42 @@ up to order $O(k^{-2})$. Thus the number of individual contributions for a Hamil
 \SA{maybe add short paragraph on structure of results section in order to guide the reader through it}
 
 \subsection{h-sweep}
-As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\overline{\Lambda}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare four different coupling strengths $\alpha=0.25,0.5,0.75,1.0$, while all remaining parameters of the cooling channel are kept fixed:
-$T=25$ with $\tau = 0.1$ (i.e. $250$ sub-steps per Trotterization), $\sigma = 2$ ensuring that the temporal window $[-T,T]$ is large compared to $\frac{1}{\sigma}$. The frequency cutoff is chosen near the systems bandwidth $\omega_{\max}=8$ and inverse temperature is set to $\beta=1$.
+As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\mathcal{E}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare five different coupling strengths $\alpha=0.25,0.5,0.75,1.0$ and $1.25$, while all remaining parameters of the cooling channel are kept fixed:
+$T=25$ with $\tau = 0.1$ (i.e. $500$ sub-steps per Trotterization), $\sigma = 2$ ensuring that the temporal window $[-T,T]$ is large compared to $\sigma$. The frequency cutoff is chosen well above the systems bandwidth $\omega_{\max}=4$ and inverse temperature is set to $\beta=1$.
 
-Convergence is measured in number of iterations starting from the pure state $\rho_0=\ket{0000}\bra{0000}$ till the trace distance
+Convergence is measured in number of iterations starting from the pure state $\rho_0=\ket{0000}\bra{0000}$ till the trace-distance
 \begin{align}\label{eq:tracedistance}
-    D(\overline{\Lambda}^n[\rho_0],\rho_*) = \tfrac 12 \left\| \overline{\Lambda}^n[\rho_0] - \rho_*\right\|_1
+    D(\mathcal{E}^n[\rho_0],\rho_*) = \tfrac 12 \left\| \mathcal{E}^n[\rho_0] - \rho_*\right\|_1
 \end{align} is less than $\epsilon = 0.05$. We note that this notion of convergence differs from the one used in \citet{ding2025} insofar as no supremum over initial states is taken. Instead, as is common in quantum computation, the initial state $\ket{0000}\bra{0000}$ is fixed.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{docu/plots/grid_alpha_num_iterations_grid_1.png}
-    \caption{Description of the image.}
+    \includegraphics[width=\textwidth, trim={0 0 0 2.0cm}, clip]{docu/plots/grid_alpha_num_iterations_grid_1.png}
+    \caption{Convergence (within trace-distance $\epsilon = 0.05)$ to fixed-point }
     \label{fig:iterations_fitted}
 \end{figure}
 
+As a comparison we have run a gradient-free minimization of necessary iterations across the parameter space (Nelder-mead) 
 
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[t]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{docu/plots/iterations_normalized.png}
-        \caption{First subplot.}
-        \label{fig:iterations}
-    \end{subfigure}%
-    \hfill
-    \begin{subfigure}[t]{0.49\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{docu/plots/iterations_log_normalized.png}
-        \caption{Second subplot.}
-        \label{fig:iterations_logplot}
-    \end{subfigure}
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}[t]{0.49\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{docu/plots/iterations_normalized.png}
+%         \caption{First subplot.}
+%         \label{fig:iterations}
+%     \end{subfigure}%
+%     \hfill
+%     \begin{subfigure}[t]{0.49\textwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{docu/plots/iterations_log_normalized.png}
+%         \caption{Second subplot.}
+%         \label{fig:iterations_logplot}
+%     \end{subfigure}
 
-    \caption{TFIM for $N=4$.}
-    \label{fig:num_iterations}
-\end{figure}
+%     \caption{TFIM for $N=4$.}
+%     \label{fig:num_iterations}
+% \end{figure}
 
 In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\epsilon$-close to the fixed point decreases almost monotonically with $h/J$, meaning convergence is reached faster in the paramagnetic regimen than in the ferromagnetic regime. In particular there seems to be nothing special about the critical region $h/J\approx 1$. However, it should be noted, that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems.
 
@@ -496,6 +510,7 @@ It is important to keep in mind, that the fixed point of a given channel is not 
     \caption{Description of the image.}
     \label{fig:distance_to_gibbs}
 \end{figure}
+
 To study the spectral properties of the channel with respect to its fixed point behavior we introduce the quantity
 \begin{align}\label{eq:spectral_separation}
     \Delta_{\mathrm{sep}} = \min_{\lambda\neq 1}|1-\lambda|.
@@ -503,7 +518,13 @@ To study the spectral properties of the channel with respect to its fixed point 
 \begin{align}\label{eq:spectral_gap}
     \Delta_{\mathrm{gap}} = 1- \max_{\lambda\neq 1}|\lambda|\le \Delta_{\mathrm{sep}},
 \end{align}
-only for real nonnegative subleading eigenvalue the two notion coincide. Since, by perturbative arguments we know that - at least in the weak coupling regime - the channel is guaranteed to have am almost thermal fixed point, we are mostly interested in the local behavior around this fixed point rather than in the global gap. However, numerical inspection of explicit spectra indicate $\lambda_2$ being positive and real, so that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ is a sensible working hypothesis for our experimental runs, cf. \cref{fig:spectrum_example}.
+only for real nonnegative subleading eigenvalue the two notion coincide. Since, by perturbative arguments we know that - at least in the weak coupling regime - the channel is guaranteed to have an almost thermal fixed point, we are mostly interested in the local behavior around this fixed point rather than in the global gap. 
+In particular calculation of the smallest finite eigenvalue $\mu_{\rm min}$ of the Lindbladian population transition matrix $(t)_{ij}$ relates to the eigenvalue $1-\alpha^2 \mu_{\rm min}$ of the restriction of $\mathcal{E}$ to classical mixtures $\displaystyle \sum p_i \ket{i}\bra{i}$ in the $H_0$ eigenbasis. Therefore closeness of $\Delta_{\mathrm{sep}}$ and $\alpha^2 \mu_{\rm min}$ is an indication that the Lindbladian approximation is accurate with respect to the slowest decaying mode near the fixed point.
+
+
+
+
+Additionally numerical inspection of explicit spectra indicate $\lambda_2$ being positive and real, so that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ is a sensible working hypothesis for our experimental runs, cf. \cref{fig:spectrum_example}.
 
 \begin{figure}[htbp]
     \centering
