@@ -1,0 +1,87 @@
+# Grid archive registry
+#
+# This file lists every archive in data/grid. Values are recovered from each
+# archive where possible. Older archives do not store J, T, tau, the channel
+# method, normalization, or iteration settings; those fields are marked
+# "not recorded" rather than inferred.
+
+Archive: superoperator_N4_grid_1.npz
+Purpose: original broad N=4 parameter grid
+Points: 600 = 10 h x 6 alpha x 5 sigma x 2 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.25, 0.5, 0.75, 1.0, 1.25, 1.5
+sigma: 0.5, 0.875, 1.25, 1.625, 2.0
+omega_max: 4.0, 8.0
+beta: 1.0
+dense spectrum: no
+classical populations / generator saved: no
+J, T, tau, method, normalization, iteration setting: not recorded
+
+Archive: superoperator_N4_grid_2.npz
+Purpose: dense-spectrum N=4 parameter grid
+Points: 560 = 7 h x 8 alpha x 5 sigma x 2 omega_max
+N: 4
+h: 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6
+alpha: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8
+sigma: 0.4, 0.8, 1.2, 1.6, 2.0
+omega_max: 2.5, 4.0
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: no
+J, T, tau, method, normalization, iteration setting: not recorded
+
+Archive: superoperator_N4_grid_3.npz
+Purpose: N=4 alpha/sigma grid with population and generator matrices
+Points: 120 = 10 h x 4 alpha x 3 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.25, 0.5, 0.75, 1.0
+sigma: 1.0, 2.0, 4.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
+  method=superoperator, iterations skipped
+
+Archive: superoperator_N4_grid_4.npz
+Purpose: fine low-alpha N=4 population/generator grid
+Points: 100 = 10 h x 10 alpha x 1 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20
+sigma: 1.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+J, T, tau, method, normalization, iteration setting: not recorded
+
+Archive: superoperator_N4_grid_5.npz
+Purpose: continuation of the fine low-alpha N=4 population/generator grid
+Points: 100 = 10 h x 10 alpha x 1 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40
+sigma: 1.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+J, T, tau, method, normalization, iteration setting: not recorded
+
+Archive: superoperator_N4_grid_6.npz
+Purpose: merged fine low-alpha grid assembled from grids 4 and 5 without recomputation
+Source grids: 4, 5
+Points: 200 = 10 h x 20 alpha x 1 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
+  0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40
+sigma: 1.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+J, T, tau, method, normalization, iteration setting: inherited from grids 4 and 5; not recorded
