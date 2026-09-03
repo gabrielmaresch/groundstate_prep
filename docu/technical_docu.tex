@@ -51,8 +51,12 @@
 \usepackage[nameinlink,capitalise]{cleveref}
 \usepackage[authoryear]{natbib}
 
+% Set boxing parameters
+\setlength{\fboxsep}{2pt}
+\setlength{\fboxrule}{0.4pt}
+
 % Default epsilon
-\let\epsilon\varepsilon
+\let\varepsilon\varepsilon
 
 % Common number sets
 \newcommand{\R}{\mathbb{R}}
@@ -451,65 +455,96 @@ up to order $O(k^{-2})$. Thus the number of individual contributions for a Hamil
 %    \item[number of channel samples $N_{\mathrm{samp}}$] determines how accurately the averaged channel is approximated when the average over bath frequencies and coupling operators is evaluated by sampling. Increasing $N_{\mathrm{samp}}$ reduces statistical fluctuations but increases the numerical resp. experimental cost. This parameter is absent if the average is evaluated exactly.
 
 \section{Numerical Experiments}
+
+In this section, we numerically investigate the cooling channel and its dependence on the relevant model and channel parameters. We first consider a range of transverse-field ratios $\frac{h}{J}$, examining the convergence rate, the accuracy of the fixed point, and the spectrum for different coupling strengths. This sweep also includes a comparison between the dynamics of the exact channel and the corresponding Lindbladian approximation. We then study the dependence on the remaining channel parameters, $\sigma$ and $\beta$ and use these results to discuss the main numerical trade-offs. We mostly use $N=4$ spins, only for the discussion of the $\beta$-sweeps we rely on $N=6$ and $N=8$ datapoints.
+
 \SA{maybe add short paragraph on structure of results section in order to guide the reader through it}
 
 \subsection{h-sweep}
-As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\mathcal{E}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare five different coupling strengths $\alpha=0.25,0.5,0.75,1.0$ and $1.25$, while all remaining parameters of the cooling channel are kept fixed:
+As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. For each $h/J$-value of the sweep the averaged cooling channel $\mathcal{E}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare five different coupling strengths $\alpha=0.25,0.5,0.75,1.0$ and $1.5$, while all remaining parameters of the cooling channel are kept fixed:
 $T=25$ with $\tau = 0.1$ (i.e. $500$ sub-steps per Trotterization), $\sigma = 2$ ensuring that the temporal window $[-T,T]$ is large compared to $\sigma$. The frequency cutoff is chosen well above the systems bandwidth $\omega_{\max}=4$ and inverse temperature is set to $\beta=1$.
 
 Convergence is measured in number of iterations starting from the pure state $\rho_0=\ket{0000}\bra{0000}$ till the trace-distance
 \begin{align}\label{eq:tracedistance}
     D(\mathcal{E}^n[\rho_0],\rho_*) = \tfrac 12 \left\| \mathcal{E}^n[\rho_0] - \rho_*\right\|_1
-\end{align} is less than $\epsilon = 0.05$. We note that this notion of convergence differs from the one used in \citet{ding2025} insofar as no supremum over initial states is taken. Instead, as is common in quantum computation, the initial state $\ket{0000}\bra{0000}$ is fixed.
+\end{align} is less than $\varepsilon = 0.05$. We note that this notion of convergence differs from the one used in \citet{ding2025} insofar as no supremum over initial states is taken. Instead, as is common in quantum computation, the initial state $\ket{0000}\bra{0000}$ is fixed. As a comparison we have run a gradient-free minimization of necessary iterations across the parameter space using the Nelder-Mead method and required threshold to the Gibbs state of $\varepsilon = 0.05$. This optimization handily beats handily every sweep parameter choice, where the improvement is larger in paramagnetic regime than in the ferromagnetic regime. Interestingly the optimized coupling strength $\alpha$ is not a weak coupling but around $0.5-0.6$, see \cref{fig:nm_omega4}.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth, trim={0 0 0 2.0cm}, clip]{docu/plots/grid_alpha_num_iterations_grid_1.png}
-    \caption{Convergence (within trace-distance $\epsilon = 0.05)$ to fixed-point }
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+      \includegraphics[width=1.05\textwidth, trim={0 0 0 2.0cm}, clip]{docu/plots/grid_alpha_num_iterations_grid_1.png}
+        \caption{Number of iterations}
+    \label{fig:num_iterations_omega4}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \includegraphics[width=1.05\textwidth, trim={0 0 0 2.0cm}, clip]{docu/plots/grid_alpha_effective_iteration_time_grid_1.png}
+        \caption{Effective Lindbladian evolution time $2T\alpha^2\cdot N$}
+        \label{fig:effective_time_omega4}
+    \end{subfigure}
+
+    \caption{Convergence within trace-distance $\varepsilon = 0.05$ to channel fixed-point for TFIM $N=4$ cooling channel , $\tfrac{h}{J}$-sweep with $10$ points between $0.2-2.0$ and varying coupling-strength $\alpha$.}
+    \label{fig:num_iterations}
+\end{figure}
+
+In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\varepsilon$-close to the fixed point decreases almost monotonically with $h/J$, meaning convergence is reached faster in the paramagnetic regimen than in the ferromagnetic regime. In particular there seems to be nothing special about the critical region $h/J\approx 1$. However, it should be noted, that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems.
+
+We also see quite different qualitative behavior for the five tested coupling strengths $\alpha = 0.25-1.5$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional relationship changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \cref{fig:num_iterations_omega4}) where as $\alpha \ge 0.75$ display a clearly nonlinear approach to a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have  different slopes in the para- resp. ferromagnetic region, see \cref{fig:iterations_fitted}.
+
+The number of iterations till fixed-point closeness does not decrease uniformly across the parameter space. In the non ferromagnetic regimen higher coupling means faster convergence, although there is only marginal improvement from $\alpha = 0.75$ out on. Qualitatively a transition from log-linear to non-linear takes place for increasing coupling strength $\alpha$.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+      \includegraphics[height=6.25cm]{docu/plots/iterations_fit_normalized.png}
+        \caption{Piecewise linear fits in the semilog plot for $\nicefrac{h}{J}\le 1$ and $\nicefrac{h}{J}\ge 1$.}
+    \label{fig:regresseion_piecewise}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includegraphics[height=6.2cm, trim={0 0 0 1.2cm}, clip]{docu/plots/grid_alpha_iteration_fit_r2_grid_1.png}
+        \caption{Fit quality ($R^2$) of the semilog regressions in the $\nicefrac{h}{J}\le 1$ and $\nicefrac{h}{J}\ge 1$ regions.}
+        \label{fig:regression_R2}
+    \end{subfigure}
+
+    \caption{Exponential fits to the number of iterations required for convergence to the fixed point of the TFIM cooling channel ($N=4$), for a $\nicefrac{h}{J}$ sweep over 10 points from $0.2$ to $2.0$ and varying coupling strengths $\alpha$.}
     \label{fig:iterations_fitted}
 \end{figure}
 
-As a comparison we have run a gradient-free minimization of necessary iterations across the parameter space (Nelder-mead) 
 
+It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \cref{fig:trace_distance_to_gibbs_omega4} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\varepsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alpha$ need more iterations.  
 % \begin{figure}[htbp]
 %     \centering
-%     \begin{subfigure}[t]{0.49\textwidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{docu/plots/iterations_normalized.png}
-%         \caption{First subplot.}
-%         \label{fig:iterations}
-%     \end{subfigure}%
-%     \hfill
-%     \begin{subfigure}[t]{0.49\textwidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{docu/plots/iterations_log_normalized.png}
-%         \caption{Second subplot.}
-%         \label{fig:iterations_logplot}
-%     \end{subfigure}
-
-%     \caption{TFIM for $N=4$.}
-%     \label{fig:num_iterations}
+%     \includegraphics[width=0.8\textwidth]{docu/plots/distance_to_gibbs_normalized.png}
+%     \caption{Description of the image.}
+%     \label{fig:distance_to_gibbs}
 % \end{figure}
 
-In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\epsilon$-close to the fixed point decreases almost monotonically with $h/J$, meaning convergence is reached faster in the paramagnetic regimen than in the ferromagnetic regime. In particular there seems to be nothing special about the critical region $h/J\approx 1$. However, it should be noted, that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems.
-
-We also see quite different qualitative behavior for the four tested coupling strengths $\alpha = 0.25, 0.5., 0.75$ and $1.0$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional relationship changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \cref{fig:iterations_logplot}) where as $\alpha = 0.75$ and $\alpha = 1.0$ display a nonlinear approach to a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have  different slopes in the para- resp. ferromagnetic region, see \cref{fig:iterations_fitted}.
-The number of iterations till fixed-point closeness does not decrease uniformly across the parameter space. In the non ferromagnetic regimen higher coupling means faster convergence, although there is only marginal improvement from $\alpha = 0.75$ out on. Qualitatively a transition from log-linear to non-linear takes place between $0.5\le \alpha \le 0.75$.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.65\textwidth]{docu/plots/iterations_fit_normalized.png}
-    \caption{Description of the image.}
-    \label{fig:iterations_fitted}
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+      \includegraphics[width=1.0\textwidth]{docu/plots/nelder_mead_h_alpha_effective_time_grid_1.png}
+        \caption{Number of iterations $N$ and effective Lindbladian evolution time $2T\alpha^2\cdot N$}
+    \label{fig:nm_params_omega4}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \includegraphics[width=1.05\textwidth]{docu/plots/grid
+        \caption{}
+        \label{fig:nm_sep_omega4}
+    \end{subfigure}
+
+    \caption{Parameters for Nelder-Mead optimized channels with up to $100$ iterations for each $\frac{h}{J}$ point and until $\varepsilon=0.05$ closeness to $\rho_{\rm \beta}$ is established. Warm starts for subsequent points were used.}
+    \label{fig:nm_omega4}
 \end{figure}
 
-It is important to keep in mind, that the fixed point of a given channel is not necessarily the desired Gibbs state. \cref{fig:distance_to_gibbs} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee $2\epsilon$-closeness of the cooled state to the Gibbs state. Also we see a different qualitative behavior for small and larger $\alpha$ with respect to the parameter $h/J$: smaller $\alpha$ need fewer iterations the farther we are in the paramagnetic region, larger $\alpha$ need more iterations.  
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{docu/plots/distance_to_gibbs_normalized.png}
-    \caption{Description of the image.}
-    \label{fig:distance_to_gibbs}
-\end{figure}
 
 To study the spectral properties of the channel with respect to its fixed point behavior we introduce the quantity
 \begin{align}\label{eq:spectral_separation}
@@ -530,22 +565,22 @@ Additionally numerical inspection of explicit spectra indicate $\lambda_2$ being
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{docu/plots/separation_normalized.png}
-        \caption{Spectral separation from channel fixed point}
-        \label{fig:sep_vs_iterations}
+        \includegraphics[width=\linewidth, trim={0 0 0 1.2cm}, clip]{docu/plots/grid_alpha_trace_distance_grid_1.png}
+        \caption{Trace distance of channel-fixed point to $\rho_{\rm \beta}$}
+        \label{fig:trace_distance_to_gibbs_omega4}
     \end{subfigure}%
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[height=0.265 \textheight]{docu/plots/superoperator_N4_crop.png}
-        \caption{Spectrum for concrete instance of averaged cooling superoperator.}
-        \label{fig:spectrum_example}
+        \includegraphics[width=\linewidth, trim={0 0 0 1.2cm}, clip]{docu/plots/grid_alpha_Delta_sep_grid_1.png}
+        \caption{Spectral gap of averaged channel}
+        \label{fig:spectral_gap_omega4}
     \end{subfigure}
 
-    \caption{TFIM for $N=4$.}
+    \caption{Spectral and fixed-point properties of TFIM cooling channel for $N=4$ at inverse temperature $\beta=1$, $\sigma = 2$ and $\omega_{\rm max}=4$ for different coupling strengths.}
     \label{fig:spectral_separation}
 \end{figure}
-The h-sweep therefore eludes to the the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small. %The tipping point where accuracy is lost is the really interesting thing
+The $h$-sweep therefore eludes to the the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small.
 
 
 \subsection{$\sigma$-sweep}
