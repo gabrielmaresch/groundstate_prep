@@ -38,6 +38,10 @@ def parse_args():
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=5)
     parser.add_argument(
+        "--h-values", type=float, nargs="+", default=None,
+        help="Explicit h values. Overrides --h_min, --h_max, and --h_points.",
+    )
+    parser.add_argument(
         "--normalize_Jh",
         help="Whether to normalize the Hamiltonian.",
         action="store_true",
@@ -263,7 +267,7 @@ def main():
     save_classical_populations = args.save_classical_populations
     dense_spectrum = args.dense_spectrum
 
-    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
+    h_values = np.asarray(args.h_values, dtype=float) if args.h_values is not None else np.linspace(args.h_min, args.h_max, args.h_points)
 
     data_dir = args.data_dir
     plot_dir = args.plot_dir

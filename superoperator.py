@@ -5,7 +5,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
+from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset
 from path_analysis import trace_distance, extract_asymptotics
 
 from scipy.linalg import eig
