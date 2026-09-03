@@ -13,6 +13,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel_matrix,
+    get_transition_generator_and_classical_populations,
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
@@ -28,6 +29,7 @@ def parse_args():
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--tau", type=float, default=0.1)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument(
         "--method",
         type=str,
@@ -46,6 +48,11 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--save-classical-populations",
+        help="Store the transition generator and classical population map.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--dense-spectrum",
         help="Diagonalize the full dense channel spectrum instead of using ARPACK.",
         action="store_true",
@@ -57,15 +64,43 @@ def parse_args():
     parser.add_argument("--h_min", type=float, default=0.2)
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=10)
+    parser.add_argument(
+        "--h-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit h values. Overrides --h_min, --h_max, and --h_points.",
+    )
     parser.add_argument("--alpha_min", type=float, default=0.25)
     parser.add_argument("--alpha_max", type=float, default=1.5)
     parser.add_argument("--alpha_points", type=int, default=6)
+    parser.add_argument(
+        "--alpha-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit alpha values. Overrides --alpha_min, --alpha_max, and --alpha_points.",
+    )
     parser.add_argument("--sigma_min", type=float, default=0.5)
     parser.add_argument("--sigma_max", type=float, default=2.0)
     parser.add_argument("--sigma_points", type=int, default=5)
+    parser.add_argument(
+        "--sigma-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit sigma values. Overrides --sigma_min, --sigma_max, and --sigma_points.",
+    )
     parser.add_argument("--omega_min", type=float, default=4.0)
     parser.add_argument("--omega_max", type=float, default=8.0)
     parser.add_argument("--omega_points", type=int, default=2)
+    parser.add_argument(
+        "--omega-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit omega_max values. Overrides --omega_min, --omega_max, and --omega_points.",
+    )
     return parser.parse_args()
 
 
@@ -90,9 +125,11 @@ def compute_single_point(
     h,
     beta,
     eps_fit,
+    skip_iterations,
     method,
     normalize_Jh,
     save_channel,
+    save_classical_populations,
     dense_spectrum,
     verbose=False,
 ):
@@ -127,7 +164,7 @@ def compute_single_point(
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     normality_residual = get_normality_residual(channel)
-    iteration_count = num_iterations(channel, fixedpoint, eps=eps_fit)
+    iteration_count = None if skip_iterations else num_iterations(channel, fixedpoint, eps=eps_fit)
 
     result = {
         "N": N,
@@ -157,15 +194,35 @@ def compute_single_point(
     }
     if save_channel:
         result["channel"] = channel
+    if save_classical_populations:
+        result["transition_generator"], result["classical_populations"] = get_transition_generator_and_classical_populations(
+            channel, h_sys, op_set, beta, omega_max, sigma
+        )
 
     return result
 
 
 def flatten_grid(args):
-    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
-    alpha_values = np.linspace(args.alpha_min, args.alpha_max, args.alpha_points)
-    sigma_values = np.linspace(args.sigma_min, args.sigma_max, args.sigma_points)
-    omega_values = np.linspace(args.omega_min, args.omega_max, args.omega_points)
+    h_values = (
+        np.asarray(args.h_values, dtype=float)
+        if args.h_values is not None
+        else np.linspace(args.h_min, args.h_max, args.h_points)
+    )
+    alpha_values = (
+        np.asarray(args.alpha_values, dtype=float)
+        if args.alpha_values is not None
+        else np.linspace(args.alpha_min, args.alpha_max, args.alpha_points)
+    )
+    sigma_values = (
+        np.asarray(args.sigma_values, dtype=float)
+        if args.sigma_values is not None
+        else np.linspace(args.sigma_min, args.sigma_max, args.sigma_points)
+    )
+    omega_values = (
+        np.asarray(args.omega_values, dtype=float)
+        if args.omega_values is not None
+        else np.linspace(args.omega_min, args.omega_max, args.omega_points)
+    )
     return h_values, alpha_values, sigma_values, omega_values
 
 
@@ -182,9 +239,11 @@ def worker(point, *, fixed):
         h=h,
         beta=fixed["beta"],
         eps_fit=fixed["eps_fit"],
+        skip_iterations=fixed["skip_iterations"],
         method=fixed["method"],
         normalize_Jh=fixed["normalize_Jh"],
         save_channel=fixed["save_channel"],
+        save_classical_populations=fixed["save_classical_populations"],
         dense_spectrum=fixed["dense_spectrum"],
         verbose=False,
     )
@@ -205,8 +264,10 @@ def render_status(completed, total, active_points, elapsed):
     return lines
 
 
-def save_grid(rows, snapshot_path, save_channel, dense_spectrum):
+def save_grid(rows, snapshot_path, save_channel, save_classical_populations, dense_spectrum):
     channel_entries = [row["channel"] for row in rows] if save_channel else []
+    transition_generators = [row["transition_generator"] for row in rows] if save_classical_populations else []
+    classical_populations = [row["classical_populations"] for row in rows] if save_classical_populations else []
     np.savez(
         snapshot_path,
         h=np.array([row["h"] for row in rows]),
@@ -224,7 +285,10 @@ def save_grid(rows, snapshot_path, save_channel, dense_spectrum):
         normality_residual=np.array([row["spectrum_data"]["normality_residual"] for row in rows]),
         num_iterations=np.array([row["spectrum_data"]["num_iterations"] for row in rows]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
+        transition_generator=np.stack(transition_generators) if save_classical_populations else np.array([]),
+        classical_populations=np.stack(classical_populations) if save_classical_populations else np.array([]),
         dense_spectrum=dense_spectrum,
+        save_classical_populations=save_classical_populations,
     )
 
 
@@ -254,9 +318,11 @@ def main():
         "beta": args.beta,
         "tau": args.tau,
         "eps_fit": args.eps_fit,
+        "skip_iterations": args.skip_iterations,
         "method": args.method,
         "normalize_Jh": args.normalize_Jh,
         "save_channel": args.save_channel,
+        "save_classical_populations": args.save_classical_populations,
         "dense_spectrum": args.dense_spectrum,
     }
 
@@ -292,7 +358,9 @@ def main():
     sys.stdout.write("\n")
     sys.stdout.flush()
 
-    save_grid(rows, snapshot_path, args.save_channel, args.dense_spectrum)
+    save_grid(
+        rows, snapshot_path, args.save_channel, args.save_classical_populations, args.dense_spectrum
+    )
     print(f"Saved grid to {snapshot_path}")
 
 

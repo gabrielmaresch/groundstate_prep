@@ -81,6 +81,11 @@ Pass `--dense-spectrum` to diagonalize the complete channel matrix and obtain
 exact `Delta_sep` and `Delta_gap` values. Without this option, the code uses
 ARPACK to obtain only a small part of the spectrum.
 
+Pass `--save-classical-populations` to store the averaged-channel
+`transition_generator` and energy-basis `classical_populations` matrices for every
+sweep point. It works independently of `--save-channel` and
+`--dense-spectrum`.
+
 Results are saved as `.npz` files. The default directories are `data/` for
 single runs and standard sweeps, `data/grid/` for grid calculations, and
 `data/nelder_mead/` for optimization runs. The notebooks

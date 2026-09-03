@@ -1,8 +1,8 @@
 import pennylane as qml
-import pennylane.numpy as np
+import numpy as np
 
 import random
-from typing import Any, List
+from typing import List
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -98,7 +98,6 @@ def construct_W_layer(num_qubits:int, m:int, tau_half:float, T:float, sigma:floa
     
     if mixed:
         # for commuting terms even 1st order approx is exact
-        n=1
         qml.ApproxTimeEvolution(H_int, tau_half, 1)
     else:
         qml.evolve(H_int, coeff=tau_half)
@@ -141,10 +140,10 @@ def initialize_rho_env(wire:int, beta:float, omega:float, *, seed:int, mixed:boo
     assert np.isclose(p0+p1, 1)
 
     if mixed:
-        K0 = np.sqrt(p0) * np.array([[1, 0], [0, 0]], dtype = np.complex128)
-        K1 = np.sqrt(p0) * np.array([[0, 1], [0, 0]], dtype = np.complex128)
-        K2 = np.sqrt(p1) * np.array([[0, 0], [1, 0]], dtype = np.complex128)
-        K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype = np.complex128)
+        K0 = np.sqrt(p0) * np.array([[1, 0], [0, 0]], dtype=np.complex128)
+        K1 = np.sqrt(p0) * np.array([[0, 1], [0, 0]], dtype=np.complex128)
+        K2 = np.sqrt(p1) * np.array([[0, 0], [1, 0]], dtype=np.complex128)
+        K3 = np.sqrt(p1) * np.array([[0, 0], [0, 1]], dtype=np.complex128)
         qml.QubitChannel([K0, K1, K2, K3], wires=wire)
     else:
         raise NotImplementedError('pure state simulation not supported')

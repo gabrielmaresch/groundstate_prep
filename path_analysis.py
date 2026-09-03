@@ -1,26 +1,20 @@
-import pennylane as qml
 import numpy as np
-import random
-import os
-import sys
 from pathlib import Path
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from typing import Any, List
-from cooling_channel import create_circuit_diagram, create_cooling_circuit, transverse_ising_hamiltonian, construct_opset
+from cooling_channel import create_cooling_circuit, transverse_ising_hamiltonian, construct_opset
 from scipy.optimize import curve_fit
 
-from ed import get_transverse_ising_gibbsstate
+from ed import thermal_state, transverse_ising_hamiltonian as ed_transverse_ising_hamiltonian
 
 
 local_path = Path(__file__).resolve().parent
 
 
 def get_gibbs(N, J, h, beta):
-    gibbs_state, energy = get_transverse_ising_gibbsstate(N, J, h, beta)
-    return gibbs_state, energy
+    H = ed_transverse_ising_hamiltonian(N, J, h)
+    return thermal_state(H, beta)
 
 
 def nice_print_matrix(A, digits=3):
