@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--h_min", type=float, default=0.1)
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=20)
@@ -103,6 +104,7 @@ def compute_single_hJ(
     J,
     beta,
     eps_fit,
+    skip_iterations,
     normalize_Jh,
     save_channel,
     save_classical_populations,
@@ -139,8 +141,9 @@ def compute_single_hJ(
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     normality_residual = get_normality_residual(analysis_channel)
-    iteration_count = num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
-    print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
+    iteration_count = None if skip_iterations else num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
+    if not skip_iterations:
+        print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
 
     result = {
         "h": h,
@@ -179,6 +182,7 @@ def compute_sweep(
     J,
     beta,
     eps_fit,
+    skip_iterations,
     h_values,
     normalize_Jh,
     save_channel,
@@ -197,6 +201,7 @@ def compute_sweep(
         J=J,
         beta=beta,
         eps_fit=eps_fit,
+        skip_iterations=skip_iterations,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
         save_classical_populations=save_classical_populations,
@@ -252,6 +257,7 @@ def main():
         J=J,
         beta=beta,
         eps_fit=eps_fit,
+        skip_iterations=args.skip_iterations,
         h_values=h_values,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
