@@ -21,6 +21,10 @@ def parse_args():
     parser.add_argument("--h_min", type=float, default=0.1)
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=20)
+    parser.add_argument(
+        "--h-values", type=float, nargs="+", default=None,
+        help="Explicit h values. Overrides --h_min, --h_max, and --h_points.",
+    )
     parser.add_argument("--omega-points", type=int, default=10)
     parser.add_argument("--eps-fit", type=float, default=0.05)
     parser.add_argument("--op-set", default="XZ")
@@ -156,7 +160,7 @@ def main():
     run_dir = args.data_dir / f"nelder_mead_N{args.N}_h_sweep_{number}_runs"
     run_dir.mkdir()
 
-    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
+    h_values = np.asarray(args.h_values, dtype=float) if args.h_values is not None else np.linspace(args.h_min, args.h_max, args.h_points)
     initial = np.asarray(args.initial, dtype=float)
     results = []
     optimizer_script = Path(__file__).with_name("nelder_mead_average.py")

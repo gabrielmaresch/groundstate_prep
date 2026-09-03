@@ -22,6 +22,10 @@ def parse_args():
     parser.add_argument("--beta-min", type=float, default=0.1)
     parser.add_argument("--beta-max", type=float, default=10.0)
     parser.add_argument("--beta-points", type=int, default=25)
+    parser.add_argument(
+        "--beta-values", type=float, nargs="+", default=None,
+        help="Explicit beta values. Overrides --beta-min, --beta-max, and --beta-points.",
+    )
     parser.add_argument("--omega-points", type=int, default=10)
     parser.add_argument("--eps-fit", type=float, default=0.05)
     parser.add_argument("--op-set", default="XZ")
@@ -166,7 +170,7 @@ def main():
     run_dir = args.data_dir / f"nelder_mead_N{args.N}_beta_sweep_{number}_runs"
     run_dir.mkdir()
 
-    beta_values = np.geomspace(args.beta_min, args.beta_max, args.beta_points)
+    beta_values = np.asarray(args.beta_values, dtype=float) if args.beta_values is not None else np.geomspace(args.beta_min, args.beta_max, args.beta_points)
     initial = np.asarray(args.initial, dtype=float)
     h_over_J = args.h / args.J
     optimizer_script = Path(__file__).with_name("nelder_mead_average.py")

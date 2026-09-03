@@ -64,15 +64,43 @@ def parse_args():
     parser.add_argument("--h_min", type=float, default=0.2)
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=10)
+    parser.add_argument(
+        "--h-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit h values. Overrides --h_min, --h_max, and --h_points.",
+    )
     parser.add_argument("--alpha_min", type=float, default=0.25)
     parser.add_argument("--alpha_max", type=float, default=1.5)
     parser.add_argument("--alpha_points", type=int, default=6)
+    parser.add_argument(
+        "--alpha-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit alpha values. Overrides --alpha_min, --alpha_max, and --alpha_points.",
+    )
     parser.add_argument("--sigma_min", type=float, default=0.5)
     parser.add_argument("--sigma_max", type=float, default=2.0)
     parser.add_argument("--sigma_points", type=int, default=5)
+    parser.add_argument(
+        "--sigma-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit sigma values. Overrides --sigma_min, --sigma_max, and --sigma_points.",
+    )
     parser.add_argument("--omega_min", type=float, default=4.0)
     parser.add_argument("--omega_max", type=float, default=8.0)
     parser.add_argument("--omega_points", type=int, default=2)
+    parser.add_argument(
+        "--omega-values",
+        type=float,
+        nargs="+",
+        default=None,
+        help="Explicit omega_max values. Overrides --omega_min, --omega_max, and --omega_points.",
+    )
     return parser.parse_args()
 
 
@@ -175,10 +203,26 @@ def compute_single_point(
 
 
 def flatten_grid(args):
-    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
-    alpha_values = np.linspace(args.alpha_min, args.alpha_max, args.alpha_points)
-    sigma_values = np.linspace(args.sigma_min, args.sigma_max, args.sigma_points)
-    omega_values = np.linspace(args.omega_min, args.omega_max, args.omega_points)
+    h_values = (
+        np.asarray(args.h_values, dtype=float)
+        if args.h_values is not None
+        else np.linspace(args.h_min, args.h_max, args.h_points)
+    )
+    alpha_values = (
+        np.asarray(args.alpha_values, dtype=float)
+        if args.alpha_values is not None
+        else np.linspace(args.alpha_min, args.alpha_max, args.alpha_points)
+    )
+    sigma_values = (
+        np.asarray(args.sigma_values, dtype=float)
+        if args.sigma_values is not None
+        else np.linspace(args.sigma_min, args.sigma_max, args.sigma_points)
+    )
+    omega_values = (
+        np.asarray(args.omega_values, dtype=float)
+        if args.omega_values is not None
+        else np.linspace(args.omega_min, args.omega_max, args.omega_points)
+    )
     return h_values, alpha_values, sigma_values, omega_values
 
 

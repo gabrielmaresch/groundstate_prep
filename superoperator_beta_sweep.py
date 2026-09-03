@@ -42,6 +42,10 @@ def parse_args():
     parser.add_argument("--beta-min", dest="beta_min", type=float, default=0.5)
     parser.add_argument("--beta-max", dest="beta_max", type=float, default=20.0)
     parser.add_argument("--beta-points", dest="beta_points", type=int, default=10)
+    parser.add_argument(
+        "--beta-values", type=float, nargs="+", default=None,
+        help="Explicit beta values. Overrides --beta-min, --beta-max, and --beta-points.",
+    )
     parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--load", action="store_true")
     parser.add_argument("--npz-number", type=int, default=None)
@@ -316,7 +320,7 @@ def main():
     J = args.J
     h = args.h
     normalize_Jh = args.normalize_Jh
-    beta_values = np.linspace(args.beta_min, args.beta_max, args.beta_points)
+    beta_values = np.asarray(args.beta_values, dtype=float) if args.beta_values is not None else np.linspace(args.beta_min, args.beta_max, args.beta_points)
 
     data_dir = args.data_dir
     plot_dir = args.plot_dir

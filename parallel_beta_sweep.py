@@ -34,6 +34,10 @@ def parse_args():
     parser.add_argument("--beta_max", type=float, default=10.0)
     parser.add_argument("--beta_points", type=int, default=25)
     parser.add_argument(
+        "--beta-values", type=float, nargs="+", default=None,
+        help="Explicit beta values. Overrides --beta_min, --beta_max, and --beta_points.",
+    )
+    parser.add_argument(
         "--normalize_Jh",
         help="Whether to normalize the Hamiltonian.",
         action="store_true",
@@ -238,7 +242,7 @@ def main():
     workers = args.workers
     save_as_nr = args.save_as_nr
 
-    beta_values = np.geomspace(args.beta_min, args.beta_max, args.beta_points)
+    beta_values = np.asarray(args.beta_values, dtype=float) if args.beta_values is not None else np.geomspace(args.beta_min, args.beta_max, args.beta_points)
 
     print("Sweep over beta:", beta_values)
 
