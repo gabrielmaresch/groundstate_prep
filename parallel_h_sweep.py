@@ -9,6 +9,7 @@ from cooling_channel import construct_opset, transverse_ising_hamiltonian
 from superoperator import (
     check_if_TFIM_gibbs,
     get_averaged_channel,
+    get_transition_generator_and_classical_populations,
     get_normality_residual,
     num_iterations,
     get_superoperator_spectral_data,
@@ -28,9 +29,14 @@ def parse_args():
     parser.add_argument("--J", type=float, default=1.0)
     parser.add_argument("--beta", type=float, default=1.0)
     parser.add_argument("--eps_fit", type=float, default=0.05)
+    parser.add_argument("--skip-iterations", action="store_true", help="Skip fixed-point iteration-count calculations.")
     parser.add_argument("--h_min", type=float, default=0.1)
     parser.add_argument("--h_max", type=float, default=2.0)
     parser.add_argument("--h_points", type=int, default=20)
+    parser.add_argument(
+        "--h-values", type=float, nargs="+", default=None,
+        help="Explicit h values. Overrides --h_min, --h_max, and --h_points.",
+    )
     parser.add_argument(
         "--normalize_Jh",
         help="Whether to normalize the Hamiltonian.",
@@ -39,6 +45,11 @@ def parse_args():
     parser.add_argument(
         "--save-channel",
         help="Whether to store the full channel matrices in the .npz file.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--save-classical-populations",
+        help="Store the transition generator and classical population map.",
         action="store_true",
     )
     parser.add_argument(
@@ -61,13 +72,17 @@ def validate_dense_size(N, dense_requested, *, max_dense_dim=4096):
         )
 
 
-def save_sweep(sweep_data, snapshot_path, save_channel, dense_spectrum):
+def save_sweep(sweep_data, snapshot_path, save_channel, save_classical_populations, dense_spectrum):
     channel_entries = [entry["channel"] for entry in sweep_data] if save_channel else []
+    transition_generators = [entry["transition_generator"] for entry in sweep_data] if save_classical_populations else []
+    classical_populations = [entry["classical_populations"] for entry in sweep_data] if save_classical_populations else []
     np.savez_compressed(
         snapshot_path,
         h_over_J=np.array([entry["h_over_J"] for entry in sweep_data]),
         beta=np.array([entry["beta"] for entry in sweep_data]),
         channels=np.stack(channel_entries) if save_channel else np.array([]),
+        transition_generator=np.stack(transition_generators) if save_classical_populations else np.array([]),
+        classical_populations=np.stack(classical_populations) if save_classical_populations else np.array([]),
         eigvals=np.stack([entry["spectrum_data"]["eigvals"] for entry in sweep_data]),
         Delta_sep=np.array([entry["spectrum_data"]["Delta_sep"] for entry in sweep_data]),
         Delta_gap=np.array([entry["spectrum_data"]["Delta_gap"] for entry in sweep_data]),
@@ -77,6 +92,7 @@ def save_sweep(sweep_data, snapshot_path, save_channel, dense_spectrum):
         normality_residual=np.array([entry["spectrum_data"]["normality_residual"] for entry in sweep_data]),
         num_iterations=np.array([entry["spectrum_data"]["num_iterations"] for entry in sweep_data]),
         dense_spectrum=dense_spectrum,
+        save_classical_populations=save_classical_populations,
     )
 
 
@@ -92,8 +108,10 @@ def compute_single_hJ(
     J,
     beta,
     eps_fit,
+    skip_iterations,
     normalize_Jh,
     save_channel,
+    save_classical_populations,
     dense_spectrum,
 ):
     print(f"Computing h={h:.4g}", flush=True)
@@ -127,8 +145,9 @@ def compute_single_hJ(
     )
     _, _, trace_distance = check_if_TFIM_gibbs(fixedpoint, beta, [N, J_hot, h_hot])
     normality_residual = get_normality_residual(analysis_channel)
-    iteration_count = num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
-    print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
+    iteration_count = None if skip_iterations else num_iterations(analysis_channel, fixedpoint, eps=eps_fit)
+    if not skip_iterations:
+        print(f"iterations for eps={eps_fit:.4g}: {iteration_count}", flush=True)
 
     result = {
         "h": h,
@@ -148,6 +167,10 @@ def compute_single_hJ(
     }
     if save_channel:
         result["channel"] = analysis_channel if dense_spectrum else linear_operator_to_dense(channel)
+    if save_classical_populations:
+        result["transition_generator"], result["classical_populations"] = get_transition_generator_and_classical_populations(
+            channel, h_sys, op_set, beta, omega_max, sigma
+        )
 
     return result
 
@@ -163,9 +186,11 @@ def compute_sweep(
     J,
     beta,
     eps_fit,
+    skip_iterations,
     h_values,
     normalize_Jh,
     save_channel,
+    save_classical_populations,
     dense_spectrum,
     workers,
 ):
@@ -180,8 +205,10 @@ def compute_sweep(
         J=J,
         beta=beta,
         eps_fit=eps_fit,
+        skip_iterations=skip_iterations,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
+        save_classical_populations=save_classical_populations,
         dense_spectrum=dense_spectrum,
         )
     with ProcessPoolExecutor(max_workers=workers) as executor:
@@ -202,12 +229,13 @@ def main():
     eps_fit = args.eps_fit
     normalize_Jh = args.normalize_Jh
     save_channel = args.save_channel
+    save_classical_populations = args.save_classical_populations
     dense_spectrum = args.dense_spectrum
     validate_dense_size(N, save_channel or dense_spectrum)
     workers = args.workers
     save_as_nr = args.save_as_nr
 
-    h_values = np.linspace(args.h_min, args.h_max, args.h_points)
+    h_values = np.asarray(args.h_values, dtype=float) if args.h_values is not None else np.linspace(args.h_min, args.h_max, args.h_points)
 
     print("Sweep over h:", h_values)
 
@@ -233,13 +261,15 @@ def main():
         J=J,
         beta=beta,
         eps_fit=eps_fit,
+        skip_iterations=args.skip_iterations,
         h_values=h_values,
         normalize_Jh=normalize_Jh,
         save_channel=save_channel,
+        save_classical_populations=save_classical_populations,
         dense_spectrum=dense_spectrum,
         workers=workers,
     )
-    save_sweep(sweep_data, snapshot_path, save_channel, dense_spectrum)
+    save_sweep(sweep_data, snapshot_path, save_channel, save_classical_populations, dense_spectrum)
 
 
 

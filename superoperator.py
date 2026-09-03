@@ -1,15 +1,11 @@
 import pennylane as qml
-import pennylane.numpy as np
-import random
-import os
-import sys
+import numpy as np
 import re
 from pathlib import Path
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset, sample_omega, sample_operator
+from cooling_channel import construct_U_layers, transverse_ising_hamiltonian, construct_opset
 from path_analysis import trace_distance, extract_asymptotics
 
 from scipy.linalg import eig
@@ -27,12 +23,16 @@ def next_running_number(folder, ext="png"):
 
 
 ##################
-from ed import get_transverse_ising_gibbsstate
+from ed import (
+    get_transition_generator_average,
+    thermal_state,
+    transverse_ising_hamiltonian as ed_transverse_ising_hamiltonian,
+)
 
 
 def get_gibbs(N, J, h, beta):
-    gibbs_state, energy = get_transverse_ising_gibbsstate(N, J, h, beta)
-    return gibbs_state, energy
+    H = ed_transverse_ising_hamiltonian(N, J, h)
+    return thermal_state(H, beta)
 ####################
 
 
@@ -59,7 +59,7 @@ def get_U_matrix(num_system_qubits, tau, T, sigma, op, omega, H_sys, alpha):
 
 def get_superoperator_basis_output(i,j, num_system_qubits, U, omega, beta):
     d_sys = 2 ** num_system_qubits
-    rho_sys  = np.zeros((d_sys, d_sys), dtype = np.complex128)
+    rho_sys  = np.zeros((d_sys, d_sys), dtype=np.complex128)
     rho_sys[i,j]  = 1 
 
     # Z = np.exp(omega*beta/2) + np.exp(-omega*beta/2)
@@ -182,7 +182,7 @@ def get_averaged_channel_matrix(N, tau, T, sigma, op_set, omega_max, H_sys, alph
         delta_omega = omega_max / n_omega
         omegas = [(k+0.5)*delta_omega for k in range(n_omega)]
     
-    S = np.zeros((2**(2*N),2**(2*N)), dtype = np.complex128)
+    S = np.zeros((2**(2*N),2**(2*N)), dtype=np.complex128)
 
     for op in op_set:
         for omega in omegas:
@@ -287,8 +287,7 @@ def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False)
     # eigenvalue whose eigenvector has maximal overlap with the thermal state
     thermal_ev = eigvals[closest_eval_to_thermal]
     thermal_dist = abs(thermal_ev - target_ev)
-    num_closer = np.sum(np.abs(eigvals - 1) < thermal_dist)
-
+    num_closer = np.sum(np.abs(other_eigvals - target_ev) < thermal_dist)
     # Separation from the fixed-point eigenvalue and conventional modulus gap.
     Delta_sep = np.min(np.abs(other_eigvals - target_ev))
     Delta_gap = 1 - np.max(np.abs(other_eigvals))
@@ -402,6 +401,38 @@ def vectorize(rho):
     #we use row stacking
     return rho.reshape(-1)
 
+
+def get_classical_populations(S, H0_basis):
+    """Return the induced population map in the basis whose columns are ``H0_basis``."""
+    U = np.asarray(H0_basis, dtype=np.complex128)
+    if U.ndim != 2 or U.shape[0] != U.shape[1]:
+        raise ValueError("H0_basis must be a square matrix with basis vectors as columns")
+
+    d = U.shape[0]
+    P = np.zeros((d, d), dtype=float)
+    for n in range(d):
+        ket_n = U[:, n]
+        rho_n = np.outer(ket_n, ket_n.conj())
+        rho_out = (S @ vectorize(rho_n)).reshape(d, d)
+        rho_out_energy = U.conj().T @ rho_out @ U
+        P[:, n] = np.real(np.diag(rho_out_energy))
+
+    return P
+
+
+def get_transition_generator_and_classical_populations(channel, H0, operators, beta, omega_max, sigma, quadrature_points=100):
+    wire_order = range(len(H0.wires)) if hasattr(H0, "wires") else None
+    H0_matrix = qml.matrix(H0, wire_order=wire_order) if wire_order is not None else H0
+    operators = [qml.matrix(op, wire_order=wire_order) if hasattr(op, "wires") else op for op in operators]
+    eigensystem = np.linalg.eigh(H0_matrix)
+    return (
+        get_transition_generator_average(
+            H0_matrix, operators, beta, omega_max, sigma, quadrature_points, eigensystem
+        ),
+        get_classical_populations(channel, eigensystem[1]),
+    )
+
+
 def apply_channel(S, rho, output='matrix'):
     rho_vec = vectorize(rho)
     
@@ -443,7 +474,7 @@ def num_iterations(S, fixedpoint, *, eps=0.01, max_iter = 5000):
     #fixedpoint should be vectorized
     d_vec = np.shape(fixedpoint)[0]
     d_sys = int(np.sqrt(d_vec))
-    rho = np.zeros((d_sys, d_sys), dtype = np.complex128)
+    rho = np.zeros((d_sys, d_sys), dtype=np.complex128)
     rho[0,0] = 1
     fixedpoint = normalize_to_densitymatrix(fixedpoint.reshape((d_sys, d_sys)))
     dist = [trace_distance(rho, fixedpoint)]
@@ -505,7 +536,7 @@ if __name__ == "__main__":
     print('number of iterations from fit:', num_iterations(S, fixedpoint))
 
     # initialize rho
-    rho = np.zeros((2**N, 2**N), dtype = np.complex128)
+    rho = np.zeros((2**N, 2**N), dtype=np.complex128)
     rho[0,0] = 1
 
     eps = 1e-2
