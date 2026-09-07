@@ -85,3 +85,37 @@ beta: 1.0
 dense spectrum: yes
 classical populations / generator saved: yes
 J, T, tau, method, normalization, iteration setting: inherited from grids 4 and 5; not recorded
+
+Archive: superoperator_N4_grid_7.npz
+Purpose: sigma=1 continuation of the fine-alpha population/generator grid
+Points: 120 = 10 h x 12 alpha x 1 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
+  0.95, 1.00
+sigma: 1.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
+  method=superoperator, iterations skipped
+
+Archive: superoperator_N4_grid_8.npz
+Purpose: merged sigma=1 fine-alpha grid assembled from grids 6 and 7 without recomputation
+Source grids: 6, 7
+Points: 320 = 10 h x 32 alpha x 1 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
+  0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
+  0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
+  0.95, 1.00
+sigma: 1.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+J, T, tau, method, normalization, iteration setting: inherited from grids 6 and 7;
+  Grid 7 used J=1.0, T=25.0, tau=0.1, normalize_Jh=yes, method=superoperator,
+  and iterations skipped; Grid 6 did not record these settings.
