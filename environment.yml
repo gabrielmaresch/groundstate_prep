@@ -4,14 +4,14 @@ channels:
 dependencies:
   - python=3.11
   - pip
-  - numpy
+  - numpy>=2.0
   - scipy
   - matplotlib=3.10.9
   - pandas
   - seaborn
   - ipython
-  # VS Code Jupyter 2025.9.1 can hang during startup with ipykernel 7.
-  - ipykernel<7
+  # Retain the notebook kernel version range used by the working VS Code setup.
+  - ipykernel>=6,<7
   - pytest=9.0.3
   - pip:
       - pennylane==0.44.1

@@ -1,6 +1,7 @@
 # Grid archive registry
 #
-# This file lists every archive in data/grid. Values are recovered from each
+# This file lists current and historical grid archives; missing files are marked.
+# Values are recovered from each
 # archive where possible. Older archives do not store J, T, tau, the channel
 # method, normalization, or iteration settings; those fields are marked
 # "not recorded" rather than inferred.
@@ -87,6 +88,9 @@ classical populations / generator saved: yes
 J, T, tau, method, normalization, iteration setting: inherited from grids 4 and 5; not recorded
 
 Archive: superoperator_N4_grid_7.npz
+Status: standalone archive missing locally; its 120 rows are preserved in Grid 8
+Provenance: entry reconstructed from commit 33e37d9; parameter values verified
+  against the alpha > 0.4 subset of the recovered Grid 8 archive
 Purpose: sigma=1 continuation of the fine-alpha population/generator grid
 Points: 120 = 10 h x 12 alpha x 1 sigma x 1 omega_max
 N: 4
@@ -98,10 +102,12 @@ omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
 classical populations / generator saved: yes
-Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
-  method=superoperator, iterations skipped
+Run settings recorded in commit 33e37d9 (not stored in the recovered archive):
+  J=1.0, T=25.0, tau=0.1, normalize_Jh=yes, method=superoperator,
+  iterations skipped (also consistent with NaN num_iterations in Grid 8)
 
 Archive: superoperator_N4_grid_8.npz
+Status: recovered from the running notebook kernel's open archive on 2026-09-07
 Purpose: merged sigma=1 fine-alpha grid assembled from grids 6 and 7 without recomputation
 Source grids: 6, 7
 Points: 320 = 10 h x 32 alpha x 1 sigma x 1 omega_max
@@ -117,5 +123,4 @@ beta: 1.0
 dense spectrum: yes
 classical populations / generator saved: yes
 J, T, tau, method, normalization, iteration setting: inherited from grids 6 and 7;
-  Grid 7 used J=1.0, T=25.0, tau=0.1, normalize_Jh=yes, method=superoperator,
-  and iterations skipped; Grid 6 did not record these settings.
+  Grid 7 settings are documented above; Grid 6 did not record these settings.
