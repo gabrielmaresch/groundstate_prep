@@ -29,6 +29,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Alternatively, create the Conda environment:
+
+```bash
+conda env create -f environment.yml
+conda activate cooling
+```
+
 Some validation and reference calculations use Julia through `juliacall`.
 From the repository root, instantiate the Julia environment with:
 
@@ -49,8 +56,8 @@ pytest tests/test_ed.py
 ### Cooling trajectories
 
 `path_analysis.py` provides `run_TFIM(...)` for simulating the cooling circuit
-on a small TFIM system. The routine compares the output state with the exact
-Gibbs state using trace distance and can generate convergence plots.
+on a small TFIM system. It compares the output state with the exact Gibbs state
+using trace distance and can generate convergence plots.
 
 The circuit construction itself lives in `cooling_channel.py`:
 
@@ -62,8 +69,7 @@ The circuit construction itself lives in `cooling_channel.py`:
 ### Averaged-channel analysis
 
 `superoperator.py` provides averaged-channel construction, spectral diagnostics,
-fixed-point checks, trace-distance calculations, normality residuals, and
-iteration estimates.
+fixed-point checks, trace-distance calculations, normality residuals, and iteration estimates.
 
 Use the parallel scripts for batch calculations:
 
@@ -73,9 +79,7 @@ python parallel_beta_sweep.py --N 4 --beta_min 0.1 --beta_max 2.0 --beta_points 
 python parallel_grid.py --N 4 --h_points 10 --alpha_points 6 --sigma_points 5 --omega_points 2
 ```
 
-`parallel_grid.py` can construct channels with either `--method superoperator`
-or `--method kraus`. The other parallel sweep scripts use a matrix-free Kraus
-representation.
+`parallel_grid.py` can construct channels with either `--method superoperator` or `--method kraus`. The other parallel sweep scripts use a matrix-free Kraus representation.
 
 Pass `--dense-spectrum` to diagonalize the complete channel matrix and obtain
 exact `Delta_sep` and `Delta_gap` values. Without this option, the code uses
@@ -86,18 +90,20 @@ Pass `--save-classical-populations` to store the averaged-channel
 sweep point. It works independently of `--save-channel` and
 `--dense-spectrum`.
 
+Pass `--skip-iterations` to the parallel scripts when only channel and spectral
+diagnostics are needed. Grid runs also accept explicit `--h-values`,
+`--alpha-values`, `--sigma-values`, and `--omega-values` lists instead of ranges.
+
 Results are saved as `.npz` files. The default directories are `data/` for
 single runs and standard sweeps, `data/grid/` for grid calculations, and
-`data/nelder_mead/` for optimization runs. The notebooks
-`sweep_analysis.ipynb`, `grid_analysis.ipynb`, and
-`nelder-mead-trajectory-analysis.ipynb` inspect these outputs.
+`data/nelder_mead/` for optimization runs. The notebooks `sweep_analysis.ipynb`,
+`grid_analysis.ipynb`, and `nelder-mead-trajectory-analysis.ipynb` inspect these outputs.
 
-> **Scaling note:** a dense channel matrix has dimension
-> \(4^N \times 4^N\). Dense-spectrum calculations are therefore practical only
-> for small `N`. In the matrix-free parallel workflows, `--dense-spectrum` and
-> `--save-channel` are rejected above a channel dimension of 4096.
-> `--dense-spectrum` computes a dense matrix temporarily; `--save-channel`
-> additionally stores it in the output archive.
+`generator_analysis.ipynb` and `bohr_analysis.ipynb` provide more specialized
+analysis for archived grid data and Bohr-frequency calculations.
+
+> **Scaling note:** dense channel matrices scale as \(4^N \times 4^N\), so
+> dense-spectrum runs are only practical for small `N`.
 
 ### Nelder-Mead optimization
 
@@ -115,31 +121,14 @@ python nelder_mead_average.py --h-over-J 1.2 --beta 1.0
 python nelder_mead_h_sweep.py --beta 1.0 --h_min 0.2 --h_max 2.0 --h_points 20
 ```
 
-These workflows always use the dense spectrum. Each result archive records the
-optimal parameters, convergence status, trace distance, and iteration count.
+`nelder_mead_beta_sweep.py` repeats the optimization across inverse temperatures:
 
-## Preliminary results
+```bash
+python nelder_mead_beta_sweep.py --h 1.2 --beta-min 0.1 --beta-max 10 --beta-points 25
+```
 
-For the explicitly constructed averaged channel of a normalized four-qubit
-TFIM, the tested cooling trajectories converge towards the channel fixed point
-across the sampled field range. The iterations needed to reach trace distance
-below `0.05` from that fixed point generally decrease in the paramagnetic
-regime.
-
-The experiments show an accuracy--speed trade-off in the coupling `alpha`:
-weaker coupling yields fixed points closer to the exact Gibbs state but takes
-more iterations. In the reported `N=4`, `beta=1` sweep, `alpha=0.25` and
-`0.5` produced fixed points within `0.1` trace distance of the Gibbs state;
-stronger coupling converged faster but with larger fixed-point error.
-
-![Trace distance of the channel fixed point from the Gibbs state across h/J, alpha, and omega_max.](docu/plots/grid_alpha_trace_distance.png)
-
-*Fixed-point trace distance for the N=4, beta=1 grid data at sigma=2. Lower is
-closer to the target Gibbs state.*
-
-These are small-system, noiseless numerical observations. They depend on the
-chosen initial state, Trotterization, and frequency quadrature, and do not yet
-establish performance for larger systems or the planned impurity model.
+These workflows always use the dense spectrum and record the optimal
+parameters, convergence status, trace distance, and iteration count.
 
 ## Repository guide
 
@@ -147,23 +136,15 @@ establish performance for larger systems or the planned impurity model.
 - `superoperator.py` — averaged quantum channels and spectral analysis.
 - `ed.py`, `ed.jl` — exact diagonalization and Gibbs-state reference methods.
 - `path_analysis.py` — cooling trajectories and convergence metrics.
-- `parallel_average.py` — one averaged-channel calculation.
-- `parallel_h_sweep.py`, `parallel_beta_sweep.py`, `parallel_grid.py` —
-  parallel parameter-sweep entry points.
-- `nelder_mead_average.py`, `nelder_mead_h_sweep.py` — constrained parameter
-  optimization and h/J optimization sweep.
-- `*_analysis.ipynb`, `nelder-mead-trajectory-analysis.ipynb` — notebook-based
-  analysis.
+- `parallel_*.py`, `nelder_mead_*.py` — batch sweeps and optimization runs.
+- `*_analysis.ipynb` — notebook-based analysis.
 - `data/` — generated numerical results.
 - `docu/` — technical documentation and figures.
 
 ## Research direction
 
 Planned work includes applying the method to a 1+2-site impurity/bath DMFT
-model and investigating the effects of noise and resource constraints. Open
-questions include effective-temperature descriptions of noise, the resources
-needed to resolve phase transitions, and hybrid cooling/filtering strategies
-for impurity Green's functions.
+model and investigating the effects of noise and resource constraints.
 
 ## References
 
