@@ -124,3 +124,21 @@ dense spectrum: yes
 classical populations / generator saved: yes
 J, T, tau, method, normalization, iteration setting: inherited from grids 6 and 7;
   Grid 7 settings are documented above; Grid 6 did not record these settings.
+
+Archive: superoperator_N4_grid_10.npz
+Purpose: sigma comparison at three selected fields, assembled without recomputation
+Source grids: 9 (sigma=2), 8 (sigma=1 subset)
+Points: 192 = 3 h x 32 alpha x 2 sigma x 1 omega_max
+N: 4
+h: 0.4, 1.0, 1.6
+alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
+  0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
+  0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
+  0.95, 1.00
+sigma: 1.0, 2.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: yes
+J, T, tau, method, normalization, iteration setting: inherited from source grids;
+  Grid 8 provenance is documented above, and Grid 9 was computed as its sigma=2 comparison.
