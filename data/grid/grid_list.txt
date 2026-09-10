@@ -142,3 +142,32 @@ dense spectrum: yes
 classical populations / generator saved: yes
 J, T, tau, method, normalization, iteration setting: inherited from source grids;
   Grid 8 provenance is documented above, and Grid 9 was computed as its sigma=2 comparison.
+
+Archive: superoperator_N4_grid_11.npz
+Purpose: reproduce plots from grid 1 but without normalization
+Points: 40 = 10 h x 4 alpha x 1 sigma x 1 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.25, 0.5, 0.75, 1.0
+sigma: 2.0
+omega_max: 4.0
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: no
+Known run settings (not stored in the archive): J=1.0, T=25.0, tau=0.1,
+  normalize_Jh=no, method=superoperator, iterations computed with eps_fit=0.05
+
+Archive: superoperator_N4_grid_12.npz
+Purpose: unnormalized extension of Grid 11 with omega_max=8 and 12
+Based on: Grid 11 parameter settings
+Points: 80 = 10 h x 4 alpha x 1 sigma x 2 omega_max
+N: 4
+h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.25, 0.5, 0.75, 1.0
+sigma: 2.0
+omega_max: 8.0, 12.0
+beta: 1.0
+dense spectrum: yes
+classical populations / generator saved: no
+Known run settings (not stored in the archive): J=1.0, T=25.0, tau=0.1,
+  normalize_Jh=no, method=superoperator, iterations computed with eps_fit=0.05
