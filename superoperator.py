@@ -249,25 +249,38 @@ def linear_operator_to_dense(channel):
     return np.column_stack([channel @ basis[:, index] for index in range(dimension)])
 
 
-def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum = False):
-
+def get_superoperator_spectral_data(S, beta, TFIM_params, full_spectrum=False, k_eigen=4):
+    n = S.shape[0]
     if full_spectrum and isinstance(S, LinearOperator):
         raise ValueError("full_spectrum requires a dense channel matrix.")
+    if full_spectrum:
+        eigvals, eigvecs = eig(S)
+    else:
+        result_k = min(k_eigen, n - 1)
+        arpack_k = min(result_k + 1, n - 1)
+        ncv = min(n, max(40, 4 * arpack_k + 1))
 
-    # to hande nan exceptions when using parallel workers ##
-    try:
-        if not full_spectrum:
-            k = min(4, S.shape[0]-1)
-            eigvals, eigvecs = eigs(S, k=k, which='LM')
-        else:
-            eigvals, eigvecs = eig(S)
-    except ArpackNoConvergence:
-        # Return dummy values instead of crashing worker process
-        d_so = S.shape[0]
-        n_eigvals = min(4, d_so - 1)
-        eigvals = np.full(n_eigvals, np.nan, dtype=np.complex128)
-        fixedpoint = np.full(d_so, np.nan, dtype=np.complex128)
-        return eigvals, fixedpoint, np.nan, np.nan, np.nan, np.nan
+        try:
+            eigvals, eigvecs = eigs(
+                S,
+                k=arpack_k,
+                which='LM',
+                ncv=ncv,
+                maxiter=max(10_000, 10 * n),
+                tol=1e-8,
+            )
+        except ArpackNoConvergence as error:
+            eigvals = error.eigenvalues
+            eigvecs = error.eigenvectors
+            if eigvals is None or eigvecs is None or len(eigvals) < result_k:
+                failed_eigvals = np.full(result_k, np.nan, dtype=np.complex128)
+                failed_fixedpoint = np.full(n, np.nan, dtype=np.complex128)
+                return failed_eigvals, failed_fixedpoint, np.nan, np.nan, np.nan, np.nan
+
+        # ARPACK may return the converged partial spectrum unsorted.
+        leading = np.argsort(np.abs(eigvals))[::-1][:result_k]
+        eigvals = eigvals[leading]
+        eigvecs = eigvecs[:, leading]
     
 
     eigvals = eigvals.astype(np.complex128)

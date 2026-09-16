@@ -171,3 +171,16 @@ dense spectrum: yes
 classical populations / generator saved: no
 Known run settings (not stored in the archive): J=1.0, T=25.0, tau=0.1,
   normalize_Jh=no, method=superoperator, iterations computed with eps_fit=0.05
+
+Archive: ../superoperator_N5_h_sweep_ASC35.npz
+Purpose: three-point N=5 h/J test sweep
+Points: 3 h/J values
+N: 5
+h/J: 0.4, 1.0, 1.6
+beta: 1.0
+dense spectrum: no (4 ARPACK eigenpairs saved per point)
+channels saved: no
+classical populations / generator saved: yes
+iteration counts: skipped (all stored values are NaN)
+alpha, sigma, omega_max, J, T, tau, method, normalization, and eps_fit:
+  not recorded
