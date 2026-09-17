@@ -184,3 +184,20 @@ classical populations / generator saved: yes
 iteration counts: skipped (all stored values are NaN)
 alpha, sigma, omega_max, J, T, tau, method, normalization, and eps_fit:
   not recorded
+
+Archive: superoperator_N6_grid_13.npz
+Purpose: merged four-sweep N=6 h grid assembled from ASC1-ASC4 without recomputation
+Source grids: sweep_N6 ASC1, ASC2, ASC3, ASC4
+Points: 32 = 8 h x 4 alpha
+N: 6
+h/J: 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0
+alpha: 0.25, 0.5, 0.75, 1.0
+sigma: 2.0
+omega_max: 8.0
+beta: 1.0
+dense spectrum: no
+channels saved: no
+classical populations / generator saved: no
+Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
+  method=kraus, iterations computed with eps_fit=0.05
+Recent nomenclature: Delta_gap, num_iterations
