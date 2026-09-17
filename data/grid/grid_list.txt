@@ -1,118 +1,135 @@
-# Grid archive registry
-#
-# This file lists current and historical grid archives; missing files are marked.
-# Values are recovered from each
-# archive where possible. Older archives do not store J, T, tau, the channel
-# method, normalization, or iteration settings; those fields are marked
-# "not recorded" rather than inferred.
-
 Archive: superoperator_N4_grid_1.npz
+Status: present
 Purpose: original broad N=4 parameter grid
-Points: 600 = 10 h x 6 alpha x 5 sigma x 2 omega_max
+Source: none
+Points: 600 = 10 h/J x 6 alpha x 5 sigma x 2 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.25, 0.5, 0.75, 1.0, 1.25, 1.5
 sigma: 0.5, 0.875, 1.25, 1.625, 2.0
 omega_max: 4.0, 8.0
 beta: 1.0
 dense spectrum: no
+channels saved: no
 classical populations / generator saved: no
-J, T, tau, method, normalization, iteration setting: not recorded
+Run settings: J, T, tau, method, normalize_Jh, iterations, and eps_fit not recorded
+Notes: none
 
 Archive: superoperator_N4_grid_2.npz
+Status: present
 Purpose: dense-spectrum N=4 parameter grid
-Points: 560 = 7 h x 8 alpha x 5 sigma x 2 omega_max
+Source: none
+Points: 560 = 7 h/J x 8 alpha x 5 sigma x 2 omega_max
 N: 4
-h: 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6
+h/J: 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6
 alpha: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8
 sigma: 0.4, 0.8, 1.2, 1.6, 2.0
 omega_max: 2.5, 4.0
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: no
-J, T, tau, method, normalization, iteration setting: not recorded
+Run settings: J, T, tau, method, normalize_Jh, iterations, and eps_fit not recorded
+Notes: none
 
 Archive: superoperator_N4_grid_3.npz
+Status: present
 Purpose: N=4 alpha/sigma grid with population and generator matrices
-Points: 120 = 10 h x 4 alpha x 3 sigma x 1 omega_max
+Source: none
+Points: 120 = 10 h/J x 4 alpha x 3 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.25, 0.5, 0.75, 1.0
 sigma: 1.0, 2.0, 4.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
-  method=superoperator, iterations skipped
+Run settings: J=1.0, T=25.0, tau=0.1, method=superoperator,
+  normalize_Jh=yes, iterations skipped, eps_fit not applicable
+Notes: none
 
 Archive: superoperator_N4_grid_4.npz
+Status: present
 Purpose: fine low-alpha N=4 population/generator grid
-Points: 100 = 10 h x 10 alpha x 1 sigma x 1 omega_max
+Source: none
+Points: 100 = 10 h/J x 10 alpha x 1 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20
 sigma: 1.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-J, T, tau, method, normalization, iteration setting: not recorded
+Run settings: J, T, tau, method, normalize_Jh, iterations, and eps_fit not recorded
+Notes: none
 
 Archive: superoperator_N4_grid_5.npz
+Status: present
 Purpose: continuation of the fine low-alpha N=4 population/generator grid
-Points: 100 = 10 h x 10 alpha x 1 sigma x 1 omega_max
+Source: none
+Points: 100 = 10 h/J x 10 alpha x 1 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40
 sigma: 1.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-J, T, tau, method, normalization, iteration setting: not recorded
+Run settings: J, T, tau, method, normalize_Jh, iterations, and eps_fit not recorded
+Notes: none
 
 Archive: superoperator_N4_grid_6.npz
-Purpose: merged fine low-alpha grid assembled from grids 4 and 5 without recomputation
-Source grids: 4, 5
-Points: 200 = 10 h x 20 alpha x 1 sigma x 1 omega_max
+Status: present
+Purpose: merged fine low-alpha grid assembled without recomputation
+Source: Grids 4 and 5
+Points: 200 = 10 h/J x 20 alpha x 1 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
   0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40
 sigma: 1.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-J, T, tau, method, normalization, iteration setting: inherited from grids 4 and 5; not recorded
+Run settings: inherited from Grids 4 and 5; J, T, tau, method,
+  normalize_Jh, iterations, and eps_fit not recorded
+Notes: none
 
 Archive: superoperator_N4_grid_7.npz
-Status: standalone archive missing locally; its 120 rows are preserved in Grid 8
-Provenance: entry reconstructed from commit 33e37d9; parameter values verified
-  against the alpha > 0.4 subset of the recovered Grid 8 archive
+Status: missing locally; all 120 rows are preserved in Grid 8
 Purpose: sigma=1 continuation of the fine-alpha population/generator grid
-Points: 120 = 10 h x 12 alpha x 1 sigma x 1 omega_max
+Source: commit 33e37d9
+Points: 120 = 10 h/J x 12 alpha x 1 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
   0.95, 1.00
 sigma: 1.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-Run settings recorded in commit 33e37d9 (not stored in the recovered archive):
-  J=1.0, T=25.0, tau=0.1, normalize_Jh=yes, method=superoperator,
-  iterations skipped (also consistent with NaN num_iterations in Grid 8)
+Run settings: J=1.0, T=25.0, tau=0.1, method=superoperator,
+  normalize_Jh=yes, iterations skipped, eps_fit not applicable
+Notes: parameter values were verified against the alpha > 0.4 subset of the
+  recovered Grid 8 archive; settings are recorded in the source commit
 
 Archive: superoperator_N4_grid_8.npz
-Status: recovered from the running notebook kernel's open archive on 2026-09-07
-Purpose: merged sigma=1 fine-alpha grid assembled from grids 6 and 7 without recomputation
-Source grids: 6, 7
-Points: 320 = 10 h x 32 alpha x 1 sigma x 1 omega_max
+Status: present
+Purpose: merged sigma=1 fine-alpha grid assembled without recomputation
+Source: Grids 6 and 7
+Points: 320 = 10 h/J x 32 alpha x 1 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
   0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
   0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
@@ -121,16 +138,19 @@ sigma: 1.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-J, T, tau, method, normalization, iteration setting: inherited from grids 6 and 7;
-  Grid 7 settings are documented above; Grid 6 did not record these settings.
+Run settings: inherited from Grids 6 and 7; Grid 6 settings are not recorded,
+  and Grid 7 settings are documented in its registry entry
+Notes: recovered from the running notebook kernel's open archive on 2026-09-07
 
 Archive: superoperator_N4_grid_10.npz
+Status: present
 Purpose: sigma comparison at three selected fields, assembled without recomputation
-Source grids: 9 (sigma=2), 8 (sigma=1 subset)
-Points: 192 = 3 h x 32 alpha x 2 sigma x 1 omega_max
+Source: Grid 9 (sigma=2) and a Grid 8 subset (sigma=1)
+Points: 192 = 3 h/J x 32 alpha x 2 sigma x 1 omega_max
 N: 4
-h: 0.4, 1.0, 1.6
+h/J: 0.4, 1.0, 1.6
 alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
   0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
   0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
@@ -139,56 +159,71 @@ sigma: 1.0, 2.0
 omega_max: 2.5
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: yes
-J, T, tau, method, normalization, iteration setting: inherited from source grids;
-  Grid 8 provenance is documented above, and Grid 9 was computed as its sigma=2 comparison.
+Run settings: inherited from source grids; see the Grid 8 entry for its
+  provenance; Grid 9 was computed as its sigma=2 comparison
+Notes: none
 
 Archive: superoperator_N4_grid_11.npz
-Purpose: reproduce plots from grid 1 but without normalization
-Points: 40 = 10 h x 4 alpha x 1 sigma x 1 omega_max
+Status: present
+Purpose: reproduce plots from Grid 1 without normalization
+Source: Grid 1 parameter selection
+Points: 40 = 10 h/J x 4 alpha x 1 sigma x 1 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.25, 0.5, 0.75, 1.0
 sigma: 2.0
 omega_max: 4.0
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: no
-Known run settings (not stored in the archive): J=1.0, T=25.0, tau=0.1,
-  normalize_Jh=no, method=superoperator, iterations computed with eps_fit=0.05
+Run settings: J=1.0, T=25.0, tau=0.1, method=superoperator,
+  normalize_Jh=no, iterations computed, eps_fit=0.05
+Notes: run settings are known but not stored in the archive
 
 Archive: superoperator_N4_grid_12.npz
+Status: present
 Purpose: unnormalized extension of Grid 11 with omega_max=8 and 12
-Based on: Grid 11 parameter settings
-Points: 80 = 10 h x 4 alpha x 1 sigma x 2 omega_max
+Source: Grid 11 parameter settings
+Points: 80 = 10 h/J x 4 alpha x 1 sigma x 2 omega_max
 N: 4
-h: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
 alpha: 0.25, 0.5, 0.75, 1.0
 sigma: 2.0
 omega_max: 8.0, 12.0
 beta: 1.0
 dense spectrum: yes
+channels saved: no
 classical populations / generator saved: no
-Known run settings (not stored in the archive): J=1.0, T=25.0, tau=0.1,
-  normalize_Jh=no, method=superoperator, iterations computed with eps_fit=0.05
+Run settings: J=1.0, T=25.0, tau=0.1, method=superoperator,
+  normalize_Jh=no, iterations computed, eps_fit=0.05
+Notes: run settings are known but not stored in the archive
 
 Archive: ../superoperator_N5_h_sweep_ASC35.npz
+Status: present
 Purpose: three-point N=5 h/J test sweep
+Source: none
 Points: 3 h/J values
 N: 5
 h/J: 0.4, 1.0, 1.6
+alpha: not recorded
+sigma: not recorded
+omega_max: not recorded
 beta: 1.0
 dense spectrum: no (4 ARPACK eigenpairs saved per point)
 channels saved: no
 classical populations / generator saved: yes
-iteration counts: skipped (all stored values are NaN)
-alpha, sigma, omega_max, J, T, tau, method, normalization, and eps_fit:
-  not recorded
+Run settings: J, T, tau, method, normalize_Jh, and eps_fit not recorded;
+  iterations skipped
+Notes: none
 
 Archive: superoperator_N6_grid_13.npz
-Purpose: merged four-sweep N=6 h grid assembled from ASC1-ASC4 without recomputation
-Source grids: sweep_N6 ASC1, ASC2, ASC3, ASC4
-Points: 32 = 8 h x 4 alpha
+Status: present
+Purpose: merged four-sweep N=6 h/J grid assembled without recomputation
+Source: sweep_N6 ASC1, ASC2, ASC3, and ASC4
+Points: 32 = 8 h/J x 4 alpha
 N: 6
 h/J: 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0
 alpha: 0.25, 0.5, 0.75, 1.0
@@ -198,14 +233,15 @@ beta: 1.0
 dense spectrum: no
 channels saved: no
 classical populations / generator saved: no
-Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
-  method=kraus, iterations computed with eps_fit=0.05
-Recent nomenclature: Delta_gap, num_iterations
+Run settings: J=1.0, T=25.0, tau=0.1, method=kraus,
+  normalize_Jh=yes, iterations computed, eps_fit=0.05
+Notes: recent nomenclature: Delta_gap, num_iterations
 
 Archive: superoperator_N6_grid_14.npz
-Purpose: merged four-sweep N=6 h grid assembled from sweep_N6_2 ASC1-ASC4 without recomputation
-Source grids: sweep_N6_2 ASC1, ASC2, ASC3, ASC4
-Points: 12 = 4 alpha x 3 h/J
+Status: present
+Purpose: merged four-sweep N=6 h/J grid assembled without recomputation
+Source: sweep_N6_2 ASC1, ASC2, ASC3, and ASC4
+Points: 12 = 3 h/J x 4 alpha
 N: 6
 h/J: 0.4, 1.0, 1.6
 alpha: 0.25, 0.5, 0.75, 1.0
@@ -215,6 +251,25 @@ beta: 1.0
 dense spectrum: no
 channels saved: no
 classical populations / generator saved: yes
-Known run settings: J=1.0, T=25.0, tau=0.1, normalize_Jh=yes,
-  method=superoperator, iterations stored directly in the source archives
-Recent nomenclature: Delta_sep, Delta_gap, Delta_th, num_iterations, normality_residual
+Run settings: J=1.0, T=25.0, tau=0.1, method=kraus (matrix-free via
+  parallel_h_sweep.py), normalize_Jh=yes, iterations skipped, eps_fit not applicable
+Notes: recent nomenclature: Delta_sep, Delta_gap, Delta_th, num_iterations,
+  normality_residual
+
+Archive: superoperator_N4_grid_15.npz
+Status: currently running locally; archive is written only after all points finish
+Purpose: dense-spectrum N=4 h/J/alpha grid at sigma=2 and omega_max=2.5
+Source: none
+Points: 60 = 10 h/J x 6 alpha x 1 sigma x 1 omega_max
+N: 4
+h/J: 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0
+alpha: 0.25, 0.5, 0.75, 1.0, 1.25, 1.5
+sigma: 2.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+channels saved: no
+classical populations / generator saved: no
+Run settings: J=1.0, T=25.0, tau=0.1, method=superoperator,
+  normalize_Jh=yes, iterations computed, eps_fit=0.05
+Notes: none
