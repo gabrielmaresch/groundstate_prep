@@ -572,6 +572,8 @@ every sweep parameter choice, where the improvement is more pronounced %larger
 in the paramagnetic regime than in the ferromagnetic one. %regime. 
 Interestingly, it turns out that the optimal coupling strength $\alpha$ is not at weak coupling but around $0.5-0.6$, see \cref{fig:nm_alphaT}. The $\omega_{\rm max}$ cutoff-values that lead to minimal iteration count are surprisingly small at only approximate half the bandwidth of the system. The temporal width is almost constant $\sigma \approx 2$. The small variance of these parameters across $\nicefrac{h}{J}$ may be taken as indication that the iterations count only depends weakly on them and that the particular values originate more from the warm start of the algorithm (taking the optimal parameters of the previous run as starting parameters of the next run) than signifying an exact minimum.
 
+In conclusion: the $h$-sweep eludes to the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small.
+
 
 \begin{figure}[htbp]
     \centering
@@ -605,27 +607,43 @@ In order to study the spectral properties of the channel with respect to its fix
 \end{align}
 only for real nonnegative subleading eigenvalue the two notions coincide. By perturbative arguments we know that - at least in the weak-coupling regime - the channel is guaranteed to have an almost thermal fixed point. For this reason we are mostly interested in the local behavior around this fixed point rather than in the global gap. 
 
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[
-        width=0.75\textwidth,
-        trim={0 0 0 3.0cm},
-        clip
-    ]{docu/plots/grid_alpha_Delta_sep_grid_1.png}
-    \caption{Spectral separation $\Delta_{\rm sep}$ of the averaged TFIM cooling channel for $N=4$, $\beta=1$, $\sigma=2$, and $\omega_{\rm max}=4$, for different coupling strengths.}
-    \label{fig:spectral_gap_omega4}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+      \includegraphics[width=1.0\textwidth,trim={0 0 0 0.9cm},
+        clip]{docu/plots/grid_alpha_Delta_sep_grid_1_keep.png}
+        \caption{Frequency cutoff $\omega_{\rm max}=4$ resulting in $\Delta \omega = 0.4$ and larger spectral separation}
+    \label{fig:nm_alphaT}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+       \includegraphics[width=1.00\textwidth, trim={0 0 0 0.9cm},
+        clip]{docu/plots/grid_alpha_Delta_sep_grid_3_keep.png}
+        \caption{Lower frequency cutoff $\omega_{\rm max}=2.5$ resulting in $\Delta \omega = 0.25$ and larger spectral separation}
+        \label{fig:nm_sigma}
+    \end{subfigure}
+    \caption{Spectral separation $\Delta_{\rm sep}$ of the averaged TFIM cooling channel for $N=4$, $\beta=1$, $\sigma=2$ for different coupling strengths $\alpha$ and frequency resolutions. Optimized configuration (NM) is given for comparison.}
+    \label{fig:spectral_gap_omega}
 \end{figure}
 
+In \cref{fig:spectral_gap_omega} we can see that the spectral gap in general increases with the coupling strength $\alpha$. Increasing the frequency resolution (by lowering $\omega_{\max}$) also increases the gap. However, $\omega_{\max}$ should not be smaller than the system's bandwith. Interestingly the spectral gap is not uniform across the $\nicefrac{h}{J}$-sweep but is reduced both in the highly ferro- and paramegnetic regimes. 
 
-In particular, the calculation of the smallest finite eigenvalue $\mu_{\rm min}$ of the Lindbladian population transition matrix $(t)_{ij}$ is related to the eigenvalue $1-\alpha^2 \mu_{\rm min}$ of the restriction of $\mathcal{E}$ to classical mixtures $\displaystyle \sum p_i \ket{i}\bra{i}$ in the $H_0$ eigenbasis. Therefore, the closeness of $\Delta_{\mathrm{sep}}$ and $\alpha^2 \mu_{\rm min}$ is an indication that the Lindbladian approximation is accurate with respect to the slowest decaying mode near the fixed point.
+For the shown parameter values the full spectra were computed: here $\Delta_{\mathrm{sep}}=\Delta_{\mathrm{gap}}$ up to numerical precision, showing that this quantity directly correlates to the dominating decaying mode and thus directly relates to the relaxation time towards the channel fixed-point. 
 
 
+
+In particular, the calculation of the smallest finite eigenvalue $\mu_{\rm min}$ of the Lindbladian population transition matrix $(t)_{ij}$ is related to the eigenvalue $1+\alpha^2 \mu_{\rm min}$ of the restriction of $\mathcal{E}$ to classical mixtures $\displaystyle \sum p_i \ket{i}\bra{i}$ in the $H_0$ eigenbasis. Noting that $\mu_{\rm min}<0$ for decaying modes of $\mathcal{E}$, therefore the closeness of $\Delta_{\mathrm{sep}}$ and $\alpha^2 |\mu_{\rm min}|$ is an indication that the Lindbladian approximation is accurate with respect to the slowest decaying mode near the fixed point.
 The further %Additionally 
 numerical inspection of the %explicit 
-spectra indicate $\lambda_2$ being positive and real, such that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ represents a sensible working hypothesis for our experimental runs.
+spectra indicate the subleading eigenvalue $\lambda_2$ being positive and real, such that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ represents a sensible working hypothesis for our experimental runs.
 
 
-The $h$-sweep therefore eludes to the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small.
+
+
+
 
 \subsection{Filter width, temperature, and system-size dependence}
 
