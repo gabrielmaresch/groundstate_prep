@@ -525,14 +525,14 @@ When given a specific Hamiltonian, a desired temperature, and an $\epsilon$ targ
     \centering
     \begin{subfigure}[t]{0.5\textwidth}
         \centering
-      \includegraphics[width=1.05\textwidth, trim={0 0 0 2.0cm}, clip]{docu/plots/grid_alpha_num_iterations_grid_1.png}
+      \includegraphics[width=\textwidth]{docu/plots/grid_alpha_num_iterations_grid_1.png}
         \caption{Number of iterations.}
     \label{fig:num_iterations_omega4}
     \end{subfigure}%
     \hfill
     \begin{subfigure}[t]{0.5\textwidth}
         \centering
-        \includegraphics[width=1.05\textwidth, trim={0 0 0 2.0cm}, clip]{docu/plots/grid_alpha_effective_iteration_time_grid_1.png}
+        \includegraphics[width=\textwidth]{docu/plots/grid_alpha_effective_iteration_time_grid_1.png}
         \caption{Effective Lindbladian evolution time $2T\alpha^2\cdot N$.}
         \label{fig:effective_time_omega4}
     \end{subfigure}
@@ -564,7 +564,7 @@ onwards. Qualitatively, a transition from log-linear to nonlinear takes place fo
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[height=6.2cm, trim={0 0 0 1.2cm}, clip]{docu/plots/grid_alpha_iteration_fit_r2_grid_1.png}
+        \includegraphics[height=6.2cm]{docu/plots/grid_alpha_iteration_fit_r2_grid_1.png}
         \caption{Fit quality ($R^2$) of the semilog regressions in the $h/J\le 1$ and $h/J\ge 1$ regions.}
         \label{fig:regression_R2}
     \end{subfigure}
@@ -579,11 +579,7 @@ It is important to keep in mind that the fixed point of a given channel is not n
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[
-        width=0.75\textwidth,
-        trim={0 0 0 2.8cm},
-        clip
-    ]{docu/plots/grid_alpha_trace_distance_grid_1.png}
+    \includegraphics[width=0.75\textwidth]{docu/plots/grid_alpha_trace_distance_grid_1.png}
     \caption{Trace distance between the channel fixed point and the Gibbs state for the TFIM cooling channel with $N=4$, $\beta=1$, $\sigma=2$, and $\omega_{\rm max}=4$, for different coupling strengths.}
     \label{fig:trace_distance_to_gibbs_omega4}
 \end{figure}
@@ -604,16 +600,14 @@ In conclusion: the $h$-sweep eludes to the main trade-off in the numerics very c
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-      \includegraphics[width=1.0\textwidth,trim={0 0 0 0.7cm},
-        clip]{docu/plots/nelder_mead_h_alpha_effective_time_grid_1.png}
+      \includegraphics[width=1.0\textwidth]{docu/plots/nelder_mead_h_alpha_effective_time_grid_1.png}
         \caption{Number of iterations $N$ and effective Lindbladian evolution time $2T\alpha^2\cdot N$.}
     \label{fig:nm_alphaT}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.5\textwidth}
         \centering
-       \includegraphics[width=1.00\textwidth, trim={0 0 0 0.7cm},
-        clip]{docu/plots/nelder_mead_h_omega_max_sigma_grid_6.png}
+       \includegraphics[width=1.00\textwidth]{docu/plots/nelder_mead_h_omega_max_sigma_grid_6.png}
         \caption{Frequency cutoff $\omega_{\rm max}$ and temporal width $\sigma$.}
         \label{fig:nm_sigma}
     \end{subfigure}
@@ -637,16 +631,14 @@ The two notions coincide only for real nonnegative subleading eigenvalues. By pe
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-      \includegraphics[width=1.0\textwidth,trim={0 0 0 0.9cm},
-        clip]{docu/plots/grid_alpha_Delta_sep_grid_1_keep.png}
+      \includegraphics[width=1.0\textwidth]{docu/plots/grid_alpha_Delta_sep_grid_1.png}
         \caption{Higher frequency cutoff $\omega_{\rm max}=4$ resulting in $\Delta \omega = 0.4$ and smaller spectral separation}
     \label{fig:nm_alphaT}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-       \includegraphics[width=1.00\textwidth, trim={0 0 0 0.9cm},
-        clip]{docu/plots/grid_alpha_Delta_sep_grid_3_keep.png}
+       \includegraphics[width=1.00\textwidth]{docu/plots/grid_alpha_Delta_sep_grid_15.png}
         \caption{Lower frequency cutoff $\omega_{\rm max}=2.5$ resulting in $\Delta \omega = 0.25$ and larger spectral separation}
         \label{fig:nm_sigma}
     \end{subfigure}
@@ -671,17 +663,15 @@ spectra indicates that the subleading eigenvalue $\lambda_2$ is positive and rea
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-      \includegraphics[width=1.0\textwidth,trim={0 0 0 0.65cm},
-        clip]{docu/plots/generator_full_channel_scaling.png}
+      \includegraphics[width=1.0\textwidth]{docu/plots/generator_full_channel_scaling.png}
         \caption{Dependence of spectral gap of full channel $\mathcal{E}$.}
     \label{fig:generator_prediction_full}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-       \includegraphics[width=1.00\textwidth, trim={0 0 0 0.65cm},
-        clip]{docu/plots/generator_population_sector_scaling.png}
-    \caption{Dependence of spectral gap of channel restricted to classical mixtures of $\bra{i}\ket{i}.$}    \label{fig:generator_prediction_population}
+       \includegraphics[width=1.00\textwidth]{docu/plots/generator_population_sector_scaling.png}
+    \caption{Dependence of spectral gap of channel restricted to classical mixtures of $\rho = \sum_i p_i \ket{i}\bra{i}.$}    \label{fig:generator_prediction_population}
     \end{subfigure}
     \caption{Ratio of channel gap $\Delta_{\rm gap}$ and minimal distance $\mu_{\rm min}$ of nonzero eigenvector to zero. The Lindbladian evolution $\mathcal{E}\approx e^{\alpha^2 \mathcal{M}}$ predicts a quadratic dependence. Plots for two values of $\sigma$ and three values of $h/J$ (ferromagnetic $0.4$, critical $1.0$ and paramagnetic $1.6$).}
     \label{fig:generator_prediction}
@@ -693,22 +683,14 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[
-            width=1.0\textwidth,
-            trim={0 0 0 0.6cm},
-            clip
-        ]{docu/plots/generator_signed_gap_residual.png}
+        \includegraphics[width=1.0\textwidth]{docu/plots/generator_signed_gap_residual.png}
         \caption{Parameter dependence of signed residuals of the generator gap-estimate for $\sigma=2$ and $\sigma=1$.}
         \label{fig:generator_signed_gap_residual}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[
-            width=1.0\textwidth,
-            trim={0 0 0 0.6cm},
-            clip
-        ]{docu/plots/generator_residual_sigma_ratio.png}
+       \includegraphics[width=1.0\textwidth]{docu/plots/generator_residual_sigma_ratio.png}
         \caption{Parameter dependence of residuals ratio from generator gap-estimate for $\sigma=2$ and $\sigma=1$.}
         \label{fig:generator_residual_ratio}
     \end{subfigure}
@@ -720,16 +702,14 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-      \includegraphics[width=1.0\textwidth,trim={0 0 0 0.65cm},
-        clip]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_1.png}
+      \includegraphics[width=1.0\textwidth]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_1.png}
         \caption{Approximation of the full channel spectral gap by the generator gap.}
     \label{fig:sinc_fit_sigma1}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-       \includegraphics[width=1.00\textwidth, trim={0 0 0 0.65cm},
-        clip]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_2.png}
+       \includegraphics[width=1.00\textwidth]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_2.png}
         \caption{Approximation of the population-sector spectral gap by the generator gap.}
         \label{fig:sinc_fit_sigma2}
     \end{subfigure}
@@ -765,14 +745,14 @@ in the subspace of the two leading channel eigenstates also off resonance.
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1.00\textwidth, trim={0 0 0 0.8cm}, clip]
+        \includegraphics[width=1.00\textwidth]
         {docu/plots/grid_sigma_num_iterations_grid_1.png}
         \caption{Number of iterations.}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1.00\textwidth, trim={0 0 0 0.8cm}, clip]
+        \includegraphics[width=1.00\textwidth]
         {docu/plots/grid_sigma_trace_distance_grid_1.png}
         \caption{Trace distance to the Gibbs state.}
     \end{subfigure}
@@ -843,7 +823,7 @@ not yet allow to establish a scaling with $N$.
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-        \includegraphics[width=1.00\textwidth, trim={0 0 0 0.8cm}, clip]
+        \includegraphics[width=1.00\textwidth,]
         {docu/plots/grid_alpha_trace_distance_grid_15.png}
         \caption{$N=4$ spins.}
     \end{subfigure}
