@@ -589,7 +589,7 @@ Using the Nelder-Mead method, we performed %have run
 a gradient-free minimization in order to determine the number of necessary iterations across the parameter space, with a threshold of $\varepsilon = 0.05$ to the Gibbs state. This optimization handily surpasses %beats %handily 
 every sweep parameter choice, where the improvement is more pronounced %larger 
 in the paramagnetic regime than in the ferromagnetic one. %regime. 
-Interestingly, it turns out that the optimal coupling strength $\alpha$ is not at weak coupling but around $0.5-0.6$, see \cref{fig:nm_alphaT}. \SA{what about Fig. 6?} The $\omega_{\rm max}$ cutoff values that lead to minimal iteration count are surprisingly small at only roughly %approximate 
+Interestingly, it turns out that the optimal coupling strength $\alpha$ is not at weak coupling but around $0.5-0.6$, see \cref{fig:nm_alphaT}. The $\omega_{\rm max}$ cutoff values that lead to minimal iteration count are surprisingly small at only roughly %approximate 
 half the bandwidth of the system. The temporal width is almost constant $\sigma \approx 2$. The small variance of these parameters across $h/J$ may be taken as indication that the iterations count is barely affected by their choice and that the specific %particular 
 values originate more from the warm start of the algorithm (taking the optimal parameters of the previous run as starting parameters of the next run). %than signifying an exact minimum.
 
@@ -600,14 +600,14 @@ In conclusion: the $h$-sweep eludes to the main trade-off in the numerics very c
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-      \includegraphics[width=1.0\textwidth]{docu/plots/nelder_mead_h_alpha_effective_time_grid_1.png}
+      \includegraphics[width=1.0\textwidth, trim={0 0 0 0.8cm}, clip]{docu/plots/nelder_mead_h_alpha_effective_time_grid_1.png}
         \caption{Number of iterations $N$ and effective Lindbladian evolution time $2T\alpha^2\cdot N$.}
     \label{fig:nm_alphaT}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.5\textwidth}
         \centering
-       \includegraphics[width=1.00\textwidth]{docu/plots/nelder_mead_h_omega_max_sigma_grid_6.png}
+     \includegraphics[width=1.0\textwidth, trim={0 0 0 0.8cm}, clip]{docu/plots/nelder_mead_h_omega_max_sigma_grid_6.png}
         \caption{Frequency cutoff $\omega_{\rm max}$ and temporal width $\sigma$.}
         \label{fig:nm_sigma}
     \end{subfigure}
@@ -633,14 +633,14 @@ The two notions coincide only for real nonnegative subleading eigenvalues. By pe
         \centering
       \includegraphics[width=1.0\textwidth]{docu/plots/grid_alpha_Delta_sep_grid_1.png}
         \caption{Higher frequency cutoff $\omega_{\rm max}=4$ resulting in $\Delta \omega = 0.4$ and smaller spectral separation}
-    \label{fig:nm_alphaT}
+    \label{fig:delta_omega_sep_high}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
        \includegraphics[width=1.00\textwidth]{docu/plots/grid_alpha_Delta_sep_grid_15.png}
         \caption{Lower frequency cutoff $\omega_{\rm max}=2.5$ resulting in $\Delta \omega = 0.25$ and larger spectral separation}
-        \label{fig:nm_sigma}
+        \label{fig:delta_omega_sep_low}
     \end{subfigure}
     \caption{Spectral separation $\Delta_{\rm sep}$ of the averaged TFIM cooling channel for $N=4$, $\beta=1$, $\sigma=2$, for different coupling strengths $\alpha$ and frequency resolutions. The optimized configuration (NM) is given for comparison.}
     \label{fig:spectral_gap_omega}
@@ -649,9 +649,9 @@ The two notions coincide only for real nonnegative subleading eigenvalues. By pe
 In \cref{fig:spectral_gap_omega} we can see that the spectral gap in general increases with the coupling strength $\alpha$. Increasing the frequency resolution (by lowering $\omega_{\max}$) also increases the gap. However, $\omega_{\max}$ should not be smaller than the system's bandwidth. Interestingly the spectral gap is not uniform across the $h/J$-sweep but is reduced both in the highly ferro- and paramagnetic regimes. 
 
 For the considered %shown 
-parameters %values 
-we computed the full spectra: here $\Delta_{\mathrm{sep}}=\Delta_{\mathrm{gap}}$ up to numerical precision, showing that this quantity directly correlates to the dominating decaying mode and is thus directly connected %relates 
-to the relaxation time towards the channel fixed-point. \SA{to waht exactly does this refer to?}
+parameter grid of 10 $h/J$ values for $N=4$ spins and different coupling strenghts $\alpha$ and temporal widths $\sigma$
+we computed the full spectra: here $\Delta_{\mathrm{sep}}=\Delta_{\mathrm{gap}}$ up to numerical precision. This shows that for for these parameters the spectral separation is a direct measure of slowest decay mode $\lambda_2^n$ and thus is directly connected %relates 
+to the relaxation time towards the channel fixed-point.
 %
 In particular, the calculation of the smallest finite eigenvalue $\mu_{\rm min}$ of the Lindbladian population transition matrix $(t)_{ij}$ is related to the eigenvalue $1+\alpha^2 \mu_{\rm min}$ of the restriction of $\mathcal{E}$ to classical mixtures $\displaystyle \sum p_i \ket{i}\bra{i}$ in the $H_0$ eigenbasis. Noting that $\mu_{\rm min}<0$ for decaying modes of $\mathcal{E}$, %therefore 
 the closeness of $\Delta_{\mathrm{sep}}$ and $\alpha^2 |\mu_{\rm min}|$ is an indication that the Lindbladian approximation is accurate with respect to the slowest decaying mode near the fixed point.
@@ -702,14 +702,15 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
     \centering
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-      \includegraphics[width=1.0\textwidth]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_1.png}
+      \includegraphics[width=1.0\textwidth]
+      {docu/plots/grid_generator_extrapolation_grid_10_h_0.4_sigma_1.png}
         \caption{Approximation of the full channel spectral gap by the generator gap.}
     \label{fig:sinc_fit_sigma1}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
-       \includegraphics[width=1.00\textwidth]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_2.png}
+       \includegraphics[width=1.00\textwidth]{docu/plots/grid_generator_extrapolation_grid_10_h_0.4_sigma_2.png}
         \caption{Approximation of the population-sector spectral gap by the generator gap.}
         \label{fig:sinc_fit_sigma2}
     \end{subfigure}
