@@ -41,7 +41,7 @@
 \usepackage{subcaption}
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{tabularx}
+\usepackage{float}
 
 
 % Code listings
@@ -93,7 +93,7 @@ Algorithms for Quantum State Preparation}
 
 \maketitle
 \begin{abstract}
-We numerically study a bath-assisted quantum cooling channel for finite transverse field Ising models with $N=4$–$8$ spins. The channel is implemented by simulating the system–bath evolution with a two-level thermal ancilla, followed by ancilla reset, and is averaged over local Pauli coupling operators and bath frequencies as suggested in %following the work of 
+We numerically study a bath-assisted quantum cooling channel for finite transverse field Ising models with $N=4$–$6$ spins. The channel is implemented by simulating the system–bath evolution with a two-level thermal ancilla, followed by ancilla reset, and is averaged over local Pauli coupling operators and bath frequencies as suggested in %following the work of 
 \citet{ding2025}. Using exact diagonalization, we compute the channel fixed point and compare it with the exact Gibbs state. %For the parameter regimes investigated, increasing the coupling strength generally reduces the number of channel iterations required for convergence but increases the fixed-point error relative to the Gibbs state. Intermediate coupling strengths provide a favorable empirical compromise between these effects.
 %
 %In this work we numerically investigate the cooling channel for finite transverse-field Ising models, including parameter regimes beyond the weak-coupling regime of the original analysis. We find evidence that stronger coupling can maintain a fixed point close to the thermal state while requiring far fewer iterations than in the weak-coupling regime. 
@@ -378,7 +378,7 @@ this may serve as numerical benchmark on how close the Lindbladian approximation
 \end{align}
 Thus expanding \cref{eq:transition_rates} in powers of $\sigma$ implies that 
 \begin{align}\label{eq:pt_expansion}
-    \frac{p_{i\leftarrow j}}{t_{i\leftarrow j}}= c(\omega_{\rm max}, \mathcal{A})\cdot \alpha^2 \sigma + o(\alpha^2 \sigma)&&(i\neq j). 
+    \frac{p_{i\leftarrow j}}{t_{i\leftarrow j}}= c(\omega_{\rm max}, \mathcal{A})\cdot \alpha^2  + o(\alpha^2 )&&(i\neq j). 
 \end{align}
 
 
@@ -428,7 +428,7 @@ U =
 \begin{pmatrix}
 U_{00} & U_{01} \\
 U_{10} & U_{11} 
-\end{pmatrix}= \sum_{i,j}\otimes U_{ij} \ket{i}_{b} \bra{j}_{b},
+\end{pmatrix}= \sum_{i,j}\ U_{ij} \otimes\ket{i}_{b} \bra{j}_{b},
 \end{align}
 where $U_{ij} = \bra{i}_{b} U  \ket{j}_{b}$ is an operator $\mathcal{H}_0 \to \mathcal{H}_0$, i.e. a $2^N \times 2^N$ matrix. Applying $U\rho U^{\dagger}$ to a density matrix of the form $\rho = \rho_0 \otimes \sum_{k} p_k  \ket{k}_{b}\bra{k}_{b}$, we get
 \begin{align}\label{eq:kraus_for_bath}
@@ -497,17 +497,16 @@ up to order $O(k^{-2})$. Thus the number of individual contributions for a Hamil
 
 \section{Numerical Experiments}
 
-In this section, we numerically investigate the cooling channel and its dependence on the relevant model and channel parameters. We first consider a range of transverse-field ratios $h/J$, examining the convergence rate, the accuracy of the fixed point, and the spectrum for different coupling strengths. This sweep also includes a comparison between the dynamics of the exact channel and the corresponding Lindbladian approximation. We then study the dependence on the remaining channel parameters, $\sigma$ and $\beta$ and use these results to discuss the main numerical trade-offs. We mostly use $N=4$ spins, only for the discussion of the system size dependence we additionally rely on $N=6$ and $N=8$ results. %datapoints.
+In this section, we numerically investigate the cooling channel and its dependence on the relevant model and channel parameters. We first consider a range of transverse-field ratios $h/J$, examining the convergence rate, the accuracy of the fixed point, and the spectrum for different coupling strengths. This sweep also includes a comparison between the dynamics of the exact channel and the corresponding Lindbladian approximation. We then study the dependence on the remaining channel parameters, $\sigma$ and $\beta$ and use these results to discuss the main numerical trade-offs. We mostly use $N=4$ spins, only for the discussion of the system size dependence we additionally rely on $N=6$ results. %datapoints.
 
 %\SA{maybe add short paragraph on structure of results section in order to guide the reader through it}
 \subsection{Model and channel parameters}
 
 
-As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. Normalization here serves also an numerical purpose: would we not normalize, either the energy scale for larger $h/J$ would meaningful exceed $[0, \omega_{\rm max}]$ or $\omega_{\rm max}$ would have to be adjusted to accommodate also those large energies, resulting in an artificially coarse frequency spacing $\Delta \omega$, that would distort results for smaller $h/J$.
-
-
+As first numerical experiment we study how the cooling channel behaves as the transverse field of the TFIM is varied. We sweep the ratio $h/J$ from the ferromagnetic regime $h/J<1$, through the critical region around $h/J=1$, into the paramagnetic regime $h/J>1$. To avoid changing the overall energy scale of the system simultaneously, $J$ and $h$ are normalized according to \cref{eq:JHnormalization}. The normalization here serves also a numerical purpose: would we not normalize, either the energy scale for larger $h/J$ would meaningful exceed $[0, \omega_{\rm max}]$ or $\omega_{\rm max}$ would have to be adjusted to accommodate also those large energies, resulting in an artificially coarse frequency spacing $\Delta \omega$, that would distort results for smaller $h/J$.
+%
 For each ratio $h/J$ %-value 
-of the sweep the averaged cooling channel $\mathcal{E}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare five different coupling strengths $\alpha=0.25,0.5,0.75,1.0$ and $1.5$, while all remaining parameters of the cooling channel are kept fixed:
+of the sweep the averaged cooling channel $\mathcal{E}$ is constructed explicitly according to \cref{eq:avg_channel}. Its fixed point $\rho^*$ is obtained from the eigenvector corresponding to the eigenvalue $\lambda=1$. We compare five different coupling strengths $\alpha=0.25$, $0.5$, $0.75$, $1.0$, and $1.5$, while all remaining parameters of the cooling channel are kept fixed:
 $T=25$ with $\tau = 0.1$ (i.e. $500$ sub-steps per Trotterization), $\sigma = 2$ ensuring that the temporal window $[-T,T]$ is large compared to $\sigma$. The frequency cutoff is chosen well above the systems bandwidth at $\omega_{\max}=4$ and the inverse temperature is set to $\beta=1$.
 
 Starting from the pure state $\rho_0=\ket{0000}\bra{0000}$, we iterate until 
@@ -543,10 +542,10 @@ When given a specific Hamiltonian, a desired temperature, and an $\epsilon$ targ
     \label{fig:num_iterations}
 \end{figure}
 
-\SA{Maybe add brief description of what is shown in the fig. (1-2 sentences) before discussing it} In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\varepsilon$ close to the fixed point decreases almost monotonically with $h/J$, which implies that %meaning 
-convergence is reached faster in the paramagnetic regime than in the ferromagnetic regime. In particular, there seems to be nothing special about the critical region $h/J\approx 1$. \SA{logic connection to previous statement unclear} It should be noted, that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems. \SA{even if not normalized, the qualitative outcome is unchanged, right?}
-
-At the same time we observe a quite different qualitative behavior for the five tested coupling strengths $\alpha = 0.25-1.5$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional dpendence %relationship 
+In \cref{fig:num_iterations} we see that the number of iterations necessary to get $\varepsilon$ close to the fixed point decreases almost monotonically with $h/J$, which implies that %meaning 
+convergence is reached faster in the paramagnetic regime than in the ferromagnetic regime. In particular, there seems to be nothing special about the critical region $h/J\approx 1$. (Note that the Hamiltonians are all normalized according to \cref{eq:JHnormalization} in order to avoid different energy scales of the systems.)
+%
+At the same time we observe a quite different qualitative behavior for the five tested coupling strengths $\alpha = 0.25-1.5$. While in general the number of necessary iterations decreases for larger $\alpha$, the functional dependence %relationship 
 changes significantly. The smallest $\alpha=0.25$ exhibits an almost exponential decay with respect to $h/J$ (linear in the semi-logarithmic plot \cref{fig:num_iterations_omega4}) whereas $\alpha \ge 0.75$ display a clearly nonlinear dependence approaching a constant baseline. $\alpha=0.5$ is qualitatively closer to the linear case, but seems to have different slopes in the para- resp. ferromagnetic region, see \cref{fig:iterations_fitted}.
 
 The number of iterations required to reach the fixed point %closeness 
@@ -575,9 +574,8 @@ onwards. Qualitatively, a transition from log-linear to nonlinear takes place fo
 \end{figure}
 
 
-It is important to keep in mind that the fixed point of a given channel is not necessarily the desired Gibbs state, thus it is necessary to quantify this distance first. \SA{Uebergang zum naechsten Satz/Punkt verbessern} 
+It is important to keep in mind that the fixed point of a given channel is not necessarily the desired Gibbs state, thus it is necessary to quantify this distance first. 
 \cref{fig:trace_distance_to_gibbs_omega4} validates the convergence of the implemented cooling against the exact thermal state. Here we clearly see a tradeoff between convergence speed and accuracy: convergents for small $\alpha$ channels stay closer to the desired target state than convergents for larger $\alpha$. In the concrete numeric experiment only $\alpha = 0.25$ and $\alpha =0.5$ guarantee a $2\varepsilon$-closeness of the cooled state to the Gibbs state. We also see a different qualitative behavior for small and large values of $\alpha$ with respect to the parameter $h/J$: small $\alpha$ need fewer iterations the farther we are in the paramagnetic region, while large $\alpha$ require more iterations.
-\SA{mention nonmonotonicity?}
 
 \begin{figure}[htbp]
     \centering
@@ -592,10 +590,12 @@ It is important to keep in mind that the fixed point of a given channel is not n
 
 
 Using the Nelder-Mead method, we performed %have run 
-a gradient-free minimization in order to determine the number of necessary iterations across the parameter space, with a threshold of $\varepsilon = 0.05$ to the Gibbs state. This optimization handily beats %handily 
+a gradient-free minimization in order to determine the number of necessary iterations across the parameter space, with a threshold of $\varepsilon = 0.05$ to the Gibbs state. This optimization handily surpasses %beats %handily 
 every sweep parameter choice, where the improvement is more pronounced %larger 
 in the paramagnetic regime than in the ferromagnetic one. %regime. 
-Interestingly, it turns out that the optimal coupling strength $\alpha$ is not at weak coupling but around $0.5-0.6$, see \cref{fig:nm_alphaT}. The $\omega_{\rm max}$ cutoff-values that lead to minimal iteration count are surprisingly small at only approximate half the bandwidth of the system. The temporal width is almost constant $\sigma \approx 2$. The small variance of these parameters across $h/J$ may be taken as indication that the iterations count only depends weakly on them and that the particular values originate more from the warm start of the algorithm (taking the optimal parameters of the previous run as starting parameters of the next run) than signifying an exact minimum.
+Interestingly, it turns out that the optimal coupling strength $\alpha$ is not at weak coupling but around $0.5-0.6$, see \cref{fig:nm_alphaT}. \SA{what about Fig. 6?} The $\omega_{\rm max}$ cutoff values that lead to minimal iteration count are surprisingly small at only roughly %approximate 
+half the bandwidth of the system. The temporal width is almost constant $\sigma \approx 2$. The small variance of these parameters across $h/J$ may be taken as indication that the iterations count is barely affected by their choice and that the specific %particular 
+values originate more from the warm start of the algorithm (taking the optimal parameters of the previous run as starting parameters of the next run). %than signifying an exact minimum.
 
 In conclusion: the $h$-sweep eludes to the main trade-off in the numerics very clearly: the weak-coupling regime results in the most accurate approximation of the Gibbs state, but at the cost of many channel iterations. At intermediate coupling strengths, one can lower the iteration count significantly while still keeping the fixed-point error relatively small.
 
@@ -617,7 +617,7 @@ In conclusion: the $h$-sweep eludes to the main trade-off in the numerics very c
         \caption{Frequency cutoff $\omega_{\rm max}$ and temporal width $\sigma$.}
         \label{fig:nm_sigma}
     \end{subfigure}
-    \caption{Parameters for Nelder-Mead optimized channels with up to $100$ iterations for each $h/J$ point and until $\varepsilon=0.05$ closeness to $\rho_{\rm \beta}$ is established. Sweep was performed from smaller to larger $h/J$ and parameters of the optimizer of the previous point were used as initial parameters for the next point.}
+    \caption{Parameters for Nelder-Mead optimized channels with up to $100$ iterations for each $h/J$ point and until $\varepsilon=0.05$ closeness to $\rho_{\rm \beta}$ is established. The sweep was performed from smaller to larger $h/J$ and parameters of the optimizer of the previous point were used as initial parameters for the next point.}
     \label{fig:nm_omega4}
 \end{figure}
 
@@ -628,9 +628,9 @@ In order to study the spectral properties of the channel with respect to its fix
     \Delta_{\mathrm{sep}} = \min_{\lambda\neq 1}|1-\lambda|.
 \end{align} Note that \cref{eq:spectral_separation} is in general different from the spectral \emph{gap}
 \begin{align}\label{eq:spectral_gap}
-    \Delta_{\mathrm{gap}} = 1- \max_{\lambda\neq 1}|\lambda|\le \Delta_{\mathrm{sep}},
+    \Delta_{\mathrm{gap}} = 1- \max_{\lambda\neq 1}|\lambda|\le \Delta_{\mathrm{sep}}.
 \end{align}
-only for real nonnegative subleading eigenvalue the two notions coincide. By perturbative arguments we know that - at least in the weak-coupling regime - the channel is guaranteed to have an almost thermal fixed point. For this reason we are mostly interested in the local behavior around this fixed point rather than in the global gap. 
+The two notions coincide only for real nonnegative subleading eigenvalues. By perturbative arguments we know that - at least in the weak-coupling regime - the channel is guaranteed to have an almost thermal fixed point, cf. \citet[Theorem 9]{ding2025}. For this reason we are mostly interested in the local behavior around this fixed point rather than in the global gap. 
 
 
 \begin{figure}[htbp]
@@ -650,20 +650,22 @@ only for real nonnegative subleading eigenvalue the two notions coincide. By per
         \caption{Lower frequency cutoff $\omega_{\rm max}=2.5$ resulting in $\Delta \omega = 0.25$ and larger spectral separation}
         \label{fig:nm_sigma}
     \end{subfigure}
-    \caption{Spectral separation $\Delta_{\rm sep}$ of the averaged TFIM cooling channel for $N=4$, $\beta=1$, $\sigma=2$ for different coupling strengths $\alpha$ and frequency resolutions. Optimized configuration (NM) is given for comparison.}
+    \caption{Spectral separation $\Delta_{\rm sep}$ of the averaged TFIM cooling channel for $N=4$, $\beta=1$, $\sigma=2$, for different coupling strengths $\alpha$ and frequency resolutions. The optimized configuration (NM) is given for comparison.}
     \label{fig:spectral_gap_omega}
 \end{figure}
 
 In \cref{fig:spectral_gap_omega} we can see that the spectral gap in general increases with the coupling strength $\alpha$. Increasing the frequency resolution (by lowering $\omega_{\max}$) also increases the gap. However, $\omega_{\max}$ should not be smaller than the system's bandwidth. Interestingly the spectral gap is not uniform across the $h/J$-sweep but is reduced both in the highly ferro- and paramagnetic regimes. 
 
-For the shown parameter values the full spectra were computed: here $\Delta_{\mathrm{sep}}=\Delta_{\mathrm{gap}}$ up to numerical precision, showing that this quantity directly correlates to the dominating decaying mode and thus directly relates to the relaxation time towards the channel fixed-point. 
-
-
-
-In particular, the calculation of the smallest finite eigenvalue $\mu_{\rm min}$ of the Lindbladian population transition matrix $(t)_{ij}$ is related to the eigenvalue $1+\alpha^2 \mu_{\rm min}$ of the restriction of $\mathcal{E}$ to classical mixtures $\displaystyle \sum p_i \ket{i}\bra{i}$ in the $H_0$ eigenbasis. Noting that $\mu_{\rm min}<0$ for decaying modes of $\mathcal{E}$, therefore the closeness of $\Delta_{\mathrm{sep}}$ and $\alpha^2 |\mu_{\rm min}|$ is an indication that the Lindbladian approximation is accurate with respect to the slowest decaying mode near the fixed point.
+For the considered %shown 
+parameters %values 
+we computed the full spectra: here $\Delta_{\mathrm{sep}}=\Delta_{\mathrm{gap}}$ up to numerical precision, showing that this quantity directly correlates to the dominating decaying mode and is thus directly connected %relates 
+to the relaxation time towards the channel fixed-point. \SA{to waht exactly does this refer to?}
+%
+In particular, the calculation of the smallest finite eigenvalue $\mu_{\rm min}$ of the Lindbladian population transition matrix $(t)_{ij}$ is related to the eigenvalue $1+\alpha^2 \mu_{\rm min}$ of the restriction of $\mathcal{E}$ to classical mixtures $\displaystyle \sum p_i \ket{i}\bra{i}$ in the $H_0$ eigenbasis. Noting that $\mu_{\rm min}<0$ for decaying modes of $\mathcal{E}$, %therefore 
+the closeness of $\Delta_{\mathrm{sep}}$ and $\alpha^2 |\mu_{\rm min}|$ is an indication that the Lindbladian approximation is accurate with respect to the slowest decaying mode near the fixed point.
 The further %Additionally 
 numerical inspection of the %explicit 
-spectra indicate the subleading eigenvalue $\lambda_2$ being positive and real, such that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ represents a sensible working hypothesis for our experimental runs.
+spectra indicates that the subleading eigenvalue $\lambda_2$ is positive and real, such that $\Delta_{\mathrm{sep}} \approx \Delta_{\mathrm{gap}}$ represents a sensible working hypothesis for our experimental runs.
 
 \begin{figure}[htbp]
     \centering
@@ -681,11 +683,11 @@ spectra indicate the subleading eigenvalue $\lambda_2$ being positive and real, 
         clip]{docu/plots/generator_population_sector_scaling.png}
     \caption{Dependence of spectral gap of channel restricted to classical mixtures of $\bra{i}\ket{i}.$}    \label{fig:generator_prediction_population}
     \end{subfigure}
-    \caption{Ratio of channel gap $\Delta_{\rm gap}$ and minimal distance $\mu_{\rm min}$ of nonzero eigenvector to zero. Lindbladian evolution $\mathcal{E}\approx e^{\alpha^2 \mathcal{M}}$ predicts quadratic dependence. Plots for two values of $\sigma$ and three values of $h/J$ (ferromagnetic $0.4$, critical $1.0$ and paramagnetic $1.6$).}
+    \caption{Ratio of channel gap $\Delta_{\rm gap}$ and minimal distance $\mu_{\rm min}$ of nonzero eigenvector to zero. The Lindbladian evolution $\mathcal{E}\approx e^{\alpha^2 \mathcal{M}}$ predicts a quadratic dependence. Plots for two values of $\sigma$ and three values of $h/J$ (ferromagnetic $0.4$, critical $1.0$ and paramagnetic $1.6$).}
     \label{fig:generator_prediction}
 \end{figure}
 
-In \cref{fig:generator_prediction} we compare the gap predicted by the generator via Lindbladian approximation both for the full channel $\mathcal{E}$ as well as for the restriction to the population sector. We see good agreement up to medium coupling strengths of around $\alpha = 0.4$. For larger coupling strengths the deviation is considerable, but interestingly also differs qualitatively from a purely quadratic behavior insofar, as there are non-monotonic effects visible. 
+In \cref{fig:generator_prediction} we compare the gap predicted by the generator via Lindbladian approximation both for the full channel $\mathcal{E}$ as well as for the restriction to the population sector. We find a good agreement up to medium coupling strengths of around $\alpha = 0.4$. For larger coupling strengths the deviation is considerable, but interestingly also differs qualitatively from a purely quadratic behavior insofar, as there are visible non monotonic effects. 
 
 \begin{figure}[H]
     \centering
@@ -711,7 +713,7 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
         \label{fig:generator_residual_ratio}
     \end{subfigure}
 
-    \caption{Deviations of population-sector channel gap $\Delta_{\rm gap}$ from the second-order $\alpha^2$ generator approximation. Plots for two values of $\sigma$ and three values of $h/J$ (ferromagnetic $0.4$, critical $1.0$ and paramagnetic $1.6$). }
+    \caption{Deviations of population-sector channel gap $\Delta_{\rm gap}$ from the second-order $\alpha^2$ generator approximation. Results for two values of $\sigma$ and three values of $h/J$ (ferromagnetic $0.4$, critical $1.0$ and paramagnetic $1.6$) are shown. }
     \label{fig:generator_residual_comparison}
 \end{figure}
 \begin{figure}[H]
@@ -720,7 +722,7 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
         \centering
       \includegraphics[width=1.0\textwidth,trim={0 0 0 0.65cm},
         clip]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_1.png}
-        \caption{Approximation of full channel spectral gap by generator gap.}
+        \caption{Approximation of the full channel spectral gap by the generator gap.}
     \label{fig:sinc_fit_sigma1}
     \end{subfigure}
     \hfill
@@ -728,31 +730,34 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
         \centering
        \includegraphics[width=1.00\textwidth, trim={0 0 0 0.65cm},
         clip]{docu/plots/grid_generator_extrapolation_grid_10_h_04_sigma_2.png}
-        \caption{Approximation of population-sector spectral gap by generator gap.}
+        \caption{Approximation of the population-sector spectral gap by the generator gap.}
         \label{fig:sinc_fit_sigma2}
     \end{subfigure}
-    \caption{Dependence of ratio of actual estimated spectral gap on $\theta \propto \alpha \sqrt{\sigma}$. Comparison of $\rm sinc^2$ model and forth order polynomic model. Fitted for values $\theta<0.5$ and validated for $\theta \ge 0.5$ }
+    \caption{Dependence of the ratio of the actual estimated spectral gap on $\theta \propto \alpha \sqrt{\sigma}$. Comparison of the $\rm sinc^2$ model and forth order polynomic model. Fitted for values $\theta<0.5$ and validated for $\theta \ge 0.5$ }
     \label{fig:sinc_model}
 \end{figure}
 
 
-In \cref{fig:generator_residual_comparison} we can better resolve the dependency on temporal width and Hamiltonian parameter $h/J$. \cref{eq:pt_expansion} suggests that the ratio of the residues scale linearly with $\sigma$, however \cref{fig:generator_residual_ratio}  shows that while $R_{\sigma = 2}/R_{\sigma = 2} >1$, it both depends on $\alpha$ and $h/J,$ finite size effects and coarse frequency resolution being likely causes for this behavior.   
+In \cref{fig:generator_residual_comparison} we can better resolve the dependence on the temporal width and Hamiltonian parameter $h/J$. The ratio of the residues scales nonlinearly with $\alpha$ and also depends nontrivially on the regime $h/J,$, cf. \cref{fig:generator_residual_ratio}. However, when analyzing this behavior, finite size effects and coarse frequency resolution have also to be taken into account.
 
 
-In  we can already see a non-monotonic behavior. In  we extrapolate the data both with a $\rm sinc$ model and a standard fourth order polynomial expansion. A few comments are in order. On resonance, i.e. for $E_j-E_i=-\omega$, the interaction Hamiltonian \cref{eq:interaction_hamiltonian} is 
+In \cref{fig:generator_prediction} we can already see a nonmonotonic behavior. In \cref{fig:sinc_model} we extrapolate the data both with a $\rm sinc$ model and a standard fourth order polynomial expansion. A few comments are in order. On resonance, i.e. for $E_j-E_i=-\omega$, the interaction Hamiltonian \cref{eq:interaction_hamiltonian} is 
 \begin{align}
    H_I \approx \alpha \int_{-T}^T dt f(t)\, \left(\braket{i|A|j} \ket{i,1}\bra{j,0}+\braket{j|A|i}\ket{j,0}\bra{i,1}\right) ,
 \end{align}
-i.e. proportional to Pauli $\sigma_x$ in the two-dimensional subspace spanned by the product states $\ket{i,1}$ and  $\ket{j,0}$. The constant of proportionality for $T\gg 1$ is approximately 
+i.e. proportional to %Pauli 
+$\sigma_x$ in the two-dimensional subspace spanned by the product states $\ket{i,1}$ and  $\ket{j,0}$. %The proportionality constant 
+For $T\gg 1$ holds approximately 
 \begin{align}
-   \theta:= |\braket{i|A|j}| \cdot \alpha \sqrt[4]{8\pi \sigma^2}
+   \theta:= |\braket{i|A|j}| \cdot \alpha \sqrt[4]{8\pi \sigma^2}\propto \alpha \sqrt{\sigma},
 \end{align} and
-the time evolution of this Hamiltonian is a Rabi-oscillation with $
-    p_{i\leftarrow j}^{\mathcal{E}} = \sin^2 \theta$. Comparing this with the expression $p_{i\leftarrow j}^{\mathcal{L}}$ for the Lindbladian generator from \cref{eq:pt_expansion}, we get 
+The time evolution of the corresponding Hamiltonian describes a Rabi-oscillation with $p_{i\leftarrow j}^{\mathcal{E}} = \sin^2 \theta$. 
+Comparing this with the expression $p_{i\leftarrow j}^{\mathcal{L}}$ for the Lindbladian generator from \cref{eq:pt_expansion}, we get 
 \begin{align}
     \frac{p_{i\leftarrow j}^{\mathcal{E}}}{p_{i\leftarrow j}^{\mathcal{L}}} \approx \frac{\sin^2 \theta}{\theta^2} = {\rm sinc}^2\, \theta.
 \end{align}
-Interestingly a similar phenomenology takes place in the subspace of the two leading channel eigenstates also off resonance.
+Interestingly, a similar phenomenology is observed %takes place 
+in the subspace of the two leading channel eigenstates also off resonance.
 
 
 \subsection{Filter width, temperature, and system-size dependence}
@@ -779,10 +784,11 @@ Interestingly a similar phenomenology takes place in the subspace of the two lea
     widths $\sigma$.}
     \label{fig:filter_width_dependence}
 \end{figure}
-In \cref{fig:filter_width_dependence} we compare the number of
+
+We finally compare the number of
 iterations necessary to reach the channel fixed point within an $\epsilon = 0.05$ neighborhood as well as the
 trace distance to the Gibbs state for different temporal widths
-$\sigma$. We see that larger $\sigma$ lead to a more accurate
+$\sigma$, see \cref{fig:filter_width_dependence}. We see that larger values of $\sigma$ lead to a more accurate
 approximation of the Gibbs state throughout the $h/J$-sweep.
 At the same time, the number of necessary iterations depends only
 weakly on $\sigma$, with larger widths requiring more iterations, in particular in the ferromagnetic regime.
@@ -816,7 +822,8 @@ weakly on $\sigma$, with larger widths requiring more iterations, in particular 
 In \cref{fig:temperature_dependence} we study the dependence on
 the inverse temperature $\beta$ for different coupling strengths
 $\alpha$. The number of necessary iterations first decreases,
-then increases and approaches a constant baseline for large
+then increases up to %approaches 
+a constant baseline for large
 $\beta$. The trace distance to the Gibbs state also exhibits
 a nonmonotonic dependence, with the largest deviations at
 intermediate $\beta$. Again, it is important to keep in mind
@@ -824,13 +831,13 @@ that convergence to the channel fixed point does not necessarily
 imply closeness to the desired Gibbs state.
 
 Finally, in \cref{fig:system_size_dependence} we compare the
-trace distance to the Gibbs state for $N=4$ and $N=6$ spins.
+trace distance to the Gibbs state for $N=4$ and $N=6$.
 For both system sizes we observe the same qualitative behavior:
 smaller coupling strengths result in fixed points closer to the
-desired thermal state. For the common coupling strengths and
+desired thermal state. For comparable coupling strengths and
 $h/J$ values, the deviations are somewhat larger for $N=6$.
 However, the comparison of these two system sizes alone does
-not yet establish a scaling with $N$.
+not yet allow to establish a scaling with $N$.
 
 \begin{figure}[htbp]
     \centering
@@ -857,7 +864,7 @@ not yet establish a scaling with $N$.
 \end{figure}
 
 \FloatBarrier
-\section{Conclusion}
+\section{Conclusion and Outlook}
 
 \FloatBarrier
 \section{Repository}
@@ -865,7 +872,7 @@ The code used for the numerical experiments is publicly available at \url{https:
 
 The main implementation is contained in \texttt{cooling\_channel.py},
 which constructs the TFIM Hamiltonian and the system--bath cooling
-circuit, and \texttt{superoperator.py}, which constructs the averaged
+circuit, and in \texttt{superoperator.py}, which constructs the averaged
 channel and computes its fixed point and spectral properties.
 The files \texttt{ed.py} and \texttt{ed.jl} provide exact-diagonalization
 and Gibbs-state reference calculations, while \texttt{path\_analysis.py}
@@ -875,7 +882,7 @@ using the \texttt{parallel\_*.py} scripts, and the
 
 The corresponding analysis is organized in Jupyter notebooks:
 \texttt{grid\_analysis.ipynb} and \texttt{sweep\_analysis.ipynb}
-evaluate parameter dependence, \texttt{generator\_analysis.ipynb}
+evaluate the parameter dependence, \texttt{generator\_analysis.ipynb}
 compares the channel with the generator approximation, and
 \texttt{bohr\_analysis.ipynb} examines the Bohr-frequency distribution.
 Numerical results are stored as \texttt{.npz} archives in
