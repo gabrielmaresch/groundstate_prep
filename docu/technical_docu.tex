@@ -124,7 +124,7 @@ One particularly important example of expectation values with respect to thermal
 %    \item[\qquad Particle density:] $n_i = - i G_{ii}^T(0^-)$
 %    \item[\qquad Self-energy:] $\Sigma(\omega) = G_0(\omega)^{-1}-%G(\omega)^{-1}$.
 %\end{description}
-It is therefore essential to have reasonably accurate approximations \SA{estimates?} of these thermal states resp. the ground state available, since due to dimensional blow-up exact computations are infeasible. There are several routes: %to obtain these approximations. 
+It is therefore essential to have reasonably accurate estimates of these thermal states resp. the ground state available, since due to dimensional blow-up exact computations are infeasible. There are several routes: %to obtain these approximations. 
 Among the most well-known are variational methods such as matrix product states, imaginary time evolution and adiabatic evolution. Another approach is
 to engineer a specific interaction with a bath, that effectively enforces thermalization at a given temperature. Such a dissipative system not only has the advantage of being implementable on a quantum computer or quantum simulator, but also allows for running times that for certain relevant systems are often merely polynomial in the system's parameters.  This route of using dissipation as an effective way to obtain the desired states is the object %content 
 of the present work. 
@@ -147,7 +147,7 @@ The specific %particular
 protocol of \citet{ding2025} has several advantages: the bath consists only of one qubit and convergence to the thermal state is obtained by repeated interaction with this bath. The protocol \cref{eq:qu_channel} is a quantum channel with the Gibbs state $\rho_{\beta}$ as an approximate fixed point: $\Lambda[\rho_{\beta}]\approx \rho_{\beta}$. The channel only relies on forward Hamiltonian resp. effective Lindbladian evolution in the perturbative regime of weak coupling. Although its dynamics are far richer than purely unitary evolution, it is amenable to numeric implementation.  Note that the last step in \cref{eq:qu_channel} will in general produce a density matrix rather than a pure state even if the initial state $\rho$ has been pure. Thus, if we think of repeated applications of this scheme, none of the involved states necessarily needs to  be pure as $\Lambda^n[\rho_0]\to \rho_{\rm fix}\approx \rho_{\beta}$. 
 
 
-We report the concrete implementation of the cooling scheme proposed in \citet{ding2025} using the \textsc{Pennylane framework} which follows the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian for small system sizes $N=4-8$, where exact diagonalization is available  and the thermal target states 
+We report the concrete implementation of the cooling scheme proposed in \citet{ding2025} using the \textsc{Pennylane framework} which follows the lines of \cref{eq:qu_channel} and validate it against a known system Hamiltonian, the transverse field Ising model (TFIM) Hamiltonian for small system sizes $N=4-6$, where exact diagonalization is available  and the thermal target states 
 \begin{align}\label{eq:gibbs_state}
 \rho_{\beta}= \frac{e^{-\beta H_0}}{{\rm Tr}\, e^{-\beta H_0}}
 \end{align}
@@ -167,6 +167,7 @@ This report is structured as follows: First, we introduce the theoretical backgr
 
 
 \section{Cooling as quantum operation}
+\subsection{System-bath interaction}
 The two-level system utilized as bath is fully described by its eigenenergies: here they are taken as $\pm\omega/2$, where $\omega>0$ is a frequency parameter. The fiducial state for the bath subsystem is the two-dimensional Gibbs-state $\rho_{\beta}\propto e^{\tfrac{\omega}{2}\beta Z }$.
 
 The basic building blocks for the coupling terms are of the form
@@ -177,6 +178,7 @@ each of which describes the physical process of transferring energy from the sys
 
 The term in \cref{eq:single_cooling_process} is multiplied with $\alpha f(t)$, where $\alpha >0$ is fixed and $f(t)$ a time-dependent coupling strength. We require $\int dt \, |f(t)|^2  = 1$, so $f(t)$ resp. its Fourier-transform $\hat{f}(\omega)$ should be thought of as frequency filter and is usually taken as square-root of a Gaussian $\mathcal{N}(0,\sigma^2)$. $\hat{f}(\omega)$ suppresses transitions from the system to the bath and vice versa that correspond to an allowed detuning of Bohr-frequencies from the bath frequency on a scale set by $1/\sigma$. Thus $H_{\rm int}(t) =  H_{\rm int}^{(\alpha, A, \sigma)}(t)$. 
 
+\subsection{Trotterization}
 For the time evolution a duration $T>0$ is fixed and the fiducial states are evolved from $-T$ to $T$. Note, that the negative times are not essential and could easily be avoided by redefining $f$. However, it is beneficial to preserve the symmetry of $f$ via $f(-t)=f(t)$ over the time interval $[-T,T]$: In this case also the Fourier transform $\hat{f}(\omega)$ is again real (and even) and thus allows for an easy interpretation as frequency filter-function. The full Hamiltonian %, however, 
 is now time dependent which makes the computation of the time-propagation more intricate:
 \begin{align}\label{eq:timedependent_H}
@@ -264,7 +266,7 @@ Let us quickly review the parameters we encountered so far:
     \begin{align}\label{eq:omega_distribution}
         g(\omega)=\frac{1}{\omega_{\max}}\mathbb{1}_{[0,\omega_{\max}]}(\omega).
     \end{align}
-    The cutoff has to be large enough to include the relevant Bohr frequencies of the system. A safe choice is the energy bandwidth $\omega_{\max}\geq  2 \|H\|\geq E_{\max}-E_{\min}$. In practice, however, it is not necessary to include \emph{all} but sufficiently many frequencies. Therefore a cutoff at the median transition frequency serves as a good starting point. It should be noted that a uniform distribution is merely convenient, but not necessarily the optimal choice.  In light of \cref{fig:bohr_bandwiths}, $\sigma=4$ is certainly safe for TFIM $N=4-8$, even when accounting for discretization artefacts.
+    The cutoff has to be large enough to include the relevant Bohr frequencies of the system. A safe choice is the energy bandwidth $\omega_{\max}\geq  2 \|H\|\geq E_{\max}-E_{\min}$. In practice, however, it is not necessary to include \emph{all} but sufficiently many frequencies. Therefore a cutoff at the median transition frequency serves as a good starting point. It should be noted that a uniform distribution is merely convenient, but not necessarily the optimal choice.  In light of \cref{fig:bohr_bandwiths}, $\sigma=4$ is certainly safe for TFIM $N=4-6$, even when accounting for discretization artefacts.
 
     
 \begin{figure}[h]
@@ -305,6 +307,7 @@ and $\mathcal{M}$ is the generator of a carefully constructed Lindbladian that p
 is valid, $\rho_{\beta}$ is an approximate fixed point of the cooling channel $\mathcal{E}[\cdot]$.  In \citet{ding2025} it 
 is proven that under certain conditions a matrix norm can be chosen such that $\mathcal{E}_{\mathcal{M}}$ is a contraction with respect to this norm, hence establishing uniqueness of the fixed point. However, uniqueness of the exact channel $\mathcal{E}$ does not necessarily follow.
 
+\subsection{Dyson expansion and dissipators}
 To construct the Lindbladian we first resolve the system-bath interaction in Bohr-frequency components with respect to the $H_0$ eigenbasis
 \begin{align}
 A = \sum_{\nu} \overbrace{\sum_{E_i-E_j = \nu} \bra{i}A\ket{j}\ket{i}\bra{j}}^{A_{\nu}}.
@@ -352,6 +355,7 @@ with
 \end{align}
 Note that $A$ always corresponds to the $\sigma_+$ factor and $A^{\dagger}$ to the $\sigma_-$ factor in  \cref{eq:single_cooling_process}. Also, along with the dissipators \cref{eq:dissipator,eq:dissipator_dagger} also imaginary contributions, the so-called Lamb-shift terms, arise. Since we are mainly interested in the dissipative processes of the quantum channel we don't follow this direction and instead refer to \citet[Appendix C]{ding2025}.
 
+\subsection{Transition rates}
 In particular, for $T\gg \sigma$ the matrix elements in the energy basis of $H_0$ can be approximated by extending the integration limits: 
 \begin{align}
     \bra{i} V(\omega) \ket{j}&= \sum_{\nu}\int_{-T}^Tdt  f(t)e^{i(\nu+\omega)t} \bra{i}A \ket{j} \delta_{E_i-E_j,\nu}=
@@ -489,7 +493,7 @@ In order to realize the averaged channel $\mathcal{E}[\cdot]$ numerically, we ap
 \mathcal{E} \approx
 \frac{1}{4N  k }\sum_{A\in\mathcal A} \sum_{i=1}^k \Lambda(A, \tfrac{2i-1}{2k}\omega_{\rm max}) 
 \end{align}
-up to order $O(k^{-2})$. Thus the number of individual contributions for a Hamiltonian on $N$ sites scales with $4N\,k$. To keep the computational demand affordable, we choose $k = 10$. For computing the average channel for $N=4,6,8$ we then have to run trajectories of length $160, 240$, and $320$ each. 
+up to order $O(k^{-2})$. Thus the number of individual contributions for a Hamiltonian on $N$ sites scales with $4N\,k$. To keep the computational demand affordable, we choose $k = 10$. For computing the average channel for $N=4,6$ we then have to run trajectories of length $160$ resp. $240$ each. 
 
 %  \item[number of channel iterations $n$] determines how long the cooling channel is applied. It does not affect the fixed point of the exact channel but determines how closely the iterated state approaches it. In the weak-coupling regime, one application corresponds approximately to a Lindbladian evolution time $\alpha^2$, so that the number of iterations required for a fixed effective evolution time scales approximately as $\alpha^{-2}$.
 %
@@ -677,7 +681,7 @@ spectra indicates that the subleading eigenvalue $\lambda_2$ is positive and rea
     \label{fig:generator_prediction}
 \end{figure}
 
-In \cref{fig:generator_prediction} we compare the gap predicted by the generator via Lindbladian approximation both for the full channel $\mathcal{E}$ as well as for the restriction to the population sector. We find a good agreement up to medium coupling strengths of around $\alpha = 0.4$. For larger coupling strengths the deviation is considerable, but interestingly also differs qualitatively from a purely quadratic behavior insofar, as there are visible non monotonic effects. 
+In \cref{fig:generator_prediction} we compare the gap predicted by the generator via Lindbladian approximation both for the full channel $\mathcal{E}$ as well as for the restriction to the population sector. We find a good agreement up to medium coupling strengths of around $\alpha = 0.4$. For larger coupling strengths the deviation is considerable, but interestingly also differs qualitatively from a purely quadratic behavior insofar, as there are visible nonmonotonic effects. 
 
 \begin{figure}[H]
     \centering
@@ -795,7 +799,7 @@ weakly on $\sigma$, with larger widths requiring more iterations, in particular 
     point and the Gibbs state for the TFIM cooling channel with
     $N=4$, $J=1$, $h=1.2$, and $\sigma=2$, for different coupling
     strengths $\alpha$ and inverse temperatures $\beta$.
-    Here the Hamiltonian is not normalized according to
+    Here the Hamiltonian is \emph{not} normalized according to
     \cref{eq:JHnormalization}.}
     \label{fig:temperature_dependence}
 \end{figure}
@@ -817,8 +821,7 @@ For both system sizes we observe the same qualitative behavior:
 smaller coupling strengths result in fixed points closer to the
 desired thermal state. For comparable coupling strengths and
 $h/J$ values, the deviations are somewhat larger for $N=6$.
-However, the comparison of these two system sizes alone does
-not yet allow to establish a scaling with $N$.
+However to establish the scaling behavior with $N$ more than two system sizes are needed.
 
 \begin{figure}[htbp]
     \centering
@@ -845,8 +848,26 @@ not yet allow to establish a scaling with $N$.
 \end{figure}
 
 \FloatBarrier
+
+
 \section{Conclusion and Outlook}
 
+The main feature that can be conclulded from the numerical experiments in this work is the trade-off between effective mixing time and correctness of the fixed point. This trade-off is most clearly controlled by the coupling strength $\alpha$. Weak coupling gives the most accurate approximation of the Gibbs state, but requires many channel iterations. Increasing $\alpha$ accelerates convergence considerably, while at the same time sacrificing closeness of the fixed point to the desired thermal state. For the finite systems considered here, intermediate coupling strengths therefore provide the most useful compromise. In particular, values around $\alpha\approx0.5-0.6$ which lie well outside the asymptotically weak-coupling regime give useful approximations.
+
+The spectral analysis of the associated quantum channels support these findings. In the weak-coupling regime the subleading channel eigenvalue are well described by a Lindbladian approximation Deviations become increasingly important for larger $\alpha$. The observed correction is nonlinear in $\alpha$ and also depends on $\sigma$ and on the Hamiltonian regime. A ${\rm sinc}^2$-model gives a useful empirical description of the investigated parameter range and can be well motivated for an isolated resonant transition. However, no corresponding derivation for the spectral gap of the full averaged channel has been obtained here.
+
+The remaining parameters show a less pronounced but still relevant influence on the convergence. Increasing $\sigma$ improves the fixed-point accuracy rather systematically, whereas the number of necessary iterations changes only moderately. The dependence on $\beta$ is nonmonotonic and shows again that fast convergence to the channel fixed point should not be identified with good approximation of the Gibbs state. The limited comparison between $N=4$ and $N=6$ shows the same qualitative dependence on $\alpha$, but does not allow for conclusions about scaling with system size.
+
+There are several knobs that have not been turned in this work. Most prominently this concerns the set of coupling operators $\mathcal{A}$. The numerical experiments were restricted to $\mathcal{A}_{XZ}=\{X_i,Z_i\}$,
+although other sets such as $\mathcal{A}_{XYZ}=\{X_i,Y_i,Z_i\}$
+and sets containing two-site operators have already been implemented. Since the coupling operators determine which transitions between energy eigenstates can be induced, it could prove worthwhile to investigate whether a different choice of $\mathcal{A}$ can improve the trade-off between mixing and fixed-point accuracy.
+
+Another obvious direction concerns the frequency average resp. its numerical approximation. In the present implementation the bath frequencies are sampled from a uniform distribution and the averaging integral is replaced by a finite midpoint quadrature. A first step would be to systematically increase the frequency resolution and test convergence of the observed quantities. Beyond that, non-uniform frequency distributions or quadrature rules adapted to the relevant Bohr frequencies may be advantageous. The same applies to the choice of  the filter function itself, which has not been varied apart from its width $\sigma$.
+
+Validation for larger spin chains is also worth considering. Explicit construction of the full superoperator becomes infeasible quickly because its dimension grows as $4^N$. Tensor-network methods, in particular MPS resp. MPO based simulations, could allow the channel dynamics to be studied for considerably larger systems. Even without access to the complete channel spectrum, convergence from selected initial states, thermal observables and the distance to an approximate target state could still be investigated. This would make it possible to test whether the parameter dependence found here survives beyond the very small system sizes accessible by exact diagonalization.
+
+A more speculative direction would be to use a machine learning approach resp. a neural network for parameter optimization. Instead of separately optimizing $\alpha$, $\sigma$, $\omega_{\rm max}$ and possibly properties of the frequency distribution for every Hamiltonian, one could try to learn suitable parameter choices from small training instances. Ideally, training on one particular class of Hamiltonians would generalize to related systems and, more importantly, to larger spin counts. It would be an interesting test of how universal the observed parameter dependencies actually are.
+\newpage
 \FloatBarrier
 \section{Repository}
 The code used for the numerical experiments is publicly available at \url{https://github.com/gabrielmaresch/groundstate_prep}.
@@ -897,6 +918,7 @@ and examples for running the calculations locally are provided in
 
 %\SA{please add journals where available (and keep preprints only if not published and provide links (DOIs)}
 \FloatBarrier
+\addcontentsline{toc}{section}{References}
 \bibliographystyle{plainnat}
 \bibliography{references}
 
