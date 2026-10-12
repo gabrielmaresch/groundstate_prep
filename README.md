@@ -18,6 +18,19 @@ towards a Gibbs state through trajectory and spectral diagnostics.
 The code is intended for exploratory research on small systems. It is not a
 general-purpose quantum-simulation library.
 
+## Technical report
+
+The report [*Cooling Algorithms for Quantum State Preparation*](docu/technical_docu.pdf)
+documents the theoretical background, circuit implementation, Kraus and
+superoperator representations, and numerical results for TFIM systems with
+`N = 4–6` spins. It examines fixed-point accuracy, convergence, channel spectra,
+and the dependence on coupling strength, filter width, temperature, and system
+size, including regimes beyond weak coupling. The results remain subject to
+finite-size, time-discretization, and frequency-quadrature effects.
+
+The [LaTeX source](docu/technical_docu.tex) and accompanying figures are in
+`docu/`.
+
 ## Installation
 
 The Python code requires Python 3.11+ and the dependencies listed in
@@ -130,6 +143,9 @@ python nelder_mead_beta_sweep.py --h 1.2 --beta-min 0.1 --beta-max 10 --beta-poi
 These workflows always use the dense spectrum and record the optimal
 parameters, convergence status, trace distance, and iteration count.
 
+`nelder_mead_normality.py` evaluates channel non-normality at saved h-sweep
+optima and adds the residuals to an existing grid-analysis archive.
+
 ## Repository guide
 
 - `cooling_channel.py` — cooling-channel and circuit construction.
@@ -139,16 +155,21 @@ parameters, convergence status, trace distance, and iteration count.
 - `parallel_*.py`, `nelder_mead_*.py` — batch sweeps and optimization runs.
 - `*_analysis.ipynb` — notebook-based analysis.
 - `data/` — generated numerical results.
-- `docu/` — technical documentation and figures.
+- `docu/` — technical report (compiled PDF and LaTeX source) and figures.
 
-## Research direction
+## Outlook
 
-Planned work includes applying the method to a 1+2-site impurity/bath DMFT
+Future work should includes applying the method to a 1+2-site impurity/bath DMFT
 model and investigating the effects of noise and resource constraints.
 
 ## References
 
 - Ding et al., [arXiv:2508.05703](https://arxiv.org/abs/2508.05703)
+
+## AI-use disclaimer
+
+AI tools were used to assist with generating visualizations, input/output
+(I/O) data management, and code auditing.
 
 ## License
 
