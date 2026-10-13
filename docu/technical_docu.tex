@@ -84,10 +84,10 @@
     showstringspaces=false
 }
 
-\title{Report \--- QIST Project:\\ Cooling
+\title{Cooling
 Algorithms for Quantum State Preparation}
 \author{Gabriel Maresch}
-\date{\today}
+\date{October 13, 2026}
 
 \begin{document}
 
@@ -718,7 +718,7 @@ In \cref{fig:generator_prediction} we compare the gap predicted by the generator
         \caption{Approximation of the population-sector spectral gap by the generator gap.}
         \label{fig:sinc_fit_sigma2}
     \end{subfigure}
-    \caption{Dependence of the ratio of the actual estimated spectral gap on $\theta \propto \alpha \sqrt{\sigma}$. Comparison of the $\rm sinc^2$ model and forth order polynomic model. Fitted for values $\theta<0.5$ and validated for $\theta \ge 0.5$ }
+    \caption{Dependence of the ratio of the actual estimated spectral gap on $\theta \propto \alpha \sqrt{\sigma}$. Comparison of the $\rm sinc^2$ model and forth order polynomial model. Fitted for values $\theta<0.5$ and validated for $\theta \ge 0.5$ }
     \label{fig:sinc_model}
 \end{figure}
 
@@ -852,12 +852,12 @@ However to establish the scaling behavior with $N$ more than two system sizes ar
 
 \section{Conclusions and Outlook}
 
-The main feature that can be conclulded from the numerical experiments in this work is the trade-off between effective mixing time and correctness of the fixed point. This trade-off is most clearly controlled by the coupling strength $\alpha$. Weak coupling gives the most accurate approximation of the Gibbs state, but requires many channel iterations. Increasing $\alpha$ accelerates convergence considerably, while at the same time sacrificing closeness of the fixed point to the desired thermal state. For the finite systems considered here, intermediate coupling strengths therefore provide the best compromise, specifically for values around $\alpha\approx0.5-0.6$ %which lie 
+The main feature that can be concluded from the numerical experiments in this work is the trade-off between effective mixing time and correctness of the fixed point. This trade-off is most clearly controlled by the coupling strength $\alpha$. Weak coupling gives the most accurate approximation of the Gibbs state, but requires many channel iterations. Increasing $\alpha$ accelerates convergence considerably, while at the same time sacrificing closeness of the fixed point to the desired thermal state. For the finite systems considered here, intermediate coupling strengths therefore provide the best compromise, specifically for values around $\alpha\approx0.5-0.6$ %which lie 
 clearly %well 
 beyond %the asymptotically 
 weak coupling. %regime, result give useful approximations.
 
-The spectral analysis of the associated quantum channels support these findings. In the weak-coupling regime the subleading channel eigenvalues are well described by a Lindbladian approximation. Deviations become increasingly important for larger values of $\alpha$. The observed correction is nonlinear in $\alpha$ and also depends on $\sigma$ and on the Hamiltonian regime. A ${\rm sinc}^2$-model gives an accurate %useful 
+The spectral analysis of the associated quantum channels supports these findings. In the weak-coupling regime the subleading channel eigenvalues are well described by a Lindbladian approximation. Deviations become increasingly important for larger values of $\alpha$. The observed correction is nonlinear in $\alpha$ and also depends on $\sigma$ and on the Hamiltonian regime. A ${\rm sinc}^2$-model gives an accurate %useful 
 empirical description of the investigated parameter range and can be well motivated for an isolated resonant transition. However, no corresponding derivation for the spectral gap of the full averaged channel could be obtained. %here.
 
 The remaining parameters show a less pronounced but still relevant influence on the convergence. Increasing $\sigma$ improves the fixed-point accuracy rather systematically, whereas the number of necessary iterations changes only moderately. The dependence on $\beta$ is nonmonotonic and shows again that fast convergence to the channel fixed point should not be identified with a good approximation of the Gibbs state. The limited comparison between $N=4$ and $N=6$ shows the same qualitative dependence on $\alpha$, but does not allow for conclusions about the scaling with the system size.
