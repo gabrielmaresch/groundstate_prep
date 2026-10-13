@@ -144,6 +144,27 @@ Run settings: inherited from Grids 6 and 7; Grid 6 settings are not recorded,
   and Grid 7 settings are documented in its registry entry
 Notes: recovered from the running notebook kernel's open archive on 2026-09-07
 
+Archive: superoperator_N4_grid_9.npz
+Status: present
+Purpose: sigma=2 comparison of the fine-alpha grid at three selected fields
+Source: Grid 8 parameter selection with sigma=2
+Points: 96 = 3 h/J x 32 alpha x 1 sigma x 1 omega_max
+N: 4
+h/J: 0.4, 1.0, 1.6
+alpha: 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20,
+  0.22, 0.24, 0.26, 0.28, 0.30, 0.32, 0.34, 0.36, 0.38, 0.40,
+  0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90,
+  0.95, 1.00
+sigma: 2.0
+omega_max: 2.5
+beta: 1.0
+dense spectrum: yes
+channels saved: no
+classical populations / generator saved: yes
+Run settings: J, T, tau, method, normalize_Jh, and eps_fit not recorded;
+  iterations skipped
+Notes: parameter values and saved-data flags verified against the archive
+
 Archive: superoperator_N4_grid_10.npz
 Status: present
 Purpose: sigma comparison at three selected fields, assembled without recomputation
@@ -162,8 +183,9 @@ dense spectrum: yes
 channels saved: no
 classical populations / generator saved: yes
 Run settings: inherited from source grids; see the Grid 8 entry for its
-  provenance; Grid 9 was computed as its sigma=2 comparison
-Notes: none
+  provenance and the Grid 9 entry for its recorded settings
+Notes: 32 nominal alpha values; merged sources differ by up to 1.2e-16
+  in floating-point representation. Use tolerant comparisons when grouping.
 
 Archive: superoperator_N4_grid_11.npz
 Status: present
@@ -257,7 +279,7 @@ Notes: recent nomenclature: Delta_sep, Delta_gap, Delta_th, num_iterations,
   normality_residual
 
 Archive: superoperator_N4_grid_15.npz
-Status: currently running locally; archive is written only after all points finish
+Status: present
 Purpose: dense-spectrum N=4 h/J/alpha grid at sigma=2 and omega_max=2.5
 Source: none
 Points: 60 = 10 h/J x 6 alpha x 1 sigma x 1 omega_max
